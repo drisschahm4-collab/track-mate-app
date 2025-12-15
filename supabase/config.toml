@@ -1,1 +1,4 @@
 project_id = "mlxwlynfagpyadezjhle"
+
+[functions.flespi-proxy]
+verify_jwt = false
