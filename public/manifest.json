@@ -1,0 +1,17 @@
+{
+  "name": "FleetTrack",
+  "short_name": "FleetTrack",
+  "description": "Application chauffeur pour le suivi GPS en temps réel",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0f1a",
+  "theme_color": "#22c55e",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}
