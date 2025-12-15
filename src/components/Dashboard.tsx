@@ -1,6 +1,7 @@
 import React from 'react';
 import { Gauge, Navigation, Clock, MapPin, Battery, Zap } from 'lucide-react';
 import { useFlespiData } from '@/hooks/useFlespiData';
+import { usePrivacyMode } from '@/hooks/usePrivacyMode';
 import Header from './Header';
 import MetricCard from './MetricCard';
 import VehicleMap from './VehicleMap';
@@ -8,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const Dashboard: React.FC = () => {
   const { vehicleData, loading, error, lastUpdate, refresh } = useFlespiData(5000);
+  const { isPrivate, togglePrivacy } = usePrivacyMode();
 
   const formatTimestamp = (timestamp: number) => {
     if (!timestamp) return '--:--';
@@ -19,6 +21,7 @@ const Dashboard: React.FC = () => {
   };
 
   const formatCoordinate = (coord: number, type: 'lat' | 'lng') => {
+    if (isPrivate) return '****';
     if (!coord) return '-.----';
     const direction = type === 'lat' 
       ? (coord >= 0 ? 'N' : 'S')
@@ -56,12 +59,15 @@ const Dashboard: React.FC = () => {
           lastUpdate={lastUpdate}
           onRefresh={refresh}
           loading={loading}
+          isPrivate={isPrivate}
+          onTogglePrivacy={togglePrivacy}
         />
 
         {/* Map Section */}
         <VehicleMap 
           vehicleData={vehicleData} 
           className="h-[40vh] min-h-[300px] shadow-card"
+          isPrivate={isPrivate}
         />
 
         {/* Metrics Grid */}

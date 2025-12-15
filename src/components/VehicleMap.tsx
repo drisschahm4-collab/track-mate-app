@@ -2,14 +2,15 @@ import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { VehicleData } from '@/hooks/useFlespiData';
-import { Loader2 } from 'lucide-react';
+import { Loader2, EyeOff } from 'lucide-react';
 
 interface VehicleMapProps {
   vehicleData: VehicleData | null;
   className?: string;
+  isPrivate?: boolean;
 }
 
-const VehicleMap: React.FC<VehicleMapProps> = ({ vehicleData, className = '' }) => {
+const VehicleMap: React.FC<VehicleMapProps> = ({ vehicleData, className = '', isPrivate = false }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
   const marker = useRef<L.Marker | null>(null);
@@ -57,9 +58,11 @@ const VehicleMap: React.FC<VehicleMapProps> = ({ vehicleData, className = '' }) 
       maxZoom: 20,
     }).addTo(map.current);
 
-    // Create initial marker
-    const icon = createIcon(vehicleData?.isOnline ?? false, vehicleData?.heading ?? 0);
-    marker.current = L.marker(initialPosition, { icon }).addTo(map.current);
+    // Create initial marker (only if not private)
+    if (!isPrivate) {
+      const icon = createIcon(vehicleData?.isOnline ?? false, vehicleData?.heading ?? 0);
+      marker.current = L.marker(initialPosition, { icon }).addTo(map.current);
+    }
 
     map.current.whenReady(() => {
       setMapLoaded(true);
@@ -73,24 +76,45 @@ const VehicleMap: React.FC<VehicleMapProps> = ({ vehicleData, className = '' }) 
     };
   }, []);
 
+  // Handle privacy mode changes
+  useEffect(() => {
+    if (!map.current) return;
+
+    if (isPrivate) {
+      // Remove marker when private
+      if (marker.current) {
+        marker.current.remove();
+        marker.current = null;
+      }
+    } else {
+      // Add marker back when not private
+      if (!marker.current && vehicleData) {
+        const icon = createIcon(vehicleData.isOnline, vehicleData.heading ?? 0);
+        marker.current = L.marker([vehicleData.latitude, vehicleData.longitude], { icon }).addTo(map.current);
+      }
+    }
+  }, [isPrivate, vehicleData]);
+
   // Update marker position and icon when vehicle data changes
   useEffect(() => {
-    if (!vehicleData || !marker.current || !map.current) return;
+    if (!vehicleData || !map.current || isPrivate) return;
 
     const newPosition: L.LatLngExpression = [vehicleData.latitude, vehicleData.longitude];
     
-    // Update marker position
-    marker.current.setLatLng(newPosition);
-    
-    // Update marker icon
-    const icon = createIcon(vehicleData.isOnline, vehicleData.heading ?? 0);
-    marker.current.setIcon(icon);
+    if (marker.current) {
+      // Update marker position
+      marker.current.setLatLng(newPosition);
+      
+      // Update marker icon
+      const icon = createIcon(vehicleData.isOnline, vehicleData.heading ?? 0);
+      marker.current.setIcon(icon);
+    }
     
     // Smooth pan to new position
     map.current.flyTo(newPosition, map.current.getZoom(), {
       duration: 1,
     });
-  }, [vehicleData]);
+  }, [vehicleData, isPrivate]);
 
   return (
     <div className={`relative overflow-hidden rounded-xl ${className}`}>
@@ -98,6 +122,16 @@ const VehicleMap: React.FC<VehicleMapProps> = ({ vehicleData, className = '' }) 
       {!mapLoaded && (
         <div className="absolute inset-0 flex items-center justify-center bg-card/80 backdrop-blur">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      )}
+      {/* Privacy overlay */}
+      {isPrivate && mapLoaded && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-card/60 backdrop-blur-sm z-[1000]">
+          <div className="p-4 rounded-full bg-accent/20 mb-3">
+            <EyeOff className="h-8 w-8 text-accent" />
+          </div>
+          <p className="text-accent font-medium">Mode Privé Activé</p>
+          <p className="text-muted-foreground text-sm">Position masquée</p>
         </div>
       )}
       <div className="absolute inset-0 pointer-events-none rounded-xl ring-1 ring-inset ring-border/30" />
