@@ -1,5 +1,5 @@
 import React from 'react';
-import { Truck, RefreshCw, Eye, EyeOff, Shield } from 'lucide-react';
+import { Truck, RefreshCw, Eye, EyeOff, Shield, LogOut, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import StatusBadge from './StatusBadge';
@@ -12,6 +12,9 @@ interface HeaderProps {
   loading?: boolean;
   isPrivate?: boolean;
   onTogglePrivacy?: () => void;
+  userEmail?: string;
+  onSignOut?: () => Promise<void> | void;
+  signingOut?: boolean;
 }
 
 const Header: React.FC<HeaderProps> = ({ 
@@ -20,7 +23,10 @@ const Header: React.FC<HeaderProps> = ({
   onRefresh, 
   loading,
   isPrivate = false,
-  onTogglePrivacy
+  onTogglePrivacy,
+  userEmail,
+  onSignOut,
+  signingOut
 }) => {
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('fr-FR', {
@@ -47,6 +53,31 @@ const Header: React.FC<HeaderProps> = ({
       </div>
 
       <div className="flex items-center gap-3">
+        {userEmail && (
+          <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-secondary/60 border border-border/50">
+            <div className="text-left">
+              <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Connecté</p>
+              <p className="text-sm font-medium text-foreground truncate max-w-[180px]">{userEmail}</p>
+            </div>
+            {onSignOut && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onSignOut}
+                disabled={signingOut}
+                className="text-muted-foreground hover:text-foreground hover:bg-secondary"
+                aria-label="Se déconnecter"
+              >
+                {signingOut ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <LogOut className="h-4 w-4" />
+                )}
+              </Button>
+            )}
+          </div>
+        )}
+
         {/* Privacy Mode Toggle */}
         {onTogglePrivacy && (
           <div className="flex items-center gap-2">

@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Gauge, Navigation, Clock, MapPin, Battery, Zap } from 'lucide-react';
 import { useFlespiData } from '@/hooks/useFlespiData';
 import { usePrivacyMode } from '@/hooks/usePrivacyMode';
+import { useAuth } from '@/hooks/useAuth';
 import Header from './Header';
 import MetricCard from './MetricCard';
 import VehicleMap from './VehicleMap';
@@ -10,6 +11,19 @@ import { Skeleton } from '@/components/ui/skeleton';
 const Dashboard: React.FC = () => {
   const { vehicleData, loading, error, lastUpdate, refresh } = useFlespiData(5000);
   const { isPrivate, togglePrivacy } = usePrivacyMode();
+  const { userEmail, signOut } = useAuth();
+  const [signingOut, setSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    setSigningOut(true);
+    try {
+      await signOut();
+    } catch (signOutError) {
+      console.error('[Dashboard] Sign out error:', signOutError);
+    } finally {
+      setSigningOut(false);
+    }
+  };
 
   const formatTimestamp = (timestamp: number) => {
     if (!timestamp) return '--:--';
@@ -61,6 +75,9 @@ const Dashboard: React.FC = () => {
           loading={loading}
           isPrivate={isPrivate}
           onTogglePrivacy={togglePrivacy}
+          userEmail={userEmail}
+          onSignOut={handleSignOut}
+          signingOut={signingOut}
         />
 
         {/* Map Section */}
