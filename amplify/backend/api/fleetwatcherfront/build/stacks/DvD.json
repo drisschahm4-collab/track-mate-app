@@ -1,0 +1,1630 @@
+{
+  "Parameters": {
+    "DynamoDBModelTableReadIOPS": {
+      "Type": "Number",
+      "Default": 5,
+      "Description": "The number of read IOPS the table should support."
+    },
+    "DynamoDBModelTableWriteIOPS": {
+      "Type": "Number",
+      "Default": 5,
+      "Description": "The number of write IOPS the table should support."
+    },
+    "DynamoDBBillingMode": {
+      "Type": "String",
+      "Default": "PAY_PER_REQUEST",
+      "AllowedValues": [
+        "PAY_PER_REQUEST",
+        "PROVISIONED"
+      ],
+      "Description": "Configure @model types to create DynamoDB tables with PAY_PER_REQUEST or PROVISIONED billing modes."
+    },
+    "DynamoDBEnablePointInTimeRecovery": {
+      "Type": "String",
+      "Default": "false",
+      "AllowedValues": [
+        "true",
+        "false"
+      ],
+      "Description": "Whether to enable Point in Time Recovery on the table."
+    },
+    "DynamoDBEnableServerSideEncryption": {
+      "Type": "String",
+      "Default": "true",
+      "AllowedValues": [
+        "true",
+        "false"
+      ],
+      "Description": "Enable server side encryption powered by KMS."
+    },
+    "referencetotransformerrootstackenv10C5A902Ref": {
+      "Type": "String"
+    },
+    "referencetotransformerrootstackGraphQLAPI20497F53ApiId": {
+      "Type": "String"
+    },
+    "referencetotransformerrootstackS3DeploymentBucket7592718ARef": {
+      "Type": "String"
+    },
+    "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref": {
+      "Type": "String"
+    },
+    "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyQuerygetCompanypreAuth0FunctionQuerygetCompanypreAuth0FunctionAppSyncFunction90178178FunctionId": {
+      "Type": "String"
+    },
+    "referencetotransformerrootstackAlertNestedStackAlertNestedStackResource7D8488D8OutputstransformerrootstackAlertQuerygetAlertauth0FunctionQuerygetAlertauth0FunctionAppSyncFunction6FA80CD0FunctionId": {
+      "Type": "String"
+    },
+    "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyQuerygetCompanypostAuth0FunctionQuerygetCompanypostAuth0FunctionAppSyncFunction0E5EEE8AFunctionId": {
+      "Type": "String"
+    },
+    "referencetotransformerrootstackauthRoleNameFB872D50Ref": {
+      "Type": "String"
+    },
+    "referencetotransformerrootstackunauthRoleName49F3C1FERef": {
+      "Type": "String"
+    },
+    "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyQuerylistCompaniespreAuth0FunctionQuerylistCompaniespreAuth0FunctionAppSyncFunctionBA092455FunctionId": {
+      "Type": "String"
+    },
+    "referencetotransformerrootstackGraphQLAPINONEDS2BA9D1C8Name": {
+      "Type": "String"
+    },
+    "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyMutationcreateCompanyinit0FunctionMutationcreateCompanyinit0FunctionAppSyncFunction04655970FunctionId": {
+      "Type": "String"
+    },
+    "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyMutationcreateCompanypreAuth0FunctionMutationcreateCompanypreAuth0FunctionAppSyncFunction33D86596FunctionId": {
+      "Type": "String"
+    },
+    "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyMutationupdateCompanyinit0FunctionMutationupdateCompanyinit0FunctionAppSyncFunction54454202FunctionId": {
+      "Type": "String"
+    },
+    "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyMutationdeleteCompanypreAuth0FunctionMutationdeleteCompanypreAuth0FunctionAppSyncFunction124120EEFunctionId": {
+      "Type": "String"
+    },
+    "referencetotransformerrootstackAlertNestedStackAlertNestedStackResource7D8488D8OutputstransformerrootstackAlertSubscriptiononCreateAlertauth0FunctionSubscriptiononCreateAlertauth0FunctionAppSyncFunctionEA672576FunctionId": {
+      "Type": "String"
+    },
+    "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanySubscriptionOnCreateCompanyDataResolverFnSubscriptionOnCreateCompanyDataResolverFnAppSyncFunctionE80FA435FunctionId": {
+      "Type": "String"
+    }
+  },
+  "Conditions": {
+    "HasEnvironmentParameter": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "referencetotransformerrootstackenv10C5A902Ref"
+            },
+            "NONE"
+          ]
+        }
+      ]
+    },
+    "ShouldUseServerSideEncryption": {
+      "Fn::Equals": [
+        {
+          "Ref": "DynamoDBEnableServerSideEncryption"
+        },
+        "true"
+      ]
+    },
+    "ShouldUsePayPerRequestBilling": {
+      "Fn::Equals": [
+        {
+          "Ref": "DynamoDBBillingMode"
+        },
+        "PAY_PER_REQUEST"
+      ]
+    },
+    "ShouldUsePointInTimeRecovery": {
+      "Fn::Equals": [
+        {
+          "Ref": "DynamoDBEnablePointInTimeRecovery"
+        },
+        "true"
+      ]
+    }
+  },
+  "Resources": {
+    "DvDTable": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "id",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "dvDVehicleImmat",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "dvDDriverSub",
+            "AttributeType": "S"
+          }
+        ],
+        "BillingMode": {
+          "Fn::If": [
+            "ShouldUsePayPerRequestBilling",
+            "PAY_PER_REQUEST",
+            {
+              "Ref": "AWS::NoValue"
+            }
+          ]
+        },
+        "GlobalSecondaryIndexes": [
+          {
+            "IndexName": "dvdByVehicleImmat",
+            "KeySchema": [
+              {
+                "AttributeName": "dvDVehicleImmat",
+                "KeyType": "HASH"
+              }
+            ],
+            "Projection": {
+              "ProjectionType": "ALL"
+            },
+            "ProvisionedThroughput": {
+              "Fn::If": [
+                "ShouldUsePayPerRequestBilling",
+                {
+                  "Ref": "AWS::NoValue"
+                },
+                {
+                  "ReadCapacityUnits": {
+                    "Ref": "DynamoDBModelTableReadIOPS"
+                  },
+                  "WriteCapacityUnits": {
+                    "Ref": "DynamoDBModelTableWriteIOPS"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "IndexName": "dvdByDriverSub",
+            "KeySchema": [
+              {
+                "AttributeName": "dvDDriverSub",
+                "KeyType": "HASH"
+              }
+            ],
+            "Projection": {
+              "ProjectionType": "ALL"
+            },
+            "ProvisionedThroughput": {
+              "Fn::If": [
+                "ShouldUsePayPerRequestBilling",
+                {
+                  "Ref": "AWS::NoValue"
+                },
+                {
+                  "ReadCapacityUnits": {
+                    "Ref": "DynamoDBModelTableReadIOPS"
+                  },
+                  "WriteCapacityUnits": {
+                    "Ref": "DynamoDBModelTableWriteIOPS"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "id",
+            "KeyType": "HASH"
+          }
+        ],
+        "PointInTimeRecoverySpecification": {
+          "Fn::If": [
+            "ShouldUsePointInTimeRecovery",
+            {
+              "PointInTimeRecoveryEnabled": true
+            },
+            {
+              "Ref": "AWS::NoValue"
+            }
+          ]
+        },
+        "ProvisionedThroughput": {
+          "Fn::If": [
+            "ShouldUsePayPerRequestBilling",
+            {
+              "Ref": "AWS::NoValue"
+            },
+            {
+              "ReadCapacityUnits": {
+                "Ref": "DynamoDBModelTableReadIOPS"
+              },
+              "WriteCapacityUnits": {
+                "Ref": "DynamoDBModelTableWriteIOPS"
+              }
+            }
+          ]
+        },
+        "SSESpecification": {
+          "SSEEnabled": {
+            "Fn::If": [
+              "ShouldUseServerSideEncryption",
+              true,
+              false
+            ]
+          }
+        },
+        "StreamSpecification": {
+          "StreamViewType": "NEW_AND_OLD_IMAGES"
+        },
+        "TableName": {
+          "Fn::Join": [
+            "",
+            [
+              "DvD-",
+              {
+                "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+              },
+              "-",
+              {
+                "Ref": "referencetotransformerrootstackenv10C5A902Ref"
+              }
+            ]
+          ]
+        }
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete"
+    },
+    "DvDIAMRoleB3A0819C": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "appsync.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "dynamodb:BatchGetItem",
+                    "dynamodb:BatchWriteItem",
+                    "dynamodb:PutItem",
+                    "dynamodb:DeleteItem",
+                    "dynamodb:GetItem",
+                    "dynamodb:Scan",
+                    "dynamodb:Query",
+                    "dynamodb:UpdateItem",
+                    "dynamodb:ConditionCheckItem",
+                    "dynamodb:DescribeTable",
+                    "dynamodb:GetRecords",
+                    "dynamodb:GetShardIterator"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::Sub": [
+                        "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${tablename}",
+                        {
+                          "tablename": {
+                            "Fn::Join": [
+                              "",
+                              [
+                                "DvD-",
+                                {
+                                  "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+                                },
+                                "-",
+                                {
+                                  "Ref": "referencetotransformerrootstackenv10C5A902Ref"
+                                }
+                              ]
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "Fn::Sub": [
+                        "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${tablename}/*",
+                        {
+                          "tablename": {
+                            "Fn::Join": [
+                              "",
+                              [
+                                "DvD-",
+                                {
+                                  "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+                                },
+                                "-",
+                                {
+                                  "Ref": "referencetotransformerrootstackenv10C5A902Ref"
+                                }
+                              ]
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "Version": "2012-10-17"
+            },
+            "PolicyName": "DynamoDBAccess"
+          }
+        ],
+        "RoleName": {
+          "Fn::Join": [
+            "",
+            [
+              "DvDIAMRole6fe5f1-",
+              {
+                "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+              },
+              "-",
+              {
+                "Ref": "referencetotransformerrootstackenv10C5A902Ref"
+              }
+            ]
+          ]
+        }
+      }
+    },
+    "DvDIAMRoleDefaultPolicy2DF825EF": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "DvDTable",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "DvDTable",
+                          "Arn"
+                        ]
+                      },
+                      "/index/*"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "DvDIAMRoleDefaultPolicy2DF825EF",
+        "Roles": [
+          {
+            "Ref": "DvDIAMRoleB3A0819C"
+          }
+        ]
+      }
+    },
+    "DvDDataSource": {
+      "Type": "AWS::AppSync::DataSource",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "DynamoDBConfig": {
+          "AwsRegion": {
+            "Ref": "AWS::Region"
+          },
+          "TableName": {
+            "Ref": "DvDTable"
+          }
+        },
+        "Name": "DvDTable",
+        "ServiceRoleArn": {
+          "Fn::GetAtt": [
+            "DvDIAMRoleB3A0819C",
+            "Arn"
+          ]
+        },
+        "Type": "AMAZON_DYNAMODB"
+      },
+      "DependsOn": [
+        "DvDIAMRoleB3A0819C"
+      ]
+    },
+    "QueryGetDvDDataResolverFnQueryGetDvDDataResolverFnAppSyncFunction68E26F73": {
+      "Type": "AWS::AppSync::FunctionConfiguration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "DataSourceName": {
+          "Fn::GetAtt": [
+            "DvDDataSource",
+            "Name"
+          ]
+        },
+        "FunctionVersion": "2018-05-29",
+        "Name": "QueryGetDvDDataResolverFn",
+        "RequestMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/Query.getDvD.req.vtl"
+            ]
+          ]
+        },
+        "ResponseMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/Query.getDvD.res.vtl"
+            ]
+          ]
+        }
+      },
+      "DependsOn": [
+        "DvDDataSource"
+      ]
+    },
+    "GetDvDResolver": {
+      "Type": "AWS::AppSync::Resolver",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "FieldName": "getDvD",
+        "Kind": "PIPELINE",
+        "PipelineConfig": {
+          "Functions": [
+            {
+              "Ref": "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyQuerygetCompanypreAuth0FunctionQuerygetCompanypreAuth0FunctionAppSyncFunction90178178FunctionId"
+            },
+            {
+              "Ref": "referencetotransformerrootstackAlertNestedStackAlertNestedStackResource7D8488D8OutputstransformerrootstackAlertQuerygetAlertauth0FunctionQuerygetAlertauth0FunctionAppSyncFunction6FA80CD0FunctionId"
+            },
+            {
+              "Ref": "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyQuerygetCompanypostAuth0FunctionQuerygetCompanypostAuth0FunctionAppSyncFunction0E5EEE8AFunctionId"
+            },
+            {
+              "Fn::GetAtt": [
+                "QueryGetDvDDataResolverFnQueryGetDvDDataResolverFnAppSyncFunction68E26F73",
+                "FunctionId"
+              ]
+            }
+          ]
+        },
+        "RequestMappingTemplate": {
+          "Fn::Join": [
+            "",
+            [
+              "$util.qr($ctx.stash.put(\"typeName\", \"Query\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"getDvD\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"AMAZON_DYNAMODB\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+              {
+                "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+              },
+              "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n$util.qr($ctx.stash.put(\"tableName\", \"",
+              {
+                "Ref": "DvDTable"
+              },
+              "\"))\n$util.qr($ctx.stash.put(\"authRole\", \"arn:aws:sts::",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":assumed-role/",
+              {
+                "Ref": "referencetotransformerrootstackauthRoleNameFB872D50Ref"
+              },
+              "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:aws:sts::",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":assumed-role/",
+              {
+                "Ref": "referencetotransformerrootstackunauthRoleName49F3C1FERef"
+              },
+              "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"eu-west-3:c1eaa760-cfb5-4ab9-a4f7-35a17efdf034\"))\n$util.qr($ctx.stash.put(\"adminRoles\", [\"FleetWatcherBusinessAlertProsessor-dev\",\"FleetWatcherCheckAlertDriving-dev\",\"FleetWatcherCustomActions-dev\",\"FleetWatcherFlespiAlertsProcessor-dev\",\"FleetWatcherMaintenanceProcessor-dev\",\"FleetWatcherNotifier-dev\",\"FleetWatcherReportProcessor-dev\",\"FleetWatcherproximitySearch-dev\",\"TeltonikaStreamProcessor-dev\",\"AntaiDayliInfractions-dev\"]))\n$util.toJson({})"
+            ]
+          ]
+        },
+        "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+        "TypeName": "Query"
+      }
+    },
+    "QueryListDvDSDataResolverFnQueryListDvDSDataResolverFnAppSyncFunctionAA8E0294": {
+      "Type": "AWS::AppSync::FunctionConfiguration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "DataSourceName": {
+          "Fn::GetAtt": [
+            "DvDDataSource",
+            "Name"
+          ]
+        },
+        "FunctionVersion": "2018-05-29",
+        "Name": "QueryListDvDSDataResolverFn",
+        "RequestMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/Query.listDvDS.req.vtl"
+            ]
+          ]
+        },
+        "ResponseMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/Query.listDvDS.res.vtl"
+            ]
+          ]
+        }
+      },
+      "DependsOn": [
+        "DvDDataSource"
+      ]
+    },
+    "ListDvDResolver": {
+      "Type": "AWS::AppSync::Resolver",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "FieldName": "listDvDS",
+        "Kind": "PIPELINE",
+        "PipelineConfig": {
+          "Functions": [
+            {
+              "Ref": "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyQuerylistCompaniespreAuth0FunctionQuerylistCompaniespreAuth0FunctionAppSyncFunctionBA092455FunctionId"
+            },
+            {
+              "Ref": "referencetotransformerrootstackAlertNestedStackAlertNestedStackResource7D8488D8OutputstransformerrootstackAlertQuerygetAlertauth0FunctionQuerygetAlertauth0FunctionAppSyncFunction6FA80CD0FunctionId"
+            },
+            {
+              "Ref": "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyQuerygetCompanypostAuth0FunctionQuerygetCompanypostAuth0FunctionAppSyncFunction0E5EEE8AFunctionId"
+            },
+            {
+              "Fn::GetAtt": [
+                "QueryListDvDSDataResolverFnQueryListDvDSDataResolverFnAppSyncFunctionAA8E0294",
+                "FunctionId"
+              ]
+            }
+          ]
+        },
+        "RequestMappingTemplate": {
+          "Fn::Join": [
+            "",
+            [
+              "$util.qr($ctx.stash.put(\"typeName\", \"Query\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"listDvDS\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"AMAZON_DYNAMODB\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+              {
+                "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+              },
+              "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n$util.qr($ctx.stash.put(\"tableName\", \"",
+              {
+                "Ref": "DvDTable"
+              },
+              "\"))\n$util.qr($ctx.stash.put(\"authRole\", \"arn:aws:sts::",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":assumed-role/",
+              {
+                "Ref": "referencetotransformerrootstackauthRoleNameFB872D50Ref"
+              },
+              "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:aws:sts::",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":assumed-role/",
+              {
+                "Ref": "referencetotransformerrootstackunauthRoleName49F3C1FERef"
+              },
+              "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"eu-west-3:c1eaa760-cfb5-4ab9-a4f7-35a17efdf034\"))\n$util.qr($ctx.stash.put(\"adminRoles\", [\"FleetWatcherBusinessAlertProsessor-dev\",\"FleetWatcherCheckAlertDriving-dev\",\"FleetWatcherCustomActions-dev\",\"FleetWatcherFlespiAlertsProcessor-dev\",\"FleetWatcherMaintenanceProcessor-dev\",\"FleetWatcherNotifier-dev\",\"FleetWatcherReportProcessor-dev\",\"FleetWatcherproximitySearch-dev\",\"TeltonikaStreamProcessor-dev\",\"AntaiDayliInfractions-dev\"]))\n$util.toJson({})"
+            ]
+          ]
+        },
+        "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+        "TypeName": "Query"
+      }
+    },
+    "MutationcreateDvDauth0FunctionMutationcreateDvDauth0FunctionAppSyncFunctionE5AA8CE4": {
+      "Type": "AWS::AppSync::FunctionConfiguration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "DataSourceName": {
+          "Ref": "referencetotransformerrootstackGraphQLAPINONEDS2BA9D1C8Name"
+        },
+        "FunctionVersion": "2018-05-29",
+        "Name": "MutationcreateDvDauth0Function",
+        "RequestMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/Mutation.createDvD.auth.1.req.vtl"
+            ]
+          ]
+        },
+        "ResponseMappingTemplate": "$util.toJson({})"
+      }
+    },
+    "MutationCreateDvDDataResolverFnMutationCreateDvDDataResolverFnAppSyncFunction004AB2AB": {
+      "Type": "AWS::AppSync::FunctionConfiguration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "DataSourceName": {
+          "Fn::GetAtt": [
+            "DvDDataSource",
+            "Name"
+          ]
+        },
+        "FunctionVersion": "2018-05-29",
+        "Name": "MutationCreateDvDDataResolverFn",
+        "RequestMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/Mutation.createDvD.req.vtl"
+            ]
+          ]
+        },
+        "ResponseMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/Mutation.createDvD.res.vtl"
+            ]
+          ]
+        }
+      },
+      "DependsOn": [
+        "DvDDataSource"
+      ]
+    },
+    "CreateDvDResolver": {
+      "Type": "AWS::AppSync::Resolver",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "FieldName": "createDvD",
+        "Kind": "PIPELINE",
+        "PipelineConfig": {
+          "Functions": [
+            {
+              "Ref": "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyMutationcreateCompanyinit0FunctionMutationcreateCompanyinit0FunctionAppSyncFunction04655970FunctionId"
+            },
+            {
+              "Ref": "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyMutationcreateCompanypreAuth0FunctionMutationcreateCompanypreAuth0FunctionAppSyncFunction33D86596FunctionId"
+            },
+            {
+              "Fn::GetAtt": [
+                "MutationcreateDvDauth0FunctionMutationcreateDvDauth0FunctionAppSyncFunctionE5AA8CE4",
+                "FunctionId"
+              ]
+            },
+            {
+              "Ref": "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyQuerygetCompanypostAuth0FunctionQuerygetCompanypostAuth0FunctionAppSyncFunction0E5EEE8AFunctionId"
+            },
+            {
+              "Fn::GetAtt": [
+                "MutationCreateDvDDataResolverFnMutationCreateDvDDataResolverFnAppSyncFunction004AB2AB",
+                "FunctionId"
+              ]
+            }
+          ]
+        },
+        "RequestMappingTemplate": {
+          "Fn::Join": [
+            "",
+            [
+              "$util.qr($ctx.stash.put(\"typeName\", \"Mutation\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"createDvD\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"AMAZON_DYNAMODB\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+              {
+                "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+              },
+              "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n$util.qr($ctx.stash.put(\"tableName\", \"",
+              {
+                "Ref": "DvDTable"
+              },
+              "\"))\n$util.qr($ctx.stash.put(\"authRole\", \"arn:aws:sts::",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":assumed-role/",
+              {
+                "Ref": "referencetotransformerrootstackauthRoleNameFB872D50Ref"
+              },
+              "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:aws:sts::",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":assumed-role/",
+              {
+                "Ref": "referencetotransformerrootstackunauthRoleName49F3C1FERef"
+              },
+              "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"eu-west-3:c1eaa760-cfb5-4ab9-a4f7-35a17efdf034\"))\n$util.qr($ctx.stash.put(\"adminRoles\", [\"FleetWatcherBusinessAlertProsessor-dev\",\"FleetWatcherCheckAlertDriving-dev\",\"FleetWatcherCustomActions-dev\",\"FleetWatcherFlespiAlertsProcessor-dev\",\"FleetWatcherMaintenanceProcessor-dev\",\"FleetWatcherNotifier-dev\",\"FleetWatcherReportProcessor-dev\",\"FleetWatcherproximitySearch-dev\",\"TeltonikaStreamProcessor-dev\",\"AntaiDayliInfractions-dev\"]))\n$util.toJson({})"
+            ]
+          ]
+        },
+        "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+        "TypeName": "Mutation"
+      }
+    },
+    "MutationupdateDvDauth0FunctionMutationupdateDvDauth0FunctionAppSyncFunction09F25981": {
+      "Type": "AWS::AppSync::FunctionConfiguration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "DataSourceName": {
+          "Fn::GetAtt": [
+            "DvDDataSource",
+            "Name"
+          ]
+        },
+        "FunctionVersion": "2018-05-29",
+        "Name": "MutationupdateDvDauth0Function",
+        "RequestMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/Mutation.updateDvD.auth.1.req.vtl"
+            ]
+          ]
+        },
+        "ResponseMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/Mutation.updateDvD.auth.1.res.vtl"
+            ]
+          ]
+        }
+      },
+      "DependsOn": [
+        "DvDDataSource"
+      ]
+    },
+    "MutationUpdateDvDDataResolverFnMutationUpdateDvDDataResolverFnAppSyncFunctionB6EBC5D8": {
+      "Type": "AWS::AppSync::FunctionConfiguration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "DataSourceName": {
+          "Fn::GetAtt": [
+            "DvDDataSource",
+            "Name"
+          ]
+        },
+        "FunctionVersion": "2018-05-29",
+        "Name": "MutationUpdateDvDDataResolverFn",
+        "RequestMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/Mutation.updateDvD.req.vtl"
+            ]
+          ]
+        },
+        "ResponseMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/Mutation.updateDvD.res.vtl"
+            ]
+          ]
+        }
+      },
+      "DependsOn": [
+        "DvDDataSource"
+      ]
+    },
+    "UpdateDvDResolver": {
+      "Type": "AWS::AppSync::Resolver",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "FieldName": "updateDvD",
+        "Kind": "PIPELINE",
+        "PipelineConfig": {
+          "Functions": [
+            {
+              "Ref": "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyMutationupdateCompanyinit0FunctionMutationupdateCompanyinit0FunctionAppSyncFunction54454202FunctionId"
+            },
+            {
+              "Ref": "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyMutationcreateCompanypreAuth0FunctionMutationcreateCompanypreAuth0FunctionAppSyncFunction33D86596FunctionId"
+            },
+            {
+              "Fn::GetAtt": [
+                "MutationupdateDvDauth0FunctionMutationupdateDvDauth0FunctionAppSyncFunction09F25981",
+                "FunctionId"
+              ]
+            },
+            {
+              "Ref": "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyQuerygetCompanypostAuth0FunctionQuerygetCompanypostAuth0FunctionAppSyncFunction0E5EEE8AFunctionId"
+            },
+            {
+              "Fn::GetAtt": [
+                "MutationUpdateDvDDataResolverFnMutationUpdateDvDDataResolverFnAppSyncFunctionB6EBC5D8",
+                "FunctionId"
+              ]
+            }
+          ]
+        },
+        "RequestMappingTemplate": {
+          "Fn::Join": [
+            "",
+            [
+              "$util.qr($ctx.stash.put(\"typeName\", \"Mutation\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"updateDvD\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"AMAZON_DYNAMODB\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+              {
+                "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+              },
+              "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n$util.qr($ctx.stash.put(\"tableName\", \"",
+              {
+                "Ref": "DvDTable"
+              },
+              "\"))\n$util.qr($ctx.stash.put(\"authRole\", \"arn:aws:sts::",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":assumed-role/",
+              {
+                "Ref": "referencetotransformerrootstackauthRoleNameFB872D50Ref"
+              },
+              "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:aws:sts::",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":assumed-role/",
+              {
+                "Ref": "referencetotransformerrootstackunauthRoleName49F3C1FERef"
+              },
+              "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"eu-west-3:c1eaa760-cfb5-4ab9-a4f7-35a17efdf034\"))\n$util.qr($ctx.stash.put(\"adminRoles\", [\"FleetWatcherBusinessAlertProsessor-dev\",\"FleetWatcherCheckAlertDriving-dev\",\"FleetWatcherCustomActions-dev\",\"FleetWatcherFlespiAlertsProcessor-dev\",\"FleetWatcherMaintenanceProcessor-dev\",\"FleetWatcherNotifier-dev\",\"FleetWatcherReportProcessor-dev\",\"FleetWatcherproximitySearch-dev\",\"TeltonikaStreamProcessor-dev\",\"AntaiDayliInfractions-dev\"]))\n$util.toJson({})"
+            ]
+          ]
+        },
+        "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+        "TypeName": "Mutation"
+      }
+    },
+    "MutationdeleteDvDauth0FunctionMutationdeleteDvDauth0FunctionAppSyncFunction4E1196E9": {
+      "Type": "AWS::AppSync::FunctionConfiguration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "DataSourceName": {
+          "Fn::GetAtt": [
+            "DvDDataSource",
+            "Name"
+          ]
+        },
+        "FunctionVersion": "2018-05-29",
+        "Name": "MutationdeleteDvDauth0Function",
+        "RequestMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/Mutation.deleteDvD.auth.1.req.vtl"
+            ]
+          ]
+        },
+        "ResponseMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/Mutation.deleteDvD.auth.1.res.vtl"
+            ]
+          ]
+        }
+      },
+      "DependsOn": [
+        "DvDDataSource"
+      ]
+    },
+    "MutationDeleteDvDDataResolverFnMutationDeleteDvDDataResolverFnAppSyncFunction8DA1EA1C": {
+      "Type": "AWS::AppSync::FunctionConfiguration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "DataSourceName": {
+          "Fn::GetAtt": [
+            "DvDDataSource",
+            "Name"
+          ]
+        },
+        "FunctionVersion": "2018-05-29",
+        "Name": "MutationDeleteDvDDataResolverFn",
+        "RequestMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/Mutation.deleteDvD.req.vtl"
+            ]
+          ]
+        },
+        "ResponseMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/Mutation.deleteDvD.res.vtl"
+            ]
+          ]
+        }
+      },
+      "DependsOn": [
+        "DvDDataSource"
+      ]
+    },
+    "DeleteDvDResolver": {
+      "Type": "AWS::AppSync::Resolver",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "FieldName": "deleteDvD",
+        "Kind": "PIPELINE",
+        "PipelineConfig": {
+          "Functions": [
+            {
+              "Ref": "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyMutationdeleteCompanypreAuth0FunctionMutationdeleteCompanypreAuth0FunctionAppSyncFunction124120EEFunctionId"
+            },
+            {
+              "Fn::GetAtt": [
+                "MutationdeleteDvDauth0FunctionMutationdeleteDvDauth0FunctionAppSyncFunction4E1196E9",
+                "FunctionId"
+              ]
+            },
+            {
+              "Ref": "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyQuerygetCompanypostAuth0FunctionQuerygetCompanypostAuth0FunctionAppSyncFunction0E5EEE8AFunctionId"
+            },
+            {
+              "Fn::GetAtt": [
+                "MutationDeleteDvDDataResolverFnMutationDeleteDvDDataResolverFnAppSyncFunction8DA1EA1C",
+                "FunctionId"
+              ]
+            }
+          ]
+        },
+        "RequestMappingTemplate": {
+          "Fn::Join": [
+            "",
+            [
+              "$util.qr($ctx.stash.put(\"typeName\", \"Mutation\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"deleteDvD\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"AMAZON_DYNAMODB\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+              {
+                "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+              },
+              "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n$util.qr($ctx.stash.put(\"tableName\", \"",
+              {
+                "Ref": "DvDTable"
+              },
+              "\"))\n$util.qr($ctx.stash.put(\"authRole\", \"arn:aws:sts::",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":assumed-role/",
+              {
+                "Ref": "referencetotransformerrootstackauthRoleNameFB872D50Ref"
+              },
+              "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:aws:sts::",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":assumed-role/",
+              {
+                "Ref": "referencetotransformerrootstackunauthRoleName49F3C1FERef"
+              },
+              "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"eu-west-3:c1eaa760-cfb5-4ab9-a4f7-35a17efdf034\"))\n$util.qr($ctx.stash.put(\"adminRoles\", [\"FleetWatcherBusinessAlertProsessor-dev\",\"FleetWatcherCheckAlertDriving-dev\",\"FleetWatcherCustomActions-dev\",\"FleetWatcherFlespiAlertsProcessor-dev\",\"FleetWatcherMaintenanceProcessor-dev\",\"FleetWatcherNotifier-dev\",\"FleetWatcherReportProcessor-dev\",\"FleetWatcherproximitySearch-dev\",\"TeltonikaStreamProcessor-dev\",\"AntaiDayliInfractions-dev\"]))\n$util.toJson({})"
+            ]
+          ]
+        },
+        "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+        "TypeName": "Mutation"
+      }
+    },
+    "SubscriptiononCreateDvDResolver": {
+      "Type": "AWS::AppSync::Resolver",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "FieldName": "onCreateDvD",
+        "Kind": "PIPELINE",
+        "PipelineConfig": {
+          "Functions": [
+            {
+              "Ref": "referencetotransformerrootstackAlertNestedStackAlertNestedStackResource7D8488D8OutputstransformerrootstackAlertSubscriptiononCreateAlertauth0FunctionSubscriptiononCreateAlertauth0FunctionAppSyncFunctionEA672576FunctionId"
+            },
+            {
+              "Ref": "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyQuerygetCompanypostAuth0FunctionQuerygetCompanypostAuth0FunctionAppSyncFunction0E5EEE8AFunctionId"
+            },
+            {
+              "Ref": "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanySubscriptionOnCreateCompanyDataResolverFnSubscriptionOnCreateCompanyDataResolverFnAppSyncFunctionE80FA435FunctionId"
+            }
+          ]
+        },
+        "RequestMappingTemplate": {
+          "Fn::Join": [
+            "",
+            [
+              "$util.qr($ctx.stash.put(\"typeName\", \"Subscription\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"onCreateDvD\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"NONE\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+              {
+                "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+              },
+              "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n\n$util.qr($ctx.stash.put(\"authRole\", \"arn:aws:sts::",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":assumed-role/",
+              {
+                "Ref": "referencetotransformerrootstackauthRoleNameFB872D50Ref"
+              },
+              "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:aws:sts::",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":assumed-role/",
+              {
+                "Ref": "referencetotransformerrootstackunauthRoleName49F3C1FERef"
+              },
+              "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"eu-west-3:c1eaa760-cfb5-4ab9-a4f7-35a17efdf034\"))\n$util.qr($ctx.stash.put(\"adminRoles\", [\"FleetWatcherBusinessAlertProsessor-dev\",\"FleetWatcherCheckAlertDriving-dev\",\"FleetWatcherCustomActions-dev\",\"FleetWatcherFlespiAlertsProcessor-dev\",\"FleetWatcherMaintenanceProcessor-dev\",\"FleetWatcherNotifier-dev\",\"FleetWatcherReportProcessor-dev\",\"FleetWatcherproximitySearch-dev\",\"TeltonikaStreamProcessor-dev\",\"AntaiDayliInfractions-dev\"]))\n$util.toJson({})"
+            ]
+          ]
+        },
+        "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+        "TypeName": "Subscription"
+      }
+    },
+    "SubscriptiononUpdateDvDResolver": {
+      "Type": "AWS::AppSync::Resolver",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "FieldName": "onUpdateDvD",
+        "Kind": "PIPELINE",
+        "PipelineConfig": {
+          "Functions": [
+            {
+              "Ref": "referencetotransformerrootstackAlertNestedStackAlertNestedStackResource7D8488D8OutputstransformerrootstackAlertSubscriptiononCreateAlertauth0FunctionSubscriptiononCreateAlertauth0FunctionAppSyncFunctionEA672576FunctionId"
+            },
+            {
+              "Ref": "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyQuerygetCompanypostAuth0FunctionQuerygetCompanypostAuth0FunctionAppSyncFunction0E5EEE8AFunctionId"
+            },
+            {
+              "Ref": "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanySubscriptionOnCreateCompanyDataResolverFnSubscriptionOnCreateCompanyDataResolverFnAppSyncFunctionE80FA435FunctionId"
+            }
+          ]
+        },
+        "RequestMappingTemplate": {
+          "Fn::Join": [
+            "",
+            [
+              "$util.qr($ctx.stash.put(\"typeName\", \"Subscription\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"onUpdateDvD\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"NONE\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+              {
+                "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+              },
+              "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n\n$util.qr($ctx.stash.put(\"authRole\", \"arn:aws:sts::",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":assumed-role/",
+              {
+                "Ref": "referencetotransformerrootstackauthRoleNameFB872D50Ref"
+              },
+              "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:aws:sts::",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":assumed-role/",
+              {
+                "Ref": "referencetotransformerrootstackunauthRoleName49F3C1FERef"
+              },
+              "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"eu-west-3:c1eaa760-cfb5-4ab9-a4f7-35a17efdf034\"))\n$util.qr($ctx.stash.put(\"adminRoles\", [\"FleetWatcherBusinessAlertProsessor-dev\",\"FleetWatcherCheckAlertDriving-dev\",\"FleetWatcherCustomActions-dev\",\"FleetWatcherFlespiAlertsProcessor-dev\",\"FleetWatcherMaintenanceProcessor-dev\",\"FleetWatcherNotifier-dev\",\"FleetWatcherReportProcessor-dev\",\"FleetWatcherproximitySearch-dev\",\"TeltonikaStreamProcessor-dev\",\"AntaiDayliInfractions-dev\"]))\n$util.toJson({})"
+            ]
+          ]
+        },
+        "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+        "TypeName": "Subscription"
+      }
+    },
+    "SubscriptiononDeleteDvDResolver": {
+      "Type": "AWS::AppSync::Resolver",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "FieldName": "onDeleteDvD",
+        "Kind": "PIPELINE",
+        "PipelineConfig": {
+          "Functions": [
+            {
+              "Ref": "referencetotransformerrootstackAlertNestedStackAlertNestedStackResource7D8488D8OutputstransformerrootstackAlertSubscriptiononCreateAlertauth0FunctionSubscriptiononCreateAlertauth0FunctionAppSyncFunctionEA672576FunctionId"
+            },
+            {
+              "Ref": "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyQuerygetCompanypostAuth0FunctionQuerygetCompanypostAuth0FunctionAppSyncFunction0E5EEE8AFunctionId"
+            },
+            {
+              "Ref": "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanySubscriptionOnCreateCompanyDataResolverFnSubscriptionOnCreateCompanyDataResolverFnAppSyncFunctionE80FA435FunctionId"
+            }
+          ]
+        },
+        "RequestMappingTemplate": {
+          "Fn::Join": [
+            "",
+            [
+              "$util.qr($ctx.stash.put(\"typeName\", \"Subscription\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"onDeleteDvD\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"NONE\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+              {
+                "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+              },
+              "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n\n$util.qr($ctx.stash.put(\"authRole\", \"arn:aws:sts::",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":assumed-role/",
+              {
+                "Ref": "referencetotransformerrootstackauthRoleNameFB872D50Ref"
+              },
+              "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:aws:sts::",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":assumed-role/",
+              {
+                "Ref": "referencetotransformerrootstackunauthRoleName49F3C1FERef"
+              },
+              "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"eu-west-3:c1eaa760-cfb5-4ab9-a4f7-35a17efdf034\"))\n$util.qr($ctx.stash.put(\"adminRoles\", [\"FleetWatcherBusinessAlertProsessor-dev\",\"FleetWatcherCheckAlertDriving-dev\",\"FleetWatcherCustomActions-dev\",\"FleetWatcherFlespiAlertsProcessor-dev\",\"FleetWatcherMaintenanceProcessor-dev\",\"FleetWatcherNotifier-dev\",\"FleetWatcherReportProcessor-dev\",\"FleetWatcherproximitySearch-dev\",\"TeltonikaStreamProcessor-dev\",\"AntaiDayliInfractions-dev\"]))\n$util.toJson({})"
+            ]
+          ]
+        },
+        "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+        "TypeName": "Subscription"
+      }
+    },
+    "QueryDvDSByDvDVehicleImmatDataResolverFnQueryDvDSByDvDVehicleImmatDataResolverFnAppSyncFunctionBE091F46": {
+      "Type": "AWS::AppSync::FunctionConfiguration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "DataSourceName": {
+          "Fn::GetAtt": [
+            "DvDDataSource",
+            "Name"
+          ]
+        },
+        "FunctionVersion": "2018-05-29",
+        "Name": "QueryDvDSByDvDVehicleImmatDataResolverFn",
+        "RequestMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/Query.dvDSByDvDVehicleImmat.req.vtl"
+            ]
+          ]
+        },
+        "ResponseMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/Query.dvDSByDvDVehicleImmat.res.vtl"
+            ]
+          ]
+        }
+      },
+      "DependsOn": [
+        "DvDDataSource"
+      ]
+    },
+    "QuerydvDSByDvDVehicleImmatResolver": {
+      "Type": "AWS::AppSync::Resolver",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "FieldName": "dvDSByDvDVehicleImmat",
+        "Kind": "PIPELINE",
+        "PipelineConfig": {
+          "Functions": [
+            {
+              "Ref": "referencetotransformerrootstackAlertNestedStackAlertNestedStackResource7D8488D8OutputstransformerrootstackAlertQuerygetAlertauth0FunctionQuerygetAlertauth0FunctionAppSyncFunction6FA80CD0FunctionId"
+            },
+            {
+              "Ref": "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyQuerygetCompanypostAuth0FunctionQuerygetCompanypostAuth0FunctionAppSyncFunction0E5EEE8AFunctionId"
+            },
+            {
+              "Fn::GetAtt": [
+                "QueryDvDSByDvDVehicleImmatDataResolverFnQueryDvDSByDvDVehicleImmatDataResolverFnAppSyncFunctionBE091F46",
+                "FunctionId"
+              ]
+            }
+          ]
+        },
+        "RequestMappingTemplate": {
+          "Fn::Join": [
+            "",
+            [
+              "$util.qr($ctx.stash.put(\"typeName\", \"Query\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"dvDSByDvDVehicleImmat\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"AMAZON_DYNAMODB\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+              {
+                "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+              },
+              "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n$util.qr($ctx.stash.put(\"tableName\", \"",
+              {
+                "Ref": "DvDTable"
+              },
+              "\"))\n$util.qr($ctx.stash.put(\"authRole\", \"arn:aws:sts::",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":assumed-role/",
+              {
+                "Ref": "referencetotransformerrootstackauthRoleNameFB872D50Ref"
+              },
+              "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:aws:sts::",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":assumed-role/",
+              {
+                "Ref": "referencetotransformerrootstackunauthRoleName49F3C1FERef"
+              },
+              "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"eu-west-3:c1eaa760-cfb5-4ab9-a4f7-35a17efdf034\"))\n$util.qr($ctx.stash.put(\"adminRoles\", [\"FleetWatcherBusinessAlertProsessor-dev\",\"FleetWatcherCheckAlertDriving-dev\",\"FleetWatcherCustomActions-dev\",\"FleetWatcherFlespiAlertsProcessor-dev\",\"FleetWatcherMaintenanceProcessor-dev\",\"FleetWatcherNotifier-dev\",\"FleetWatcherReportProcessor-dev\",\"FleetWatcherproximitySearch-dev\",\"TeltonikaStreamProcessor-dev\",\"AntaiDayliInfractions-dev\"]))\n$util.toJson({})"
+            ]
+          ]
+        },
+        "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+        "TypeName": "Query"
+      }
+    },
+    "QueryDvDSByDvDDriverSubDataResolverFnQueryDvDSByDvDDriverSubDataResolverFnAppSyncFunction80FB07F3": {
+      "Type": "AWS::AppSync::FunctionConfiguration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "DataSourceName": {
+          "Fn::GetAtt": [
+            "DvDDataSource",
+            "Name"
+          ]
+        },
+        "FunctionVersion": "2018-05-29",
+        "Name": "QueryDvDSByDvDDriverSubDataResolverFn",
+        "RequestMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/Query.dvDSByDvDDriverSub.req.vtl"
+            ]
+          ]
+        },
+        "ResponseMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/Query.dvDSByDvDDriverSub.res.vtl"
+            ]
+          ]
+        }
+      },
+      "DependsOn": [
+        "DvDDataSource"
+      ]
+    },
+    "QuerydvDSByDvDDriverSubResolver": {
+      "Type": "AWS::AppSync::Resolver",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "FieldName": "dvDSByDvDDriverSub",
+        "Kind": "PIPELINE",
+        "PipelineConfig": {
+          "Functions": [
+            {
+              "Ref": "referencetotransformerrootstackAlertNestedStackAlertNestedStackResource7D8488D8OutputstransformerrootstackAlertQuerygetAlertauth0FunctionQuerygetAlertauth0FunctionAppSyncFunction6FA80CD0FunctionId"
+            },
+            {
+              "Ref": "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyQuerygetCompanypostAuth0FunctionQuerygetCompanypostAuth0FunctionAppSyncFunction0E5EEE8AFunctionId"
+            },
+            {
+              "Fn::GetAtt": [
+                "QueryDvDSByDvDDriverSubDataResolverFnQueryDvDSByDvDDriverSubDataResolverFnAppSyncFunction80FB07F3",
+                "FunctionId"
+              ]
+            }
+          ]
+        },
+        "RequestMappingTemplate": {
+          "Fn::Join": [
+            "",
+            [
+              "$util.qr($ctx.stash.put(\"typeName\", \"Query\"))\n$util.qr($ctx.stash.put(\"fieldName\", \"dvDSByDvDDriverSub\"))\n$util.qr($ctx.stash.put(\"conditions\", []))\n$util.qr($ctx.stash.put(\"metadata\", {}))\n$util.qr($ctx.stash.metadata.put(\"dataSourceType\", \"AMAZON_DYNAMODB\"))\n$util.qr($ctx.stash.metadata.put(\"apiId\", \"",
+              {
+                "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+              },
+              "\"))\n$util.qr($ctx.stash.put(\"connectionAttributes\", {}))\n$util.qr($ctx.stash.put(\"tableName\", \"",
+              {
+                "Ref": "DvDTable"
+              },
+              "\"))\n$util.qr($ctx.stash.put(\"authRole\", \"arn:aws:sts::",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":assumed-role/",
+              {
+                "Ref": "referencetotransformerrootstackauthRoleNameFB872D50Ref"
+              },
+              "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"unauthRole\", \"arn:aws:sts::",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":assumed-role/",
+              {
+                "Ref": "referencetotransformerrootstackunauthRoleName49F3C1FERef"
+              },
+              "/CognitoIdentityCredentials\"))\n$util.qr($ctx.stash.put(\"identityPoolId\", \"eu-west-3:c1eaa760-cfb5-4ab9-a4f7-35a17efdf034\"))\n$util.qr($ctx.stash.put(\"adminRoles\", [\"FleetWatcherBusinessAlertProsessor-dev\",\"FleetWatcherCheckAlertDriving-dev\",\"FleetWatcherCustomActions-dev\",\"FleetWatcherFlespiAlertsProcessor-dev\",\"FleetWatcherMaintenanceProcessor-dev\",\"FleetWatcherNotifier-dev\",\"FleetWatcherReportProcessor-dev\",\"FleetWatcherproximitySearch-dev\",\"TeltonikaStreamProcessor-dev\",\"AntaiDayliInfractions-dev\"]))\n$util.toJson({})"
+            ]
+          ]
+        },
+        "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
+        "TypeName": "Query"
+      }
+    }
+  },
+  "Outputs": {
+    "GetAttDvDTableStreamArn": {
+      "Description": "Your DynamoDB table StreamArn.",
+      "Value": {
+        "Fn::GetAtt": [
+          "DvDTable",
+          "StreamArn"
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Join": [
+            ":",
+            [
+              {
+                "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+              },
+              "GetAtt:DvDTable:StreamArn"
+            ]
+          ]
+        }
+      }
+    },
+    "GetAttDvDTableName": {
+      "Description": "Your DynamoDB table name.",
+      "Value": {
+        "Ref": "DvDTable"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Join": [
+            ":",
+            [
+              {
+                "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+              },
+              "GetAtt:DvDTable:Name"
+            ]
+          ]
+        }
+      }
+    },
+    "GetAttDvDDataSourceName": {
+      "Description": "Your model DataSource name.",
+      "Value": {
+        "Fn::GetAtt": [
+          "DvDDataSource",
+          "Name"
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Join": [
+            ":",
+            [
+              {
+                "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+              },
+              "GetAtt:DvDDataSource:Name"
+            ]
+          ]
+        }
+      }
+    }
+  }
+}

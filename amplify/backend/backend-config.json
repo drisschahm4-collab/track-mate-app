@@ -1,0 +1,938 @@
+{
+  "api": {
+    "AdminQueries": {
+      "authorizationType": "AMAZON_COGNITO_USER_POOLS",
+      "dependsOn": [
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "fleetwatcherfrontbf750521"
+        },
+        {
+          "attributes": [
+            "Arn",
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "AdminQueries3fede987"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "API Gateway"
+    },
+    "fleetwatcherfront": {
+      "dependsOn": [
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "fleetwatcherfrontbf750521"
+        }
+      ],
+      "output": {
+        "authConfig": {
+          "additionalAuthenticationProviders": [
+            {
+              "apiKeyConfig": {
+                "apiKeyExpirationDate": "2026-10-30T17:27:49.170Z",
+                "apiKeyExpirationDays": 365,
+                "description": "api for public use"
+              },
+              "authenticationType": "API_KEY"
+            },
+            {
+              "authenticationType": "AWS_IAM"
+            }
+          ],
+          "defaultAuthentication": {
+            "authenticationType": "AMAZON_COGNITO_USER_POOLS",
+            "userPoolConfig": {
+              "userPoolId": "authfleetwatcherfrontbf750521"
+            }
+          }
+        }
+      },
+      "providerPlugin": "awscloudformation",
+      "service": "AppSync"
+    }
+  },
+  "auth": {
+    "fleetwatcherfrontbf750521": {
+      "customAuth": false,
+      "dependsOn": [],
+      "frontendAuthConfig": {
+        "mfaConfiguration": "OFF",
+        "mfaTypes": [
+          "SMS"
+        ],
+        "passwordProtectionSettings": {
+          "passwordPolicyCharacters": [],
+          "passwordPolicyMinLength": 8
+        },
+        "signupAttributes": [
+          "EMAIL"
+        ],
+        "socialProviders": [],
+        "usernameAttributes": [],
+        "verificationMechanisms": [
+          "EMAIL"
+        ]
+      },
+      "providerPlugin": "awscloudformation",
+      "service": "Cognito"
+    },
+    "userPoolGroups": {
+      "dependsOn": [
+        {
+          "attributes": [
+            "UserPoolId",
+            "AppClientIDWeb",
+            "AppClientID",
+            "IdentityPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "fleetwatcherfrontbf750521"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Cognito-UserPool-Groups"
+    }
+  },
+  "function": {
+    "AdminQueries3fede987": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "fleetwatcherfrontbf750521"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "AntaiDayliInfractions": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "fleetwatcherfront"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "AntaiProdActions": {
+      "build": true,
+      "dependsOn": [],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "FleetWatcherBusinessAlertProsessor": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "fleetwatcherfront"
+        },
+        {
+          "attributes": [
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "FleetWatcherNotifier"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "FleetWatcherCheckAlertDriving": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "fleetwatcherfrontbf750521"
+        },
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "fleetwatcherfront"
+        },
+        {
+          "attributes": [
+            "ApiName",
+            "ApiId"
+          ],
+          "category": "api",
+          "resourceName": "AdminQueries"
+        },
+        {
+          "attributes": [
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "FleetWatcherCustomActions"
+        },
+        {
+          "attributes": [
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "FleetWatcherReportProcessor"
+        },
+        {
+          "attributes": [
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "FleetWatcherNotifier"
+        },
+        {
+          "attributes": [
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "FleetWatcherBusinessAlertProsessor"
+        },
+        {
+          "attributes": [
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "FleetWatcherFlespiAlertsProcessor"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "FleetWatcherCustomActions": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "fleetwatcherfront"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "FleetWatcherFlespiAlertsProcessor": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "fleetwatcherfront"
+        },
+        {
+          "attributes": [
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "FleetWatcherNotifier"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "FleetWatcherMaintenanceProcessor": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "fleetwatcherfront"
+        },
+        {
+          "attributes": [
+            "ApiName",
+            "ApiId"
+          ],
+          "category": "api",
+          "resourceName": "AdminQueries"
+        },
+        {
+          "attributes": [
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "AdminQueries3fede987"
+        },
+        {
+          "attributes": [
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "FleetWatcherCustomActions"
+        },
+        {
+          "attributes": [
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "FleetWatcherNotifier"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "FleetWatcherMaintenanceReminder": {
+      "build": true,
+      "dependsOn": [],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "FleetWatcherNotifier": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "fleetwatcherfront"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "FleetWatcherReportProcessor": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "fleetwatcherfront"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "FleetWatcherUpdateUserPassword": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "FleetWatcherproximitySearch": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "fleetwatcherfront"
+        },
+        {
+          "attributes": [
+            "ApiName",
+            "ApiId"
+          ],
+          "category": "api",
+          "resourceName": "AdminQueries"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "TeltonikaStreamProcessor": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "fleetwatcherfront"
+        },
+        {
+          "attributes": [
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "FleetWatcherCustomActions"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "antaiFunction": {
+      "build": true,
+      "dependsOn": [],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "apiSIV": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    }
+  },
+  "parameters": {
+    "AMPLIFY_function_AdminQueries3fede987_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "AdminQueries3fede987"
+        }
+      ]
+    },
+    "AMPLIFY_function_AdminQueries3fede987_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "AdminQueries3fede987"
+        }
+      ]
+    },
+    "AMPLIFY_function_AntaiDayliInfractions_antaiPassword": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "AntaiDayliInfractions"
+        }
+      ]
+    },
+    "AMPLIFY_function_AntaiDayliInfractions_antaiUsername": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "AntaiDayliInfractions"
+        }
+      ]
+    },
+    "AMPLIFY_function_AntaiDayliInfractions_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "AntaiDayliInfractions"
+        }
+      ]
+    },
+    "AMPLIFY_function_AntaiDayliInfractions_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "AntaiDayliInfractions"
+        }
+      ]
+    },
+    "AMPLIFY_function_AntaiProdActions_antaiPassword": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "AntaiProdActions"
+        }
+      ]
+    },
+    "AMPLIFY_function_AntaiProdActions_antaiUsername": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "AntaiProdActions"
+        }
+      ]
+    },
+    "AMPLIFY_function_AntaiProdActions_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "AntaiProdActions"
+        }
+      ]
+    },
+    "AMPLIFY_function_AntaiProdActions_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "AntaiProdActions"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherBusinessAlertProsessor_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherBusinessAlertProsessor"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherBusinessAlertProsessor_gmKey": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherBusinessAlertProsessor"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherBusinessAlertProsessor_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherBusinessAlertProsessor"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherCheckAlertDriving_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherCheckAlertDriving"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherCheckAlertDriving_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherCheckAlertDriving"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherCustomActions_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherCustomActions"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherCustomActions_flespiToken": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherCustomActions"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherCustomActions_flespiUrl": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherCustomActions"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherCustomActions_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherCustomActions"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherFlespiAlertsProcessor_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherFlespiAlertsProcessor"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherFlespiAlertsProcessor_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherFlespiAlertsProcessor"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherMaintenanceProcessor_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherMaintenanceProcessor"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherMaintenanceProcessor_mjApikeyPrivate": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherMaintenanceProcessor"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherMaintenanceProcessor_mjApikeyPublic": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherMaintenanceProcessor"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherMaintenanceProcessor_mjSender": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherMaintenanceProcessor"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherMaintenanceProcessor_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherMaintenanceProcessor"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherMaintenanceReminder_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherMaintenanceReminder"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherMaintenanceReminder_mailjetApiKey": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherMaintenanceReminder"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherMaintenanceReminder_mailjetSecretKey": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherMaintenanceReminder"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherMaintenanceReminder_mjApikeyPrivate": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherMaintenanceReminder"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherMaintenanceReminder_mjApikeyPublic": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherMaintenanceReminder"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherMaintenanceReminder_mjSender": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherMaintenanceReminder"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherMaintenanceReminder_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherMaintenanceReminder"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherNotifier_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherNotifier"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherNotifier_mjApikeyPrivate": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherNotifier"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherNotifier_mjApikeyPublic": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherNotifier"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherNotifier_mjSender": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherNotifier"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherNotifier_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherNotifier"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherNotifier_twilioApikeyPrivate": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherNotifier"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherNotifier_twilioApikeyPublic": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherNotifier"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherNotifier_twilioSender": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherNotifier"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherReportProcessor_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherReportProcessor"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherReportProcessor_flespiActivityReportCalc": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherReportProcessor"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherReportProcessor_flespiDailySummaryCalc": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherReportProcessor"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherReportProcessor_flespiFuelReportCalc": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherReportProcessor"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherReportProcessor_flespiToken": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherReportProcessor"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherReportProcessor_flespiTrajectoryHistoryCalc": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherReportProcessor"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherReportProcessor_flespiUrl": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherReportProcessor"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherReportProcessor_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherReportProcessor"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherUpdateUserPassword_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherUpdateUserPassword"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherUpdateUserPassword_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherUpdateUserPassword"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherproximitySearch_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherproximitySearch"
+        }
+      ]
+    },
+    "AMPLIFY_function_FleetWatcherproximitySearch_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "FleetWatcherproximitySearch"
+        }
+      ]
+    },
+    "AMPLIFY_function_TeltonikaStreamProcessor_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "TeltonikaStreamProcessor"
+        }
+      ]
+    },
+    "AMPLIFY_function_TeltonikaStreamProcessor_functionFleetwatchercustomactionsName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "TeltonikaStreamProcessor"
+        }
+      ]
+    },
+    "AMPLIFY_function_TeltonikaStreamProcessor_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "TeltonikaStreamProcessor"
+        }
+      ]
+    },
+    "AMPLIFY_function_antaiFunction_antaiEmail": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "antaiFunction"
+        }
+      ]
+    },
+    "AMPLIFY_function_antaiFunction_antaiPassword": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "antaiFunction"
+        }
+      ]
+    },
+    "AMPLIFY_function_antaiFunction_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "antaiFunction"
+        }
+      ]
+    },
+    "AMPLIFY_function_antaiFunction_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "antaiFunction"
+        }
+      ]
+    },
+    "AMPLIFY_function_apiSIV_apiToken": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "apiSIV"
+        }
+      ]
+    },
+    "AMPLIFY_function_apiSIV_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "apiSIV"
+        }
+      ]
+    },
+    "AMPLIFY_function_apiSIV_infoSivTableName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "apiSIV"
+        }
+      ]
+    },
+    "AMPLIFY_function_apiSIV_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "apiSIV"
+        }
+      ]
+    },
+    "AMPLIFY_function_apiSIV_vehiclesTableName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "apiSIV"
+        }
+      ]
+    }
+  }
+}

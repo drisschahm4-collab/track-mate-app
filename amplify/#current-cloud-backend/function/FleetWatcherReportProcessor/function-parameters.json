@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "api": {
+      "fleetwatcherfront": [
+        "Query",
+        "Mutation",
+        "Subscription"
+      ]
+    }
+  },
+  "lambdaLayers": [],
+  "environmentVariableList": [
+    {
+      "cloudFormationParameterName": "flespiActivityReportCalc",
+      "environmentVariableName": "FLESPI_ACTIVITY_REPORT_CALC"
+    },
+    {
+      "cloudFormationParameterName": "flespiDailySummaryCalc",
+      "environmentVariableName": "FLESPI_DAILY_SUMMARY_CALC"
+    },
+    {
+      "cloudFormationParameterName": "flespiToken",
+      "environmentVariableName": "FLESPI_TOKEN"
+    },
+    {
+      "cloudFormationParameterName": "flespiTrajectoryHistoryCalc",
+      "environmentVariableName": "FLESPI_TRAJECTORY_HISTORY_CALC"
+    },
+    {
+      "cloudFormationParameterName": "flespiUrl",
+      "environmentVariableName": "FLESPI_URL"
+    },
+    {
+      "cloudFormationParameterName": "flespiFuelReportCalc",
+      "environmentVariableName": "FLESPI_FUEL_REPORT_CALC"
+    }
+  ],
+  "secretNames": []
+}

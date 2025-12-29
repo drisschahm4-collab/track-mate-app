@@ -1,0 +1,237 @@
+{
+  "Description": "Root Stack for AWS Amplify CLI",
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Parameters": {
+    "env": {
+      "Type": "String"
+    },
+    "AuthRoleArn": {
+      "Type": "String"
+    },
+    "UnauthRoleArn": {
+      "Type": "String"
+    },
+    "authfleetwatcherfrontbf750521UserPoolId": {
+      "Type": "String",
+      "Default": "authfleetwatcherfrontbf750521UserPoolId"
+    },
+    "authfleetwatcherfrontbf750521IdentityPoolId": {
+      "Type": "String",
+      "Default": "authfleetwatcherfrontbf750521IdentityPoolId"
+    },
+    "authfleetwatcherfrontbf750521AppClientID": {
+      "Type": "String",
+      "Default": "authfleetwatcherfrontbf750521AppClientID"
+    },
+    "authfleetwatcherfrontbf750521AppClientIDWeb": {
+      "Type": "String",
+      "Default": "authfleetwatcherfrontbf750521AppClientIDWeb"
+    }
+  },
+  "Conditions": {
+    "ShouldNotCreateEnvResources": {
+      "Fn::Equals": [
+        {
+          "Ref": "env"
+        },
+        "NONE"
+      ]
+    }
+  },
+  "Resources": {
+    "adminGroup": {
+      "Type": "AWS::Cognito::UserPoolGroup",
+      "Properties": {
+        "Description": "override success",
+        "GroupName": "admin",
+        "Precedence": 1,
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "adminGroupRole",
+            "Arn"
+          ]
+        },
+        "UserPoolId": {
+          "Ref": "authfleetwatcherfrontbf750521UserPoolId"
+        }
+      }
+    },
+    "adminGroupRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "",
+              "Effect": "Allow",
+              "Principal": {
+                "Federated": "cognito-identity.amazonaws.com"
+              },
+              "Action": "sts:AssumeRoleWithWebIdentity",
+              "Condition": {
+                "StringEquals": {
+                  "cognito-identity.amazonaws.com:aud": {
+                    "Ref": "authfleetwatcherfrontbf750521IdentityPoolId"
+                  }
+                },
+                "ForAnyValue:StringLike": {
+                  "cognito-identity.amazonaws.com:amr": "authenticated"
+                }
+              }
+            }
+          ]
+        },
+        "RoleName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "authfleetwatcherfrontbf750521UserPoolId"
+              },
+              "-adminGroupRole"
+            ]
+          ]
+        }
+      }
+    },
+    "managerGroup": {
+      "Type": "AWS::Cognito::UserPoolGroup",
+      "Properties": {
+        "Description": "override success",
+        "GroupName": "manager",
+        "Precedence": 2,
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "managerGroupRole",
+            "Arn"
+          ]
+        },
+        "UserPoolId": {
+          "Ref": "authfleetwatcherfrontbf750521UserPoolId"
+        }
+      }
+    },
+    "managerGroupRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "",
+              "Effect": "Allow",
+              "Principal": {
+                "Federated": "cognito-identity.amazonaws.com"
+              },
+              "Action": "sts:AssumeRoleWithWebIdentity",
+              "Condition": {
+                "StringEquals": {
+                  "cognito-identity.amazonaws.com:aud": {
+                    "Ref": "authfleetwatcherfrontbf750521IdentityPoolId"
+                  }
+                },
+                "ForAnyValue:StringLike": {
+                  "cognito-identity.amazonaws.com:amr": "authenticated"
+                }
+              }
+            }
+          ]
+        },
+        "RoleName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "authfleetwatcherfrontbf750521UserPoolId"
+              },
+              "-managerGroupRole"
+            ]
+          ]
+        }
+      }
+    },
+    "guestGroup": {
+      "Type": "AWS::Cognito::UserPoolGroup",
+      "Properties": {
+        "Description": "override success",
+        "GroupName": "guest",
+        "Precedence": 3,
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "guestGroupRole",
+            "Arn"
+          ]
+        },
+        "UserPoolId": {
+          "Ref": "authfleetwatcherfrontbf750521UserPoolId"
+        }
+      }
+    },
+    "guestGroupRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "",
+              "Effect": "Allow",
+              "Principal": {
+                "Federated": "cognito-identity.amazonaws.com"
+              },
+              "Action": "sts:AssumeRoleWithWebIdentity",
+              "Condition": {
+                "StringEquals": {
+                  "cognito-identity.amazonaws.com:aud": {
+                    "Ref": "authfleetwatcherfrontbf750521IdentityPoolId"
+                  }
+                },
+                "ForAnyValue:StringLike": {
+                  "cognito-identity.amazonaws.com:amr": "authenticated"
+                }
+              }
+            }
+          ]
+        },
+        "RoleName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "authfleetwatcherfrontbf750521UserPoolId"
+              },
+              "-guestGroupRole"
+            ]
+          ]
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "adminGroupRole": {
+      "Value": {
+        "Fn::GetAtt": [
+          "adminGroupRole",
+          "Arn"
+        ]
+      }
+    },
+    "managerGroupRole": {
+      "Value": {
+        "Fn::GetAtt": [
+          "managerGroupRole",
+          "Arn"
+        ]
+      }
+    },
+    "guestGroupRole": {
+      "Value": {
+        "Fn::GetAtt": [
+          "guestGroupRole",
+          "Arn"
+        ]
+      }
+    }
+  }
+}

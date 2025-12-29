@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "api": {
+      "fleetwatcherfront": [
+        "Query",
+        "Mutation",
+        "Subscription"
+      ]
+    }
+  },
+  "lambdaLayers": [],
+  "environmentVariableList": [
+    {
+      "cloudFormationParameterName": "mjSender",
+      "environmentVariableName": "MJ_SENDER"
+    },
+    {
+      "cloudFormationParameterName": "mjApikeyPrivate",
+      "environmentVariableName": "MJ_APIKEY_PRIVATE"
+    },
+    {
+      "cloudFormationParameterName": "mjApikeyPublic",
+      "environmentVariableName": "MJ_APIKEY_PUBLIC"
+    },
+    {
+      "cloudFormationParameterName": "twilioApikeyPrivate",
+      "environmentVariableName": "TWILIO_APIKEY_PRIVATE"
+    },
+    {
+      "cloudFormationParameterName": "twilioApikeyPublic",
+      "environmentVariableName": "TWILIO_APIKEY_PUBLIC"
+    },
+    {
+      "cloudFormationParameterName": "twilioSender",
+      "environmentVariableName": "TWILIO_SENDER"
+    }
+  ]
+}

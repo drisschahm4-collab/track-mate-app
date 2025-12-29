@@ -1,0 +1,25 @@
+{
+  "lambdaLayers": [],
+  "environmentVariableList": [
+    {
+      "cloudFormationParameterName": "mjApikeyPrivate",
+      "environmentVariableName": "MJ_APIKEY_PRIVATE"
+    },
+    {
+      "cloudFormationParameterName": "mjApikeyPublic",
+      "environmentVariableName": "MJ_APIKEY_PUBLIC"
+    },
+    {
+      "cloudFormationParameterName": "mjSender",
+      "environmentVariableName": "MJ_SENDER"
+    },
+    {
+      "cloudFormationParameterName": "mailjetApiKey",
+      "environmentVariableName": "MAILJET_API_KEY"
+    },
+    {
+      "cloudFormationParameterName": "mailjetSecretKey",
+      "environmentVariableName": "MAILJET_SECRET_KEY"
+    }
+  ]
+}

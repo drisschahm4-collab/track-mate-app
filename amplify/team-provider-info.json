@@ -1,0 +1,124 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-fleetwatcherfront-dev-bbd87-authRole",
+      "UnauthRoleArn": "arn:aws:iam::050451379356:role/amplify-fleetwatcherfront-dev-bbd87-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::050451379356:role/amplify-fleetwatcherfront-dev-bbd87-authRole",
+      "Region": "eu-west-3",
+      "DeploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+      "UnauthRoleName": "amplify-fleetwatcherfront-dev-bbd87-unauthRole",
+      "StackName": "amplify-fleetwatcherfront-dev-bbd87",
+      "StackId": "arn:aws:cloudformation:eu-west-3:050451379356:stack/amplify-fleetwatcherfront-dev-bbd87/bd2e2e70-b5af-11f0-af01-0ea1c67e15fd",
+      "AmplifyAppId": "druwefrubmif9"
+    },
+    "categories": {
+      "function": {
+        "FleetWatcherBusinessAlertProsessor": {
+          "gmKey": "AIzaSyA3_p-_4Mvx-DkoX2xGbEeDR06LCkk8_vY",
+          "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+          "s3Key": "amplify-builds/FleetWatcherBusinessAlertProsessor-694a416b78665a417953-build.zip"
+        },
+        "FleetWatcherCustomActions": {
+          "flespiToken": "gA2pUQHcTnz41YKfdkwO6hcaq9ZX9aNGdVZDqfFyMYnOaHwKnLsDNYMaqfqmEqL9",
+          "flespiUrl": "https://flespi.io/gw",
+          "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+          "s3Key": "amplify-builds/FleetWatcherCustomActions-335476454a7632313243-build.zip"
+        },
+        "FleetWatcherMaintenanceProcessor": {
+          "mjApikeyPrivate": "67df664573437890fa03d998fc6227c4",
+          "mjApikeyPublic": "a128d016e24913e132e8478965c3bc4c",
+          "mjSender": "k.izzouke@geoloc-systems.com",
+          "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+          "s3Key": "amplify-builds/FleetWatcherMaintenanceProcessor-535571316267655a4d43-build.zip"
+        },
+        "FleetWatcherMaintenanceReminder": {
+          "mailjetApiKey": "a128d016e24913e132e8478965c3bc4c",
+          "mailjetSecretKey": "67df664573437890fa03d998fc6227c4",
+          "mjApikeyPrivate": "67df664573437890fa03d998fc6227c4",
+          "mjApikeyPublic": "a128d016e24913e132e8478965c3bc4c",
+          "mjSender": "k.izzouke@geoloc-systems.com",
+          "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+          "s3Key": "amplify-builds/FleetWatcherMaintenanceReminder-565035377657677a7731-build.zip"
+        },
+        "FleetWatcherNotifier": {
+          "mjApikeyPrivate": "67df664573437890fa03d998fc6227c4",
+          "mjApikeyPublic": "a128d016e24913e132e8478965c3bc4c",
+          "mjSender": "k.izzouke@geoloc-systems.com",
+          "twilioApikeyPrivate": "9d52e6459275ec71cc6299d3c6e9ead4",
+          "twilioApikeyPublic": "AC94af8c37b7e74b1f26c4bb265a3beacf",
+          "twilioSender": "+12674335988",
+          "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+          "s3Key": "amplify-builds/FleetWatcherNotifier-374756486f753851465a-build.zip"
+        },
+        "FleetWatcherReportProcessor": {
+          "flespiActivityReportCalc": "1695308",
+          "flespiDailySummaryCalc": "1725011",
+          "flespiFuelReportCalc": "1713663",
+          "flespiToken": "gA2pUQHcTnz41YKfdkwO6hcaq9ZX9aNGdVZDqfFyMYnOaHwKnLsDNYMaqfqmEqL9",
+          "flespiTrajectoryHistoryCalc": "1675320",
+          "flespiUrl": "https://flespi.io/gw/devices",
+          "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+          "s3Key": "amplify-builds/FleetWatcherReportProcessor-723149584f3868546437-build.zip"
+        },
+        "TeltonikaStreamProcessor": {
+          "functionFleetwatchercustomactionsName": "FleetWatcherCustomActions-dev",
+          "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+          "s3Key": "amplify-builds/TeltonikaStreamProcessor-7a6c3858464f76686e41-build.zip"
+        },
+        "antaiFunction": {
+          "antaiEmail": "m.kheroua@geoloc-systems.com",
+          "antaiPassword": "0lBye$4joSukcW",
+          "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+          "s3Key": "amplify-builds/antaiFunction-74594d75515a4e747831-build.zip"
+        },
+        "apiSIV": {
+          "apiToken": "2cc614726936bc2fc2533b8f47f42c06",
+          "infoSivTableName": "sivtable",
+          "vehiclesTableName": "Siv",
+          "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+          "s3Key": "amplify-builds/apiSIV-75352b79764a516f5171-build.zip"
+        },
+        "AdminQueries3fede987": {
+          "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+          "s3Key": "amplify-builds/AdminQueries3fede987-487454354d4f5677414b-build.zip"
+        },
+        "FleetWatcherCheckAlertDriving": {
+          "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+          "s3Key": "amplify-builds/FleetWatcherCheckAlertDriving-4a3361585871484c3134-build.zip"
+        },
+        "FleetWatcherFlespiAlertsProcessor": {
+          "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+          "s3Key": "amplify-builds/FleetWatcherFlespiAlertsProcessor-3068414f794d49683774-build.zip"
+        },
+        "FleetWatcherUpdateUserPassword": {
+          "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+          "s3Key": "amplify-builds/FleetWatcherUpdateUserPassword-54684b5a5a4835314b35-build.zip"
+        },
+        "FleetWatcherproximitySearch": {
+          "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+          "s3Key": "amplify-builds/FleetWatcherproximitySearch-6b4c4473646b722b3051-build.zip"
+        },
+        "AntaiProdActions": {
+          "antaiUsername": "m.kheroua@geoloc-systems.com",
+          "antaiPassword": "st#QDnSX4bGPy@m!",
+          "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+          "s3Key": "amplify-builds/AntaiProdActions-356e426b704862426a57-build.zip"
+        },
+        "AntaiDayliInfractions": {
+          "antaiUsername": "m.kheroua@geoloc-systems.com",
+          "antaiPassword": "st#QDnSX4bGPy@m!",
+          "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+          "s3Key": "amplify-builds/AntaiDayliInfractions-6e6b3748622f43753077-build.zip"
+        }
+      },
+      "auth": {
+        "fleetwatcherfrontbf750521": {},
+        "userPoolGroups": {}
+      },
+      "api": {
+        "AdminQueries": {},
+        "fleetwatcherfront": {}
+      }
+    }
+  }
+}

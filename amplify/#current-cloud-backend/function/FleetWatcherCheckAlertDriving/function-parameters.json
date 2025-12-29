@@ -1,0 +1,58 @@
+{
+  "permissions": {
+    "auth": {
+      "fleetwatcherfrontbf750521": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ]
+    },
+    "api": {
+      "fleetwatcherfront": [
+        "Query",
+        "Mutation",
+        "Subscription"
+      ],
+      "AdminQueries": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ]
+    },
+    "function": {
+      "FleetWatcherCustomActions": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "FleetWatcherReportProcessor": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "FleetWatcherNotifier": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "FleetWatcherBusinessAlertProsessor": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "FleetWatcherFlespiAlertsProcessor": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ]
+    }
+  },
+  "lambdaLayers": []
+}

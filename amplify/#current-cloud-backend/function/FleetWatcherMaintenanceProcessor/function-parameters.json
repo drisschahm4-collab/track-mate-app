@@ -1,0 +1,51 @@
+{
+  "permissions": {
+    "api": {
+      "fleetwatcherfront": [
+        "Query",
+        "Mutation"
+      ],
+      "AdminQueries": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ]
+    },
+    "function": {
+      "AdminQueries3fede987": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "FleetWatcherCustomActions": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "FleetWatcherNotifier": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ]
+    }
+  },
+  "lambdaLayers": [],
+  "environmentVariableList": [
+    {
+      "cloudFormationParameterName": "mjApikeyPrivate",
+      "environmentVariableName": "MJ_APIKEY_PRIVATE"
+    },
+    {
+      "cloudFormationParameterName": "mjApikeyPublic",
+      "environmentVariableName": "MJ_APIKEY_PUBLIC"
+    },
+    {
+      "cloudFormationParameterName": "mjSender",
+      "environmentVariableName": "MJ_SENDER"
+    }
+  ]
+}

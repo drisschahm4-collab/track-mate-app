@@ -1,0 +1,17 @@
+{
+  "lambdaLayers": [],
+  "environmentVariableList": [
+    {
+      "cloudFormationParameterName": "apiToken",
+      "environmentVariableName": "API_TOKEN"
+    },
+    {
+      "cloudFormationParameterName": "infoSivTableName",
+      "environmentVariableName": "INFO_SIV_TABLE_NAME"
+    },
+    {
+      "cloudFormationParameterName": "vehiclesTableName",
+      "environmentVariableName": "VEHICLES_TABLE_NAME"
+    }
+  ]
+}

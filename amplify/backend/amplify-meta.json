@@ -1,0 +1,739 @@
+{
+  "providers": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-fleetwatcherfront-dev-bbd87-authRole",
+      "UnauthRoleArn": "arn:aws:iam::050451379356:role/amplify-fleetwatcherfront-dev-bbd87-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::050451379356:role/amplify-fleetwatcherfront-dev-bbd87-authRole",
+      "Region": "eu-west-3",
+      "DeploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+      "UnauthRoleName": "amplify-fleetwatcherfront-dev-bbd87-unauthRole",
+      "StackName": "amplify-fleetwatcherfront-dev-bbd87",
+      "StackId": "arn:aws:cloudformation:eu-west-3:050451379356:stack/amplify-fleetwatcherfront-dev-bbd87/bd2e2e70-b5af-11f0-af01-0ea1c67e15fd",
+      "AmplifyAppId": "druwefrubmif9"
+    }
+  },
+  "api": {
+    "AdminQueries": {
+      "authorizationType": "AMAZON_COGNITO_USER_POOLS",
+      "dependsOn": [
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "fleetwatcherfrontbf750521"
+        },
+        {
+          "attributes": [
+            "Arn",
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "AdminQueries3fede987"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "API Gateway",
+      "output": {
+        "ApiName": "AdminQueries",
+        "RootUrl": "https://sghnz5ty2e.execute-api.eu-west-3.amazonaws.com/dev",
+        "ApiId": "sghnz5ty2e"
+      },
+      "lastPushTimeStamp": "2025-11-27T22:02:33.665Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-fleetwatcherfront-dev-bbd87-deployment/amplify-cfn-templates/api/AdminQueries-cloudformation-template.json",
+        "logicalId": "apiAdminQueries"
+      }
+    },
+    "fleetwatcherfront": {
+      "dependsOn": [
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "fleetwatcherfrontbf750521"
+        }
+      ],
+      "output": {
+        "authConfig": {
+          "additionalAuthenticationProviders": [
+            {
+              "apiKeyConfig": {
+                "apiKeyExpirationDate": "2026-10-30T17:27:49.170Z",
+                "apiKeyExpirationDays": 365,
+                "description": "api for public use"
+              },
+              "authenticationType": "API_KEY"
+            },
+            {
+              "authenticationType": "AWS_IAM"
+            }
+          ],
+          "defaultAuthentication": {
+            "authenticationType": "AMAZON_COGNITO_USER_POOLS",
+            "userPoolConfig": {
+              "userPoolId": "authfleetwatcherfrontbf750521"
+            }
+          }
+        },
+        "GraphQLAPIIdOutput": "s2u7z4ppy5cndoamshbscmpggy",
+        "GraphQLAPIEndpointOutput": "https://c2yd53frvfff7fkdkwwu7u3ahu.appsync-api.eu-west-3.amazonaws.com/graphql",
+        "GraphQLAPIKeyOutput": "da2-2jbdfcic3fhehcnjb6mce2gtgq"
+      },
+      "providerPlugin": "awscloudformation",
+      "service": "AppSync",
+      "lastPushTimeStamp": "2025-11-27T22:02:38.294Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-fleetwatcherfront-dev-bbd87-deployment/amplify-cfn-templates/api/cloudformation-template.json",
+        "logicalId": "apifleetwatcherfront"
+      },
+      "lastPushDirHash": "zmIxVT7QHsFhYI/KeuSPbBLKuR4="
+    }
+  },
+  "auth": {
+    "fleetwatcherfrontbf750521": {
+      "customAuth": false,
+      "dependsOn": [],
+      "frontendAuthConfig": {
+        "mfaConfiguration": "OFF",
+        "mfaTypes": [
+          "SMS"
+        ],
+        "passwordProtectionSettings": {
+          "passwordPolicyMinLength": 8,
+          "passwordPolicyCharacters": []
+        },
+        "signupAttributes": [
+          "EMAIL"
+        ],
+        "socialProviders": [],
+        "usernameAttributes": [],
+        "verificationMechanisms": [
+          "EMAIL"
+        ]
+      },
+      "providerPlugin": "awscloudformation",
+      "service": "Cognito",
+      "output": {
+        "UserPoolId": "eu-west-3_4syLEZetO",
+        "AppClientIDWeb": "qoh7i756nl41s9iscsbkabia2",
+        "AppClientID": "vnv8ksta4hvr1ab050mv03esg",
+        "IdentityPoolId": "eu-west-3:c1eaa760-cfb5-4ab9-a4f7-35a17efdf034",
+        "UserPoolArn": "arn:aws:cognito-idp:eu-west-3:050451379356:userpool/eu-west-3_4syLEZetO",
+        "IdentityPoolName": "fleetwatcherfrontbf750521_identitypool_bf750521__dev",
+        "UserPoolName": "fleetwatcherfrontbf750521_userpool_bf750521"
+      },
+      "lastPushTimeStamp": "2025-11-27T22:02:33.850Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-fleetwatcherfront-dev-bbd87-deployment/amplify-cfn-templates/auth/fleetwatcherfrontbf750521-cloudformation-template.json",
+        "logicalId": "authfleetwatcherfrontbf750521"
+      }
+    },
+    "userPoolGroups": {
+      "dependsOn": [
+        {
+          "category": "auth",
+          "resourceName": "fleetwatcherfrontbf750521",
+          "attributes": [
+            "UserPoolId",
+            "AppClientIDWeb",
+            "AppClientID",
+            "IdentityPoolId"
+          ]
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Cognito-UserPool-Groups",
+      "output": {
+        "adminGroupRole": "arn:aws:iam::050451379356:role/eu-west-3_4syLEZetO-adminGroupRole",
+        "guestGroupRole": "arn:aws:iam::050451379356:role/eu-west-3_4syLEZetO-guestGroupRole",
+        "managerGroupRole": "arn:aws:iam::050451379356:role/eu-west-3_4syLEZetO-managerGroupRole"
+      },
+      "lastPushTimeStamp": "2025-11-27T22:02:33.964Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-fleetwatcherfront-dev-bbd87-deployment/amplify-cfn-templates/auth/userPoolGroups-cloudformation-template.json",
+        "logicalId": "authuserPoolGroups"
+      }
+    }
+  },
+  "function": {
+    "AdminQueries3fede987": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "fleetwatcherfrontbf750521"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda",
+      "output": {
+        "LambdaExecutionRoleArn": "arn:aws:iam::050451379356:role/AdminQueries3fede987LambdaRole-dev",
+        "Region": "eu-west-3",
+        "Arn": "arn:aws:lambda:eu-west-3:050451379356:function:AdminQueries3fede987-dev",
+        "Name": "AdminQueries3fede987-dev",
+        "LambdaExecutionRole": "AdminQueries3fede987LambdaRole-dev"
+      },
+      "lastPushTimeStamp": "2025-11-27T22:02:34.091Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-fleetwatcherfront-dev-bbd87-deployment/amplify-cfn-templates/function/AdminQueries3fede987-cloudformation-template.json",
+        "logicalId": "functionAdminQueries3fede987"
+      },
+      "s3Bucket": {
+        "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+        "s3Key": "amplify-builds/AdminQueries3fede987-487454354d4f5677414b-build.zip"
+      }
+    },
+    "FleetWatcherBusinessAlertProsessor": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "fleetwatcherfront"
+        },
+        {
+          "attributes": [
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "FleetWatcherNotifier"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda",
+      "output": {
+        "LambdaExecutionRoleArn": "arn:aws:iam::050451379356:role/fleetwatcherfrontLambdaRole00d26464-dev",
+        "Region": "eu-west-3",
+        "Arn": "arn:aws:lambda:eu-west-3:050451379356:function:FleetWatcherBusinessAlertProsessor-dev",
+        "Name": "FleetWatcherBusinessAlertProsessor-dev",
+        "LambdaExecutionRole": "fleetwatcherfrontLambdaRole00d26464-dev"
+      },
+      "lastPushTimeStamp": "2025-11-27T22:02:34.218Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-fleetwatcherfront-dev-bbd87-deployment/amplify-cfn-templates/function/FleetWatcherBusinessAlertProsessor-cloudformation-template.json",
+        "logicalId": "functionFleetWatcherBusinessAlertProsessor"
+      },
+      "s3Bucket": {
+        "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+        "s3Key": "amplify-builds/FleetWatcherBusinessAlertProsessor-694a416b78665a417953-build.zip"
+      }
+    },
+    "FleetWatcherCheckAlertDriving": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "fleetwatcherfrontbf750521"
+        },
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "fleetwatcherfront"
+        },
+        {
+          "attributes": [
+            "ApiName",
+            "ApiId"
+          ],
+          "category": "api",
+          "resourceName": "AdminQueries"
+        },
+        {
+          "attributes": [
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "FleetWatcherCustomActions"
+        },
+        {
+          "attributes": [
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "FleetWatcherReportProcessor"
+        },
+        {
+          "attributes": [
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "FleetWatcherNotifier"
+        },
+        {
+          "attributes": [
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "FleetWatcherBusinessAlertProsessor"
+        },
+        {
+          "attributes": [
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "FleetWatcherFlespiAlertsProcessor"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda",
+      "output": {
+        "LambdaExecutionRoleArn": "arn:aws:iam::050451379356:role/fleetwatcherfrontLambdaRole2935076f-dev",
+        "Region": "eu-west-3",
+        "Arn": "arn:aws:lambda:eu-west-3:050451379356:function:FleetWatcherCheckAlertDriving-dev",
+        "Name": "FleetWatcherCheckAlertDriving-dev",
+        "LambdaExecutionRole": "fleetwatcherfrontLambdaRole2935076f-dev"
+      },
+      "lastPushTimeStamp": "2025-11-27T22:02:34.343Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-fleetwatcherfront-dev-bbd87-deployment/amplify-cfn-templates/function/FleetWatcherCheckAlertDriving-cloudformation-template.json",
+        "logicalId": "functionFleetWatcherCheckAlertDriving"
+      },
+      "s3Bucket": {
+        "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+        "s3Key": "amplify-builds/FleetWatcherCheckAlertDriving-4a3361585871484c3134-build.zip"
+      }
+    },
+    "FleetWatcherCustomActions": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "fleetwatcherfront"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda",
+      "output": {
+        "LambdaExecutionRoleArn": "arn:aws:iam::050451379356:role/fleetwatcherfrontLambdaRole35b7457d-dev",
+        "Region": "eu-west-3",
+        "Arn": "arn:aws:lambda:eu-west-3:050451379356:function:FleetWatcherCustomActions-dev",
+        "Name": "FleetWatcherCustomActions-dev",
+        "LambdaExecutionRole": "fleetwatcherfrontLambdaRole35b7457d-dev"
+      },
+      "lastPushTimeStamp": "2025-11-27T22:02:34.452Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-fleetwatcherfront-dev-bbd87-deployment/amplify-cfn-templates/function/FleetWatcherCustomActions-cloudformation-template.json",
+        "logicalId": "functionFleetWatcherCustomActions"
+      },
+      "s3Bucket": {
+        "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+        "s3Key": "amplify-builds/FleetWatcherCustomActions-335476454a7632313243-build.zip"
+      }
+    },
+    "FleetWatcherFlespiAlertsProcessor": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "fleetwatcherfront"
+        },
+        {
+          "attributes": [
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "FleetWatcherNotifier"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda",
+      "output": {
+        "LambdaExecutionRoleArn": "arn:aws:iam::050451379356:role/fleetwatcherfrontLambdaRole46d9d34d-dev",
+        "Region": "eu-west-3",
+        "Arn": "arn:aws:lambda:eu-west-3:050451379356:function:FleetWatcherFlespiAlertsProcessor-dev",
+        "Name": "FleetWatcherFlespiAlertsProcessor-dev",
+        "LambdaExecutionRole": "fleetwatcherfrontLambdaRole46d9d34d-dev"
+      },
+      "lastPushTimeStamp": "2025-11-27T22:02:34.568Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-fleetwatcherfront-dev-bbd87-deployment/amplify-cfn-templates/function/FleetWatcherFlespiAlertsProcessor-cloudformation-template.json",
+        "logicalId": "functionFleetWatcherFlespiAlertsProcessor"
+      },
+      "s3Bucket": {
+        "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+        "s3Key": "amplify-builds/FleetWatcherFlespiAlertsProcessor-3068414f794d49683774-build.zip"
+      }
+    },
+    "FleetWatcherMaintenanceProcessor": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "fleetwatcherfront"
+        },
+        {
+          "attributes": [
+            "ApiName",
+            "ApiId"
+          ],
+          "category": "api",
+          "resourceName": "AdminQueries"
+        },
+        {
+          "attributes": [
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "AdminQueries3fede987"
+        },
+        {
+          "attributes": [
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "FleetWatcherCustomActions"
+        },
+        {
+          "attributes": [
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "FleetWatcherNotifier"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda",
+      "output": {
+        "LambdaExecutionRoleArn": "arn:aws:iam::050451379356:role/fleetwatcherfrontLambdaRolece5fbc38-dev",
+        "Region": "eu-west-3",
+        "Arn": "arn:aws:lambda:eu-west-3:050451379356:function:FleetWatcherMaintenanceProcessor-dev",
+        "Name": "FleetWatcherMaintenanceProcessor-dev",
+        "LambdaExecutionRole": "fleetwatcherfrontLambdaRolece5fbc38-dev"
+      },
+      "lastPushTimeStamp": "2025-11-27T22:02:34.708Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-fleetwatcherfront-dev-bbd87-deployment/amplify-cfn-templates/function/FleetWatcherMaintenanceProcessor-cloudformation-template.json",
+        "logicalId": "functionFleetWatcherMaintenanceProcessor"
+      },
+      "s3Bucket": {
+        "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+        "s3Key": "amplify-builds/FleetWatcherMaintenanceProcessor-535571316267655a4d43-build.zip"
+      }
+    },
+    "FleetWatcherMaintenanceReminder": {
+      "build": true,
+      "dependsOn": [],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda",
+      "output": {
+        "LambdaExecutionRoleArn": "arn:aws:iam::050451379356:role/fleetwatcherfrontLambdaRole07739cfb-dev",
+        "Region": "eu-west-3",
+        "Arn": "arn:aws:lambda:eu-west-3:050451379356:function:FleetWatcherMaintenanceReminder-dev",
+        "Name": "FleetWatcherMaintenanceReminder-dev",
+        "LambdaExecutionRole": "fleetwatcherfrontLambdaRole07739cfb-dev"
+      },
+      "lastPushTimeStamp": "2025-11-27T22:02:34.775Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-fleetwatcherfront-dev-bbd87-deployment/amplify-cfn-templates/function/FleetWatcherMaintenanceReminder-cloudformation-template.json",
+        "logicalId": "functionFleetWatcherMaintenanceReminder"
+      },
+      "s3Bucket": {
+        "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+        "s3Key": "amplify-builds/FleetWatcherMaintenanceReminder-565035377657677a7731-build.zip"
+      }
+    },
+    "FleetWatcherNotifier": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "fleetwatcherfront"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda",
+      "output": {
+        "LambdaExecutionRoleArn": "arn:aws:iam::050451379356:role/fleetwatcherfrontLambdaRoleb1a8f38b-dev",
+        "Region": "eu-west-3",
+        "Arn": "arn:aws:lambda:eu-west-3:050451379356:function:FleetWatcherNotifier-dev",
+        "Name": "FleetWatcherNotifier-dev",
+        "LambdaExecutionRole": "fleetwatcherfrontLambdaRoleb1a8f38b-dev"
+      },
+      "lastPushTimeStamp": "2025-11-27T22:02:34.894Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-fleetwatcherfront-dev-bbd87-deployment/amplify-cfn-templates/function/FleetWatcherNotifier-cloudformation-template.json",
+        "logicalId": "functionFleetWatcherNotifier"
+      },
+      "s3Bucket": {
+        "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+        "s3Key": "amplify-builds/FleetWatcherNotifier-374756486f753851465a-build.zip"
+      }
+    },
+    "FleetWatcherReportProcessor": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "fleetwatcherfront"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda",
+      "output": {
+        "LambdaExecutionRoleArn": "arn:aws:iam::050451379356:role/fleetwatcherfrontLambdaRoleb952c5a3-dev",
+        "Region": "eu-west-3",
+        "Arn": "arn:aws:lambda:eu-west-3:050451379356:function:FleetWatcherReportProcessor-dev",
+        "Name": "FleetWatcherReportProcessor-dev",
+        "LambdaExecutionRole": "fleetwatcherfrontLambdaRoleb952c5a3-dev"
+      },
+      "lastPushTimeStamp": "2025-11-27T22:02:35.009Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-fleetwatcherfront-dev-bbd87-deployment/amplify-cfn-templates/function/FleetWatcherReportProcessor-cloudformation-template.json",
+        "logicalId": "functionFleetWatcherReportProcessor"
+      },
+      "s3Bucket": {
+        "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+        "s3Key": "amplify-builds/FleetWatcherReportProcessor-723149584f3868546437-build.zip"
+      }
+    },
+    "FleetWatcherUpdateUserPassword": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda",
+      "output": {
+        "LambdaExecutionRoleArn": "arn:aws:iam::050451379356:role/fleetwatcherfrontLambdaRole6127e5f4-dev",
+        "Region": "eu-west-3",
+        "Arn": "arn:aws:lambda:eu-west-3:050451379356:function:FleetWatcherUpdateUserPassword-dev",
+        "Name": "FleetWatcherUpdateUserPassword-dev",
+        "LambdaExecutionRole": "fleetwatcherfrontLambdaRole6127e5f4-dev"
+      },
+      "lastPushTimeStamp": "2025-11-27T22:02:35.136Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-fleetwatcherfront-dev-bbd87-deployment/amplify-cfn-templates/function/FleetWatcherUpdateUserPassword-cloudformation-template.json",
+        "logicalId": "functionFleetWatcherUpdateUserPassword"
+      },
+      "s3Bucket": {
+        "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+        "s3Key": "amplify-builds/FleetWatcherUpdateUserPassword-54684b5a5a4835314b35-build.zip"
+      }
+    },
+    "FleetWatcherproximitySearch": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "fleetwatcherfront"
+        },
+        {
+          "attributes": [
+            "ApiName",
+            "ApiId"
+          ],
+          "category": "api",
+          "resourceName": "AdminQueries"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda",
+      "output": {
+        "LambdaExecutionRoleArn": "arn:aws:iam::050451379356:role/fleetwatcherfrontLambdaRolede9e9c2d-dev",
+        "Region": "eu-west-3",
+        "Arn": "arn:aws:lambda:eu-west-3:050451379356:function:FleetWatcherproximitySearch-dev",
+        "Name": "FleetWatcherproximitySearch-dev",
+        "LambdaExecutionRole": "fleetwatcherfrontLambdaRolede9e9c2d-dev"
+      },
+      "lastPushTimeStamp": "2025-11-27T22:02:35.264Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-fleetwatcherfront-dev-bbd87-deployment/amplify-cfn-templates/function/FleetWatcherproximitySearch-cloudformation-template.json",
+        "logicalId": "functionFleetWatcherproximitySearch"
+      },
+      "s3Bucket": {
+        "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+        "s3Key": "amplify-builds/FleetWatcherproximitySearch-6b4c4473646b722b3051-build.zip"
+      }
+    },
+    "TeltonikaStreamProcessor": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ],
+          "category": "api",
+          "resourceName": "fleetwatcherfront"
+        },
+        {
+          "attributes": [
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "FleetWatcherCustomActions"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda",
+      "output": {
+        "LambdaExecutionRoleArn": "arn:aws:iam::050451379356:role/fleetwatcherfrontLambdaRole1c630038-dev",
+        "Region": "eu-west-3",
+        "Arn": "arn:aws:lambda:eu-west-3:050451379356:function:TeltonikaStreamProcessor-dev",
+        "Name": "TeltonikaStreamProcessor-dev",
+        "LambdaExecutionRole": "fleetwatcherfrontLambdaRole1c630038-dev"
+      },
+      "lastPushTimeStamp": "2025-11-27T22:02:35.379Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-fleetwatcherfront-dev-bbd87-deployment/amplify-cfn-templates/function/TeltonikaStreamProcessor-cloudformation-template.json",
+        "logicalId": "functionTeltonikaStreamProcessor"
+      },
+      "s3Bucket": {
+        "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+        "s3Key": "amplify-builds/TeltonikaStreamProcessor-7a6c3858464f76686e41-build.zip"
+      }
+    },
+    "antaiFunction": {
+      "build": true,
+      "dependsOn": [],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda",
+      "output": {
+        "LambdaExecutionRoleArn": "arn:aws:iam::050451379356:role/fleetwatcherfrontLambdaRole030849f1-dev",
+        "Region": "eu-west-3",
+        "Arn": "arn:aws:lambda:eu-west-3:050451379356:function:antaiFunction-dev",
+        "Name": "antaiFunction-dev",
+        "LambdaExecutionRole": "fleetwatcherfrontLambdaRole030849f1-dev"
+      },
+      "lastPushTimeStamp": "2025-11-27T22:02:35.486Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-fleetwatcherfront-dev-bbd87-deployment/amplify-cfn-templates/function/antaiFunction-cloudformation-template.json",
+        "logicalId": "functionantaiFunction"
+      },
+      "s3Bucket": {
+        "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+        "s3Key": "amplify-builds/antaiFunction-74594d75515a4e747831-build.zip"
+      }
+    },
+    "apiSIV": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda",
+      "output": {
+        "LambdaExecutionRoleArn": "arn:aws:iam::050451379356:role/fleetwatcherfrontLambdaRole604a19fc-dev",
+        "Region": "eu-west-3",
+        "Arn": "arn:aws:lambda:eu-west-3:050451379356:function:apiSIV-dev",
+        "Name": "apiSIV-dev",
+        "LambdaExecutionRole": "fleetwatcherfrontLambdaRole604a19fc-dev"
+      },
+      "lastPushTimeStamp": "2025-11-27T22:02:35.601Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-fleetwatcherfront-dev-bbd87-deployment/amplify-cfn-templates/function/apiSIV-cloudformation-template.json",
+        "logicalId": "functionapiSIV"
+      },
+      "s3Bucket": {
+        "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+        "s3Key": "amplify-builds/apiSIV-75352b79764a516f5171-build.zip"
+      }
+    },
+    "AntaiProdActions": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda",
+      "dependsOn": [],
+      "lastBuildTimeStamp": "2025-11-27T21:07:57.311Z",
+      "lastBuildType": "PROD",
+      "lastPackageTimeStamp": "2025-11-27T21:08:02.407Z",
+      "distZipFilename": "AntaiProdActions-356e426b704862426a57-build.zip",
+      "s3Bucket": {
+        "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+        "s3Key": "amplify-builds/AntaiProdActions-356e426b704862426a57-build.zip"
+      },
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-fleetwatcherfront-dev-bbd87-deployment/amplify-cfn-templates/function/AntaiProdActions-cloudformation-template.json",
+        "logicalId": "functionAntaiProdActions"
+      },
+      "lastPushTimeStamp": "2025-11-27T22:02:35.722Z",
+      "output": {
+        "LambdaExecutionRoleArn": "arn:aws:iam::050451379356:role/fleetwatcherfrontLambdaRole859033af-dev",
+        "Region": "eu-west-3",
+        "Arn": "arn:aws:lambda:eu-west-3:050451379356:function:AntaiProdActions-dev",
+        "Name": "AntaiProdActions-dev",
+        "LambdaExecutionRole": "fleetwatcherfrontLambdaRole859033af-dev"
+      },
+      "lastPushDirHash": "t3AU5TF1Z7TsrozXWUIxQ1w68UY="
+    },
+    "AntaiDayliInfractions": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda",
+      "dependsOn": [
+        {
+          "category": "api",
+          "resourceName": "fleetwatcherfront",
+          "attributes": [
+            "GraphQLAPIIdOutput",
+            "GraphQLAPIEndpointOutput",
+            "GraphQLAPIKeyOutput"
+          ]
+        }
+      ],
+      "lastBuildTimeStamp": "2025-11-27T21:55:40.333Z",
+      "lastBuildType": "PROD",
+      "lastPackageTimeStamp": "2025-11-27T21:55:41.847Z",
+      "distZipFilename": "AntaiDayliInfractions-6e6b3748622f43753077-build.zip",
+      "s3Bucket": {
+        "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+        "s3Key": "amplify-builds/AntaiDayliInfractions-6e6b3748622f43753077-build.zip"
+      },
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-fleetwatcherfront-dev-bbd87-deployment/amplify-cfn-templates/function/AntaiDayliInfractions-cloudformation-template.json",
+        "logicalId": "functionAntaiDayliInfractions"
+      },
+      "lastPushTimeStamp": "2025-11-27T22:02:38.294Z",
+      "output": {
+        "LambdaExecutionRoleArn": "arn:aws:iam::050451379356:role/fleetwatcherfrontLambdaRolefd8cc0ae-dev",
+        "Region": "eu-west-3",
+        "CloudWatchEventRule": "amplify-fleetwatcherfront-dev-bbd87-CloudWatchEvent-oWFw5XczyGea",
+        "Arn": "arn:aws:lambda:eu-west-3:050451379356:function:AntaiDayliInfractions-dev",
+        "Name": "AntaiDayliInfractions-dev",
+        "LambdaExecutionRole": "fleetwatcherfrontLambdaRolefd8cc0ae-dev"
+      },
+      "lastPushDirHash": "L4cX8Jvh2zNMZ024jbN0u0VR1gU="
+    }
+  }
+}

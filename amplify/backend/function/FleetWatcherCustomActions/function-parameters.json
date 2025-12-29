@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "api": {
+      "fleetwatcherfront": [
+        "Query",
+        "Mutation",
+        "Subscription"
+      ]
+    }
+  },
+  "lambdaLayers": [],
+  "environmentVariableList": [
+    {
+      "cloudFormationParameterName": "flespiToken",
+      "environmentVariableName": "FLESPI_TOKEN"
+    },
+    {
+      "cloudFormationParameterName": "flespiUrl",
+      "environmentVariableName": "FLESPI_URL"
+    }
+  ]
+}

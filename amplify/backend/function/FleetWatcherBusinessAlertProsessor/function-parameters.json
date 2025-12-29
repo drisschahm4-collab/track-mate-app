@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "api": {
+      "fleetwatcherfront": [
+        "Query",
+        "Mutation",
+        "Subscription"
+      ]
+    },
+    "function": {
+      "FleetWatcherNotifier": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ]
+    }
+  },
+  "lambdaLayers": [],
+  "environmentVariableList": [
+    {
+      "cloudFormationParameterName": "gmKey",
+      "environmentVariableName": "GM_KEY"
+    }
+  ]
+}

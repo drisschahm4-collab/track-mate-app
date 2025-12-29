@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "api": {
+      "fleetwatcherfront": [
+        "Query",
+        "Mutation",
+        "Subscription"
+      ]
+    },
+    "function": {
+      "FleetWatcherCustomActions": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ]
+    }
+  },
+  "lambdaLayers": [],
+  "environmentVariableList": [
+    {
+      "cloudFormationParameterName": "functionFleetwatchercustomactionsName",
+      "environmentVariableName": "FUNCTION_FLEETWATCHERCUSTOMACTIONS_NAME"
+    },
+    {
+      "cloudFormationParameterName": "functionFleetwatchercustomactionsName",
+      "environmentVariableName": "FUNCTION_FLEETWATCHERCUSTOMACTIONS_NAME"
+    }
+  ]
+}

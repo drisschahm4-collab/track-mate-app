@@ -1,0 +1,1117 @@
+type Company @model
+@auth(
+    rules: [
+        { allow: private, provider: iam, operations: [ read ] },
+        { allow: groups, groups: [ "admin" ] }
+    ]
+){
+    id: ID! @primaryKey,
+    name: String
+    siret: String
+    address: String
+    postalCode: String
+    city: String
+    countryCode: String
+    contact: String
+    email: String
+    mobile: String
+    phone: String
+    fax: String
+    creationDate: String
+    subscriptionDate: String
+    keyedStart: Boolean
+    hasAntaiSubscription: Boolean
+    haveAntai: Boolean
+
+    # Relationships
+    companyDevices: [CompanyDevice] @hasMany(indexName: "byCompany", fields: ["id"])
+
+    users: [User] @hasMany (indexName: "usersByCompany", fields: ["id"])
+    vehicles: [Vehicle] @hasMany (indexName: "vehiclesByCompany", fields: ["id"])
+    zones: [Zone] @hasMany (indexName: "zonesByCompany", fields: ["id"])
+    pois: [Poi] @hasMany (indexName: "poisByCompany", fields: ["id"])
+    drivers: [Driver] @hasMany (indexName: "driversByCompany", fields: ["id"])
+    trames: [Trame] @hasMany (indexName: "tramesByCompany", fields: ["id"])
+    maintenances: [Maintenance] @hasMany(indexName: "maintenancesByCompany", fields: ["id"])
+    cartesCarburant: [CarteCarburant] @hasMany(indexName: "cartesByCompany", fields: ["id"])
+    depenses: [Depense] @hasMany(indexName: "depensesByCompany", fields: ["id"])
+    contraventions: [Contravention] @hasMany(indexName: "contraventionsByCompany", fields: ["id"])
+
+}
+
+type User @model
+@auth(
+    rules: [
+        { allow: private, provider: iam, operations: [ read ] },
+        { allow: groups, groups: [ "admin" ] }
+        { allow: public, operations: [read] },
+    ]
+){
+    sub: String! @primaryKey
+    firstname: String
+    lastname: String
+    address: String
+    mobile: String
+    username: String
+    password: String
+    lastLogin: String 
+    loginCount: String
+    #invited: String // Role invité
+    beginDate: String
+    endDate: String
+    mappingId: String
+    languageCode: String
+    lastModificationDate: String
+    showReport: String
+    dispatcher: String
+    applicationVersion: String
+    themeId: String
+    picture: S3Object
+    role: UserRole @index(name: "usersByRole")
+    accessExpiresAt: AWSDateTime
+    accessType: AccessType
+     accessibleVehicles: [String!] # Liste des immatriculations autorisées
+    # Relationships
+    companyUsersId: ID! @index(name: "usersByCompany")
+    company: Company! @belongsTo (fields: ["companyUsersId"])
+}
+
+type Driver @model
+@auth(
+    rules: [
+        { allow: private, provider: iam, operations: [ read ] },
+        { allow: groups, groups: [ "admin" ] }
+    ]
+){
+    sub: String! @primaryKey
+    firstname: String
+    lastname: String
+    password: String
+    username: String
+    fullname: String
+    birthDate: String
+    drivingLicenseNumber: String
+    drivingLicenseType: String
+    job: String
+    hiringDate: String
+    comment: String
+    driverKey: String @index(name: "driverByKey")
+    email: String
+    mobile: String
+    lastModificationDate: String
+    code: String
+    address: String
+    agencyId: String
+    cdc: String
+    pdm: String
+    nni: String
+    isDeleted: String
+    # Relationships
+    companyDriversId: ID! @index(name: "driversByCompany")
+    company: Company! @belongsTo (fields: ["companyDriversId"])
+}
+
+# type Vehicle @model
+# @auth(
+#     rules: [
+#         { allow: private, provider: iam, operations: [ read ] },
+#         { allow: groups, groups: [ "admin" ] }
+#     ]
+# ){
+#     immat: String! @primaryKey
+#     year: String
+#     fuelType: String
+#     consumption: String
+#     maxSpeed: String
+#     seatCount: String
+#     icon: String
+#     picture: S3Object
+#     kilometerage: String
+#     kilometerPrice: String
+#     kilometerageStart: String
+#     kilometerageDay: String
+#     kilometerageLastUpdate: String
+#     timeRunning: String
+#     counterValue: String
+#     co2: String
+#     lastModificationDate: String
+#     rollingTimeStart: String
+#     rollingTimeDay: String
+#     locations: String
+#     installationPrecautions: String
+#     code: String
+#     vehicleCategory: VehicleCategory @hasOne
+#     brand: VehicleBrand @hasOne
+#     modele: VehicleModel @hasOne
+#     gefcoSend: String
+#     tankCapacity: String
+#     canMileage: String
+#     # Relationships
+#     companyVehiclesId: ID! @index(name: "vehiclesByCompany")
+#     company: Company! @belongsTo (fields: ["companyVehiclesId"])
+#     device: Device @hasOne
+#     alerts: [VehicleAlerts] @hasMany(indexName: "byVehicle", fields: ["immat"])
+#     tags: [Tag] @manyToMany(relationName: "VehicleTags")
+#     maintenances: [Maintenance] @hasMany(indexName: "maintenancesByVehicle", fields: ["immat"])
+#     depenses: [Depense] @hasMany(indexName: "byVehicle", fields: ["immat"]) 
+# }
+
+# type Vehicle @model
+# @auth(
+#     rules: [
+#         { allow: private, provider: iam, operations: [ read ] },
+#         { allow: groups, groups: [ "admin" ] }
+#     ]
+# ){
+#     immat: String! @primaryKey
+#     code_certificat_qualite_air: String
+#           ad_blue: String
+#           ad_green: String
+#           depollution: String
+#           cl_environ_prf: String
+#           AWN_model_image: String
+#           dateMiseEnCirculation: String
+#           puissanceFiscale: String
+#           puissanceDin: String
+#            energie: String
+#           boiteVitesse: String
+#           couleur: String
+#           carrosserie: String
+#           marque: String
+#           marque_id: String
+#           modele_id: String
+#           version: String
+#           immatriculation: String
+#           VIN:String
+#           k_type: String
+#           type_mine:String
+#           AWN_url_image:String
+#     year: String
+#     fuelType: String
+#     consumption: String
+#     maxSpeed: String
+#     seatCount: String
+#     icon: String
+#     picture: S3Object
+#     kilometerage: String
+#     kilometerPrice: String
+#     kilometerageStart: String
+#     kilometerageDay: String
+#     kilometerageLastUpdate: String
+#     timeRunning: String
+#     counterValue: String
+#     co2: String
+#     lastModificationDate: String
+#     rollingTimeStart: String
+#     rollingTimeDay: String
+#     locations: String
+#     installationPrecautions: String
+#     code: String
+#     vehicleCategory: VehicleCategory @hasOne
+#     brand: VehicleBrand @hasOne
+#     modele: VehicleModel @hasOne
+#     gefcoSend: String
+#     tankCapacity: String
+#     canMileage: String
+#     # Relationships
+#     companyVehiclesId: ID! @index(name: "vehiclesByCompany")
+#     company: Company! @belongsTo (fields: ["companyVehiclesId"])
+#     device: Device @hasOne
+#     alerts: [VehicleAlerts] @hasMany(indexName: "byVehicle", fields: ["immat"])
+#     tags: [Tag] @manyToMany(relationName: "VehicleTags")
+#     maintenances: [Maintenance] @hasMany(indexName: "maintenancesByVehicle", fields: ["immat"])
+#     depenses: [Depense] @hasMany(indexName: "byVehicle", fields: ["immat"])
+# }
+
+type Vehicle @model
+@auth(
+    rules: [
+        { allow: private, provider: iam, operations: [ read ] },
+        { allow: groups, groups: [ "admin" ] }
+    ]
+){
+    immat: String! @primaryKey
+    realImmat: String
+    code_certificat_qualite_air: String
+          ad_blue: String
+          AWN_genre: String
+          emissions: String
+          AWN_nom_commercial: String
+          AWN_numero_de_serie: String
+          AWN_niveau_de_bruit_au_ralenti: String
+          AWN_consommation_ex_urbaine: String
+          AWN_consommation_urbaine: String
+          AWN_max_speed: String
+          AWN_emission_co_2_prf: String
+          AWN_depollution: String
+          AWN_nbr_soupapes: String
+          AWN_nbr_vitesses: String
+          AWN_nbr_portes: String
+          AWN_nbr_places: String
+          AWN_propulsion: String
+          AWN_date_30: String
+          AWN_date_cg: String
+          AWN_collection: String
+          AWN_segment: String
+          AWN_type_frein: String
+          AWN_group: String
+          AWN_VIN: String
+          AWN_k_type: String
+          AWN_version: String
+          AWN_label: String
+           AWN_code_moteur: String
+           AWN_nbr_cylindre_energie:String
+                    AWN_nbr_cylindres:String
+  AWN_energie_code: String
+  AWN_mode_injection: String
+  AWN_type_injection: String
+  AWN_turbo_compressor: String
+  AWN_vitesse_moteur: String
+          AWN_generation: String
+          AWN_poids_total: String
+          AWN_poids_vide: String
+          AWN_poids_total_roulant: String
+          AWN_consommation_mixte: String
+          ad_green: String
+          AWN_poids_max_autorise: String
+          depollution: String
+          cl_environ_prf: String
+          AWN_model:String
+          AWN_model_image: String
+          dateMiseEnCirculation: String
+          puissanceFiscale: String
+          puissanceDin: String
+           energie: String
+           AWN_puissance_KW: String
+          boiteVitesse: String
+          couleur: String
+          carrosserie: String
+          marque: String
+          marque_id: String
+          modele_id: String
+          version: String
+          immatriculation: String
+          VIN:String
+          k_type: String
+          type_mine:String
+          AWN_url_image:String
+    year: String
+    fuelType: String
+    consumption: String
+    maxSpeed: String
+    seatCount: String
+    icon: String
+    picture: S3Object
+    kilometerage: String
+    kilometerPrice: String
+    kilometerageStart: String
+    kilometerageDay: String
+    kilometerageLastUpdate: String
+    timeRunning: String
+    counterValue: String
+    co2: String
+    lastModificationDate: String
+    rollingTimeStart: String
+    rollingTimeDay: String
+    locations: String
+    installationPrecautions: String
+    code: String
+    nomVehicule: String
+    vehicleCategory: VehicleCategory @hasOne
+    brand: VehicleBrand @hasOne
+    modele: VehicleModel @hasOne
+    gefcoSend: String
+    tankCapacity: String
+    canMileage: String
+    # Relationships
+    companyVehiclesId: ID @index(name: "vehiclesByCompany")
+    company: Company @belongsTo (fields: ["companyVehiclesId"])
+    device: Device @hasOne
+    alerts: [VehicleAlerts] @hasMany(indexName: "byVehicle", fields: ["immat"])
+    tags: [Tag] @manyToMany(relationName: "VehicleTags")
+    maintenances: [Maintenance] @hasMany(indexName: "maintenancesByVehicle", fields: ["immat"])
+    depenses: [Depense] @hasMany(indexName: "byVehicle", fields: ["immat"])
+    contraventions: [Contravention] @hasMany(indexName: "contraventionsByVehicle", fields: ["immat"])
+}
+
+
+type Contravention @model
+@auth(
+  rules: [
+    { allow: private, provider: iam, operations: [read, create, update] },
+    { allow: groups, groups: ["admin"] }
+  ]
+) {
+  id: ID! @primaryKey
+
+  # Relations
+  companyContraventionId: ID! @index(name: "contraventionsByCompany")
+  company: Company! @belongsTo(fields: ["companyContraventionId"])
+
+  vehicleContraventionImmat: String @index(name: "contraventionsByVehicle")
+  vehicle: Vehicle @belongsTo(fields: ["vehicleContraventionImmat"])
+
+  # Champs fournis par ANTAI
+  numeroDossier: String                       # "Référence ANTAI"
+  codeNatinf: String                          # Code NATINF
+  libelleNatinf: String                       # Libellé de l'infraction
+  dateInfraction: AWSDateTime                 # Date de l'infraction
+  datePremiereExposition: AWSDateTime         # Date de première exposition
+  source: String                              # Source du signalement (ex: GDI-VIT)
+  repereKilometrique: String                  # Repère kilométrique
+  sensCirculation: String                     # Sens de circulation
+
+  # Lieu de l'infraction
+  numeroVoie: String
+  voie: String
+  complement: String
+  codePostal: String
+  ville: String
+  pays: String
+
+  # Infos vehicules
+  paysImmatriculation: String
+  marque: String
+  modele: String
+
+ # Nos champs extra
+  montant: String
+  Statut: String
+
+  # Informations supplémentaires
+  dateNotification: AWSDateTime               # Date de notification
+  dateLimitePaiement: AWSDateTime             # Date limite de paiement
+  identifiantDesignation: AWSJSON             # Identifiant de désignation ou référence unique
+}
+
+
+
+type Alert @model
+@auth(
+  rules: [
+    { allow: groups, groups: [ "admin" ] }
+  ]
+){
+  id: ID! @primaryKey
+  name: String
+  type: AlertType!
+  typeLabel: String
+  disabled: Boolean
+  instantaneous: Boolean
+  reportFrequency: AlertFrequency
+  byMail: Boolean
+  bySms: Boolean
+  byWhatsapp: Boolean
+  smsTemplate: String
+  emailTemplate: String
+  sentToDriver: Boolean!
+  phones: [String]
+  emails: [String]
+  company: Company! @hasOne
+  vehicles: [VehicleAlerts] @hasMany(indexName: "byAlert", fields: ["id"])
+  extra: AWSJSON
+  zone: Zone @hasOne
+}
+
+type VehicleAlerts @model
+@auth(
+  rules: [
+    { allow: groups, groups: [ "admin" ] }
+  ]
+){
+  id: ID! @primaryKey
+  vehicleImmat: String! @index(name: "byVehicle")
+  vehicle: Vehicle! @belongsTo(fields:["vehicleImmat"])
+  alertId: ID! @index(name: "byAlert")
+  alert: Alert! @belongsTo(fields:["alertId"])
+  isFlespi: Boolean
+}
+
+type AlertDefinition @model
+@auth(
+  rules: [
+    { allow: groups, groups: [ "admin" ] }
+  ]
+){
+  key: AlertType! @primaryKey
+  label: String!
+  description: String!
+  isFlespi: Boolean!
+  calculator: Int
+  variables: [String]
+}
+
+type VehicleAlertState @model
+@auth(
+  rules: [
+    { allow: groups, groups: [ "admin" ] }
+  ]
+){
+  id: String! @primaryKey
+  alert: AlertType!
+  state: String
+  timestamp: AWSTimestamp!
+  zone: Zone @hasOne
+  vehicle: Vehicle! @hasOne
+}
+
+type AlertHistory @model
+@auth(
+  rules: [
+    { allow: groups, groups: [ "admin" ] }
+  ]
+){
+  id: ID! @primaryKey
+  type: AlertType!
+  imei: String!
+  vehicle: Vehicle! @hasOne
+  driver: Driver @hasOne
+  company: Company! @hasOne
+  timestamp: AWSTimestamp!
+  config: Alert! @hasOne
+  data: AWSJSON!
+}
+
+type Zone @model
+@auth(
+  rules: [
+    { allow: public, operations: [read] },
+    { allow: groups, groups: [ "admin" ] }
+  ]
+){
+  id: ID!,
+  name: String!
+  adress: String
+  lat: Float!
+  lng: Float!
+  radius: Int
+  isPoly: Boolean
+   # Zone polygonale : liste de points lat/lng
+  polygon: AWSJSON
+  companyZonesId: ID! @index(name: "zonesByCompany")
+  company: Company! @belongsTo (fields: ["companyZonesId"])
+}
+
+type Poi @model
+@auth(
+  rules: [
+    { allow: public, operations: [read] },
+    { allow: groups, groups: [ "admin" ] }
+  ]
+){
+  id: ID!,
+  name: String!
+  adress: String
+  lat: Float!
+  lng: Float!
+  companyPoisId: ID! @index(name: "poisByCompany")
+  company: Company! @belongsTo (fields: ["companyPoisId"])
+}
+
+type VehicleCategory @model
+@auth(
+    rules: [
+        { allow: groups, groups: [ "admin" ] }
+    ]
+){
+    id: ID! @primaryKey
+    category: String!
+    description: String
+}
+
+type VehicleBrand @model
+@auth(
+    rules: [
+        { allow: private, provider: iam, operations: [ read ] },
+        { allow: groups, groups: [ "admin" ] }
+    ]
+){
+    brandName: String! @primaryKey
+    logo: S3Object
+    models: [VehicleModel] @hasMany
+}
+
+type VehicleModel @model
+@auth(
+    rules: [
+        { allow: private, provider: iam, operations: [ read ] },
+        { allow: groups, groups: [ "admin" ] }
+    ]
+){
+    id: ID! @primaryKey
+    modele: String
+    brand: VehicleBrand! @belongsTo
+}
+
+type Device @model
+@auth(
+    rules: [
+        { allow: groups, groups: [ "admin" ] }
+    ]
+){
+    imei: String! @primaryKey
+    protocolId: Int
+    sim: String
+    phone: String
+    messages_ttl: String
+    device_type_id: Int
+    flespi_id: Int
+    enabled: Boolean
+    media_ttl: String
+    name: String
+    cid: String
+    media_rotate: String
+    messages_rotate: String
+    # Relationships
+    companyDevices: [CompanyDevice] @hasMany(indexName: "byDevice", fields: ["imei"])
+    vehicle: Vehicle @belongsTo
+}
+
+type CompanyDevice @model
+@auth(
+  rules: [
+    { allow: private, provider: iam, operations: [read] },
+    { allow: groups, groups: ["admin"] }
+  ]
+) {
+  id: ID! @primaryKey
+  companyID: ID! @index(name: "byCompany", sortKeyFields: ["associationDate"])
+  deviceIMEI: String! @index(name: "byDevice", sortKeyFields: ["associationDate"])
+  associationDate: AWSDateTime!
+  dissociationDate: AWSDateTime
+  isActive: Boolean
+  # Relations
+  company: Company @belongsTo(fields: ["companyID"])
+  device: Device @belongsTo(fields: ["deviceIMEI"])
+}
+
+
+type Trame @model
+@auth(
+    rules: [
+        { allow: public, operations: [read] },
+        { allow: private, provider: iam, operations: [ read, create, update ]  },
+        { allow: groups, groups: [ "admin" ] }
+    ]
+){
+    id: String! @primaryKey
+    speed: Float
+    lat: Float
+    lng: Float
+    distance: Float
+    address: String
+    azimut: Float
+    immobilisation: Boolean
+    timestamp: AWSDateTime
+    state: String
+    fuel: String
+    ibuttonCode: String
+    # Filter
+    companyId: String
+    driverFullName: String
+    vehicleBrandName: String
+    # Relationships
+    companyTramesId: ID @index(name: "tramesByCompany")
+    company: Company @belongsTo (fields: ["companyTramesId"])
+    driver: Driver @hasOne
+    vehicle: Vehicle @hasOne
+    # Technical
+    processor: Processor
+}
+
+type DvD @model
+@auth(
+    rules: [
+        { allow: groups, groups: [ "admin" ] }
+    ]
+){
+  id: ID! @primaryKey
+  dvDVehicleImmat: String @index(name: "dvdByVehicleImmat")
+  vehicle: Vehicle @hasOne (fields: ["dvDVehicleImmat"])
+  dvDDriverSub: String @index(name: "dvdByDriverSub")
+  driver: Driver @hasOne (fields: ["dvDDriverSub"])
+  company: Company! @hasOne
+  assignmentDate: AWSDateTime!
+  unassignmentDate: AWSDateTime
+}
+
+type Maintenance @model
+@auth(
+  rules: [
+    { allow: private, provider: iam, operations: [ read ] },
+    { allow: groups, groups: [ "admin" ] }
+  ]
+) {
+  id: ID! @primaryKey
+  operationType: MaintenanceOperationType!
+  status: MaintenanceStatus!
+  reminderDays: Int!
+  alertDate: AWSDateTime!
+  cost: Float
+  email: String
+  notes: String
+  creationDate: AWSDateTime!
+  lastModificationDate: AWSDateTime
+  # Relationships
+  companyMaintenancesId: ID! @index(name: "maintenancesByCompany")
+  company: Company! @belongsTo(fields: ["companyMaintenancesId"])
+  vehicleMaintenancesImmat: String! @index(name: "maintenancesByVehicle")
+  vehicle: Vehicle! @belongsTo(fields: ["vehicleMaintenancesImmat"])
+}
+
+type TypeDepense @model
+@auth(
+    rules: [
+        { allow: groups, groups: [ "admin" ] }
+    ]
+){
+  id: ID! @primaryKey
+  name: String!
+  description: String
+  depenses: [Depense] @hasMany(indexName: "byTypeDepense", fields: ["id"])
+}
+
+
+# type Depense @model
+# @auth(
+#     rules: [
+#         { allow: groups, groups: [ "admin" ] }
+#     ]
+# ){
+#  id: ID! @primaryKey
+#   vehicleImmat: String! @index(name: "byVehicle")
+#   vehicle: Vehicle! @belongsTo(fields: ["vehicleImmat"])
+#   typeDepenseId: ID! @index(name: "byTypeDepense")
+#   typeDepense: TypeDepense! @belongsTo(fields: ["typeDepenseId"])
+#   prestataire: String
+#   montantTTC: Float!
+#   montantHT: Float
+#   associateDate: AWSDateTime
+#   produit: String
+#   ville: String
+#   qte: Int
+#   description: String
+#   companyDepensesId: ID! @index(name: "depensesByCompany")
+#   company: Company! @belongsTo(fields: ["companyDepensesId"])
+# }
+
+type Depense @model
+@auth(
+  rules: [
+    { allow: groups, groups: ["admin"] }
+  ]
+){
+  id: ID! @primaryKey
+
+  vehicleImmat: String! @index(name: "byVehicle")
+  vehicle: Vehicle! @belongsTo(fields: ["vehicleImmat"])
+
+  typeDepenseId: ID! @index(name: "byTypeDepense")
+  typeDepense: TypeDepense! @belongsTo(fields: ["typeDepenseId"])
+
+  companyDepensesId: ID! @index(name: "depensesByCompany")
+  company: Company! @belongsTo(fields: ["companyDepensesId"])
+
+  associateDate: AWSDateTime!
+  prestataire: String
+  montantTTC: Float
+  montantHT: Float
+  produit: String
+  ville: String
+  qte: Int
+  description: String
+
+  ## Champs spécifiques pour carburant
+  volumeLitres: Float
+  prixUnitaire: Float
+  prixTotal: Float
+  typeCarburant: String
+  odometre: Int
+  lieu: String
+  paiementMode: String # carte, cash, etc.
+  date: String
+  carteCarburantId: ID @index(name: "byCarteCarburant")
+  carteCarburant: CarteCarburant @belongsTo(fields: ["carteCarburantId"])
+
+  ## Champs spécifiques pour péage
+  troncon: String
+  badgeTelepeage: String
+  montant: Float
+  modePaiement: String # carte télépéage, cash, etc.
+}
+
+
+
+# type CarteCarburant @model {
+#   id: ID!
+
+#   nom: String!                         # Nom donné à la carte (ex: "Carte Total 001")
+#   numeroCarte: String! @index         # Numéro unique fourni par le fournisseur
+#   fournisseur: String                 # Ex: Total, Shell, Afriquia...
+#   typeCarte: String                   # Ex: "prépayée", "postpayée", "carte entreprise", etc.
+
+#   dateActivation: AWSDateTime         # Date de mise en service
+#   dateExpiration: AWSDateTime         # Facultatif, date de fin
+#   statut: String        # ENUM: ACTIVE, DESACTIVE, EXPIREE, PERDUE
+  
+#   codePin: String                     # Si besoin, peut être masqué en frontend
+  
+#   plafondJournalier: Float            # Facultatif
+#   plafondMensuel: Float               # Facultatif
+
+#   depenses: [Depense] @hasMany(indexName: "byCarteCarburant", fields: ["id"])
+
+#   createdAt: AWSDateTime
+#   updatedAt: AWSDateTime
+
+#   companyId: ID! @index(name: "cartesByCompany")
+#   company: Company! @belongsTo(fields: ["companyId"])
+# }
+
+type CarteCarburant @model @auth(
+  rules: [
+    { allow: groups, groups: ["admin"] }
+  ]
+) {
+  id: ID!
+
+  nom: String!
+  numeroCarte: String! @index
+  fournisseur: String
+  typeCarte: String
+
+  dateActivation: AWSDateTime
+  dateExpiration: AWSDateTime
+  statut: String
+  codePin: String
+
+  plafondJournalier: Float
+  plafondMensuel: Float
+
+  depenses: [Depense] @hasMany(indexName: "byCarteCarburant", fields: ["id"])
+
+  companyId: ID! @index(name: "cartesByCompany")
+  company: Company! @belongsTo(fields: ["companyId"])
+
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+
+
+
+type Query {
+  getTrajectoryHistory(driverSub:String, vehicleImmat: String, tagId: String, from: String!, to:String!, page: Int!, mode: ReportCallMode!): TrajectoryHistory @function(name: "FleetWatcherReportProcessor-${env}")
+  getDailySummary(driverSub:String, vehicleImmat: String, tagId: String, from: String!, to:String!, page: Int!, mode: ReportCallMode!): DailySummary @function(name: "FleetWatcherReportProcessor-${env}")
+  getActivityReport(driverSub:String, vehicleImmat: String, tagId: String, from: String!, to:String!, page: Int!, mode: ReportCallMode!): ActivityReport @function(name: "FleetWatcherReportProcessor-${env}")
+  getFuelReport(driverSub:String, vehicleImmat: String, tagId: String, from: String!, to:String!, page: Int!, mode: ReportCallMode!): FuelReport @function(name: "FleetWatcherReportProcessor-${env}")
+  getProximitySearch(address: String!, companyId: ID!): [Trame] @function(name: "FleetWatcherproximitySearch-${env}")
+  antaiQuery(request: AWSJSON!): AntaiResponse @function(name: "AntaiProdActions-${env}")
+}
+
+type Mutation {
+  executeCustomAction(operation:CustomActionOperation!, request: AWSJSON!): CustomActionResponse @function(name: "FleetWatcherCustomActions-${env}")
+  executeMaintenanceAction( action: MaintenanceAction! maintenanceId: ID! input: AWSJSON ): MaintenanceResponse @function(name: "FleetWatcherMaintenanceProcessor-${env}")
+  updateUserPassword( userPoolId: String! username: String! newPassword: String! ): UpdatePasswordResponse @function(name: "FleetWatcherUpdateUserPassword-${env}")
+  createAntaiVehicleAndInfraction(input: AntaiVehicleInput!): AntaiResponse @function(name: "antaifunction-${env}")
+}
+
+type AntaiResponse {
+  success: Boolean
+  data: AWSJSON
+}
+
+input AntaiVehicleInput {
+  immatriculation: String!
+  marque: String!
+  modele: String!
+}
+
+# type AntaiResponse {
+#   success: Boolean!
+#   vehicleResponse: AWSJSON
+#   infractionResponse: AWSJSON
+#   error: String
+# }
+
+type LabelsCollection @model
+@auth(
+  rules: [
+    { allow: private}
+  ]
+){
+  key: String! @primaryKey
+  label: String!
+  type: String!
+}
+
+type Tag @model
+@auth(
+  rules: [
+    { allow: groups, groups: [ "admin" ] }
+  ]
+){
+  id: ID!
+  name: String!
+  description: String!
+  color: String
+  company: Company! @hasOne
+  vehicles: [Vehicle] @manyToMany(relationName: "VehicleTags")
+}
+
+# Enums pour les actions de maintenance
+enum MaintenanceAction {
+  schedule_maintenance
+  cancel_maintenance
+  complete_maintenance
+  update_maintenance  
+}
+
+
+type UpdatePasswordResponse {
+  message: String
+  error: String
+}
+
+# Type de réponse pour les actions de maintenance
+type MaintenanceResponse {
+  status: String!
+  message: String!
+}
+
+# ActivityReport
+type ActivityReport {
+  pagesCount: Int
+  currentPageNumber: Int
+  currentPageItemsCount: Int
+  fullItemsCount: Int
+  items: [ActivityReportRecord]
+}
+
+# ActivityReportRecord
+type ActivityReportRecord {
+  begin: AWSDateTime
+  end: AWSDateTime
+  route: String
+  duration: Float
+  totalMileage: Float
+  maxSpeed: Float
+  canMileageStart: Float
+  canMileageEnd: Float
+  totalCanMileage: Float
+  totalFuelConsumed: Float
+  vehicleImmat: String
+  vehicleBrand: String
+  driverSub: String
+  driverFirstname: String
+  driverLastname: String
+}
+
+# DailySummary
+type DailySummary {
+  pagesCount: Int
+  currentPageNumber: Int
+  currentPageItemsCount: Int
+  fullItemsCount: Int
+  items: [DailySummaryRecord]
+}
+
+# DailySummaryRecord
+type DailySummaryRecord {
+  begin: AWSDateTime
+  end: AWSDateTime
+  route: String
+  duration: Float
+  distance: Float
+  totalMileage: Float
+  vehicleImmat: String
+  vehicleBrand: String
+  driverSub: String
+  driverFirstname: String
+  driverLastname: String
+}
+
+# FuelReport
+type FuelReport {
+  pagesCount: Int
+  currentPageNumber: Int
+  currentPageItemsCount: Int
+  fullItemsCount: Int
+  items: [FuelReportRecord]
+}
+
+# FuelReportRecord
+type FuelReportRecord {
+  begin: AWSDateTime
+  end: AWSDateTime
+  duration: Float
+  fuelBefore: String
+  fuelAfter: String
+  fuelDelta: String
+  distance: Float
+  adress: String
+  lat: Float
+  lng: Float
+  vehicleImmat: String
+  vehicleBrand: String
+  driverSub: String
+  driverFirstname: String
+  driverLastname: String
+  driverFullName: String
+}
+
+
+# TrajectoryHistory
+type TrajectoryHistory {
+  pagesCount: Int
+  currentPageNumber: Int
+  currentPageItemsCount: Int
+  fullItemsCount: Int
+  items: [TrajectoryHistoryRecord]
+}
+
+# TrajectoryHistoryRecord
+type TrajectoryHistoryRecord {
+  deviceId: String
+  imei: String
+  avgSpeed: Float
+  begin: AWSDateTime
+  end: AWSDateTime
+  groupingDate: String
+  addressStart: String
+  addressEnd: String
+  distance: Float
+  eco: String
+  acceleration: String
+  braking: String
+  totalDistance: Float
+  tempsArret: Float
+  duration: Float
+  idleTime: Float
+  maxSpeed: Float
+  vehicleImmat: String
+  vehicleBrand: String
+  driverSub: String
+  driverFirstname: String
+  driverLastname: String
+  points: [Point]
+}
+
+# Point
+type Point {
+  gisgraphyAddressFormatedPostal: String
+  positionAltitude: Float
+  positionLatitude: Float
+  positionLongitude: Float
+  positionSatellites: Int
+  positionSpeed: Float
+  timestamp: AWSDateTime
+}
+
+enum AlertFrequency {
+  daily
+  weekly
+  monthly
+}
+
+enum AlertType {
+  add_fuel # Ravitaillement
+  device_disconnected # Boitier GPS Déconnecté
+  maintenance_required # Maintenance Recommandée
+  zone_boundary # Géorepérage
+  timefencing # Délimitation Temporelle
+  start_driving # Non démarrage à l'heure
+  mileage_exceeded # Dépassement de Kilométrage
+  speed_limit_exceeded # Dépassement de Vitesse
+
+  unrecognized_driver
+
+  battery_warning # Batterie bas
+  collision_detection # Détection de Collision
+}
+
+enum ReportCallMode {
+  trajectory_history
+  daily_summary
+  activity_report
+  fuel_report
+}
+
+enum Processor {
+  teltonika
+  ruptela
+  xirgo
+}
+
+# Picture Model
+type S3Object {
+  bucket: String!
+  region: String!
+  key: String!
+}
+
+type CustomActionResponse {
+  status: String!
+  message: String!
+}
+
+enum MaintenanceOperationType {
+  CHANGEMENT_HUILE
+  INSPECTION_FREINS
+  ROTATION_PNEUS
+  VERIFICATION_FLUIDES
+  REMPLACEMENT_BATTERIE
+  REGLAGE_MOTEUR
+  REMPLACEMENT_FILTRE_AIR
+  FLUSH_LIQUIDE_REFROIDISSEMENT
+  ALIGNEMENT_ROUES
+  REMPLACEMENT_BOUGIES
+  CHANGEMENT_LIQUIDE_TRANSMISSION
+  REMPLACEMENT_LIQUIDE_FREIN
+  REMPLACEMENT_LIQUIDE_DIRECTION
+  REMPLACEMENT_FILTRE_CARBURANT
+  INSPECTION_RADIATEUR
+  REMPLACEMENT_COURROIE_DISTRIBUTION
+  INSPECTION_SUSPENSION
+  VERIFICATION_SYSTEME_ECHAPPEMENT
+  REMPLACEMENT_FILTRE_HABITACLE
+  NETTOYAGE_CORPS_PAPILLON
+  REMPLACEMENT_COURROIE_ENTRAINEMENT
+  REGLAGE_SOUPAPES
+  INSPECTION_ROULEMENTS_ROUE
+  REMPLACEMENT_VALVE_PCV
+  INSPECTION_CONVERTISSEUR_CATALYTIQUE
+  VERIFICATION_SYSTEME_EMISSION
+  INSPECTION_SYSTEME_ALLUMAGE
+  INSPECTION_SYSTEME_DIRECTION
+  SERVICE_ETRIER_FREIN
+  INSPECTION_MOYEU_ROUE
+  CARBURANT,
+  PEAGE
+}
+
+enum MaintenanceStatus {
+  PROGRAMMED
+  OPENED
+  CLOSED
+}
+
+enum CustomActionOperation {
+  link_conductor_vehicle
+  link_vehicle_alert
+  unlink_vehicle_alert
+  delete_alert
+  setup_start_driving_Alert
+}
+
+enum UserRole {
+    ADMIN
+    MANAGER
+    INVITED
+    LIMITED_INVITED
+}
+
+enum AccessType {
+    FULL_COMPANY
+    VEHICLE_LIST
+}

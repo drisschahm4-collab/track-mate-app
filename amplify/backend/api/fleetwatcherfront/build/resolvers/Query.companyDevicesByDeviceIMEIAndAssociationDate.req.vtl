@@ -1,0 +1,97 @@
+## [Start] Set query expression for key **
+#set( $modelQueryExpression = {} )
+## [Start] Validate key arguments. **
+#if( !$util.isNull($ctx.args.associationDate) && $util.isNull($ctx.args.deviceIMEI) )
+  $util.error("When providing argument 'associationDate' you must also provide arguments deviceIMEI", "InvalidArgumentsError")
+#end
+## [End] Validate key arguments. **
+#if( !$util.isNull($ctx.args.deviceIMEI) )
+  #set( $modelQueryExpression.expression = "#deviceIMEI = :deviceIMEI" )
+  #set( $modelQueryExpression.expressionNames = {
+  "#deviceIMEI": "deviceIMEI"
+} )
+  #set( $modelQueryExpression.expressionValues = {
+  ":deviceIMEI": {
+      "S": "$ctx.args.deviceIMEI"
+  }
+} )
+#end
+## [Start] Applying Key Condition **
+#if( !$util.isNull($ctx.args.associationDate) && !$util.isNull($ctx.args.associationDate.beginsWith) )
+  #set( $modelQueryExpression.expression = "$modelQueryExpression.expression AND begins_with(#sortKey, :sortKey)" )
+  $util.qr($modelQueryExpression.expressionNames.put("#sortKey", "associationDate"))
+  $util.qr($modelQueryExpression.expressionValues.put(":sortKey", { "S": "$ctx.args.associationDate.beginsWith" }))
+#end
+#if( !$util.isNull($ctx.args.associationDate) && !$util.isNull($ctx.args.associationDate.between) )
+  #set( $modelQueryExpression.expression = "$modelQueryExpression.expression AND #sortKey BETWEEN :sortKey0 AND :sortKey1" )
+  $util.qr($modelQueryExpression.expressionNames.put("#sortKey", "associationDate"))
+  $util.qr($modelQueryExpression.expressionValues.put(":sortKey0", { "S": "$ctx.args.associationDate.between[0]" }))
+  $util.qr($modelQueryExpression.expressionValues.put(":sortKey1", { "S": "$ctx.args.associationDate.between[1]" }))
+#end
+#if( !$util.isNull($ctx.args.associationDate) && !$util.isNull($ctx.args.associationDate.eq) )
+  #set( $modelQueryExpression.expression = "$modelQueryExpression.expression AND #sortKey = :sortKey" )
+  $util.qr($modelQueryExpression.expressionNames.put("#sortKey", "associationDate"))
+  $util.qr($modelQueryExpression.expressionValues.put(":sortKey", { "S": "$ctx.args.associationDate.eq" }))
+#end
+#if( !$util.isNull($ctx.args.associationDate) && !$util.isNull($ctx.args.associationDate.lt) )
+  #set( $modelQueryExpression.expression = "$modelQueryExpression.expression AND #sortKey < :sortKey" )
+  $util.qr($modelQueryExpression.expressionNames.put("#sortKey", "associationDate"))
+  $util.qr($modelQueryExpression.expressionValues.put(":sortKey", { "S": "$ctx.args.associationDate.lt" }))
+#end
+#if( !$util.isNull($ctx.args.associationDate) && !$util.isNull($ctx.args.associationDate.le) )
+  #set( $modelQueryExpression.expression = "$modelQueryExpression.expression AND #sortKey <= :sortKey" )
+  $util.qr($modelQueryExpression.expressionNames.put("#sortKey", "associationDate"))
+  $util.qr($modelQueryExpression.expressionValues.put(":sortKey", { "S": "$ctx.args.associationDate.le" }))
+#end
+#if( !$util.isNull($ctx.args.associationDate) && !$util.isNull($ctx.args.associationDate.gt) )
+  #set( $modelQueryExpression.expression = "$modelQueryExpression.expression AND #sortKey > :sortKey" )
+  $util.qr($modelQueryExpression.expressionNames.put("#sortKey", "associationDate"))
+  $util.qr($modelQueryExpression.expressionValues.put(":sortKey", { "S": "$ctx.args.associationDate.gt" }))
+#end
+#if( !$util.isNull($ctx.args.associationDate) && !$util.isNull($ctx.args.associationDate.ge) )
+  #set( $modelQueryExpression.expression = "$modelQueryExpression.expression AND #sortKey >= :sortKey" )
+  $util.qr($modelQueryExpression.expressionNames.put("#sortKey", "associationDate"))
+  $util.qr($modelQueryExpression.expressionValues.put(":sortKey", { "S": "$ctx.args.associationDate.ge" }))
+#end
+## [End] Applying Key Condition **
+## [End] Set query expression for key **
+#set( $limit = $util.defaultIfNull($context.args.limit, 100) )
+#set( $QueryRequest = {
+  "version": "2018-05-29",
+  "operation": "Query",
+  "limit": $limit,
+  "query": $modelQueryExpression,
+  "index": "byDevice"
+} )
+#if( !$util.isNull($ctx.args.sortDirection)
+                  && $ctx.args.sortDirection == "DESC" )
+  #set( $QueryRequest.scanIndexForward = false )
+#else
+  #set( $QueryRequest.scanIndexForward = true )
+#end
+#if( $context.args.nextToken ) #set( $QueryRequest.nextToken = $context.args.nextToken ) #end
+#if( !$util.isNullOrEmpty($ctx.stash.authFilter) )
+  #set( $filter = $ctx.stash.authFilter )
+  #if( !$util.isNullOrEmpty($ctx.args.filter) )
+    #set( $filter = {
+  "and":   [$filter, $ctx.args.filter]
+} )
+  #end
+#else
+  #if( !$util.isNullOrEmpty($ctx.args.filter) )
+    #set( $filter = $ctx.args.filter )
+  #end
+#end
+#if( !$util.isNullOrEmpty($filter) )
+  #set( $filterExpression = $util.parseJson($util.transform.toDynamoDBFilterExpression($filter)) )
+  #if( $util.isNullOrEmpty($filterExpression) )
+    $util.error("Unable to process the filter expression", "Unrecognized Filter")
+  #end
+  #if( !$util.isNullOrBlank($filterExpression.expression) )
+    #if( $filterExpression.expressionValues.size() == 0 )
+      $util.qr($filterExpression.remove("expressionValues"))
+    #end
+    #set( $QueryRequest.filter = $filterExpression )
+  #end
+#end
+$util.toJson($QueryRequest)

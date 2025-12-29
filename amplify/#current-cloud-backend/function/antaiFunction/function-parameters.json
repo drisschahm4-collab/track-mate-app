@@ -1,0 +1,13 @@
+{
+  "lambdaLayers": [],
+  "environmentVariableList": [
+    {
+      "cloudFormationParameterName": "antaiEmail",
+      "environmentVariableName": "ANTAI_EMAIL"
+    },
+    {
+      "cloudFormationParameterName": "antaiPassword",
+      "environmentVariableName": "ANTAI_PASSWORD"
+    }
+  ]
+}
