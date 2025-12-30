@@ -21,7 +21,7 @@ $util.unauthorized()
 #end
 #if( $util.authType() == "User Pool Authorization" )
   #if( !$isAuthorized )
-    #set( $staticGroupRoles = [{"claim":"cognito:groups","entity":"admin","allowedFields":["imei","protocolId","sim","phone","messages_ttl","device_type_id","flespi_id","enabled","media_ttl","name","cid","media_rotate","messages_rotate","companyDevices","vehicle","deviceVehicleImmat"],"nullAllowedFields":["imei","protocolId","sim","phone","messages_ttl","device_type_id","flespi_id","enabled","media_ttl","name","cid","media_rotate","messages_rotate","companyDevices","vehicle"],"isAuthorizedOnAllFields":true}] )
+    #set( $staticGroupRoles = [{"claim":"cognito:groups","entity":"admin","allowedFields":["imei","protocolId","sim","phone","messages_ttl","device_type_id","flespi_id","enabled","media_ttl","name","cid","media_rotate","messages_rotate","companyDevices","vehicle","deviceVehicleImmat"],"nullAllowedFields":["imei","protocolId","sim","phone","messages_ttl","device_type_id","flespi_id","enabled","media_ttl","name","cid","media_rotate","messages_rotate","companyDevices","vehicle"],"isAuthorizedOnAllFields":true},{"claim":"cognito:groups","entity":"guest","allowedFields":["imei","protocolId","sim","phone","messages_ttl","device_type_id","flespi_id","enabled","media_ttl","name","cid","media_rotate","messages_rotate","companyDevices","vehicle","deviceVehicleImmat"],"nullAllowedFields":[],"isAuthorizedOnAllFields":false}] )
     #foreach( $groupRole in $staticGroupRoles )
       #set( $groupsInToken = $util.defaultIfNull($ctx.identity.claims.get($groupRole.claim), []) )
       #if( $groupsInToken.contains($groupRole.entity) )

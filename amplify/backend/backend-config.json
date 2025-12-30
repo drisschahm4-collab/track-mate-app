@@ -411,6 +411,11 @@
       "build": true,
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
+    },
+    "resetPassword": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
     }
   },
   "parameters": {
@@ -933,6 +938,29 @@
           "resourceName": "apiSIV"
         }
       ]
+    },
+    "AMPLIFY_function_resetPassword_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "resetPassword"
+        }
+      ]
+    },
+    "AMPLIFY_function_resetPassword_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "resetPassword"
+        }
+      ]
+    }
+  },
+  "storage": {
+    "fleetStorage": {
+      "dependsOn": [],
+      "providerPlugin": "awscloudformation",
+      "service": "S3"
     }
   }
 }

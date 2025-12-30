@@ -247,7 +247,7 @@
             "Ref": "UnauthRoleName"
           },
           "S3DeploymentBucket": "amplify-fleetwatcherfront-dev-bbd87-deployment",
-          "S3DeploymentRootKey": "amplify-appsync-files/e5eaf397d52bc9fd560ab06d45109088fdcf37a6",
+          "S3DeploymentRootKey": "amplify-appsync-files/94d620170b798d1935a99e8ec40695a1b7626fef",
           "env": "dev"
         }
       }
@@ -805,7 +805,7 @@
           "infoSivTableName": "sivtable",
           "vehiclesTableName": "Siv",
           "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
-          "s3Key": "amplify-builds/apiSIV-75352b79764a516f5171-build.zip",
+          "s3Key": "amplify-builds/apiSIV-39373432564331716146-build.zip",
           "env": "dev"
         }
       }
@@ -851,6 +851,50 @@
               "Outputs.GraphQLAPIKeyOutput"
             ]
           },
+          "env": "dev"
+        }
+      }
+    },
+    "functionresetPassword": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "https://s3.amazonaws.com/amplify-fleetwatcherfront-dev-bbd87-deployment/amplify-cfn-templates/function/resetPassword-cloudformation-template.json",
+        "Parameters": {
+          "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+          "s3Key": "amplify-builds/resetPassword-4c574344475262596251-build.zip",
+          "env": "dev"
+        }
+      }
+    },
+    "storagefleetStorage": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "https://s3.amazonaws.com/amplify-fleetwatcherfront-dev-bbd87-deployment/amplify-cfn-templates/storage/cloudformation-template.json",
+        "Parameters": {
+          "bucketName": "fleetwatcherfront7b17e2351c12492aa9f037493512a1",
+          "selectedGuestPermissions": "",
+          "selectedAuthenticatedPermissions": "s3:PutObject,s3:GetObject,s3:ListBucket,s3:DeleteObject",
+          "unauthRoleName": {
+            "Ref": "UnauthRoleName"
+          },
+          "authRoleName": {
+            "Ref": "AuthRoleName"
+          },
+          "s3PrivatePolicy": "Private_policy_7ac7500d",
+          "s3ProtectedPolicy": "Protected_policy_7ac7500d",
+          "s3PublicPolicy": "Public_policy_7ac7500d",
+          "s3ReadPolicy": "read_policy_7ac7500d",
+          "s3UploadsPolicy": "Uploads_policy_7ac7500d",
+          "authPolicyName": "s3_amplify_7ac7500d",
+          "unauthPolicyName": "s3_amplify_7ac7500d",
+          "AuthenticatedAllowList": "ALLOW",
+          "GuestAllowList": "DISALLOW",
+          "s3PermissionsAuthenticatedPrivate": "s3:PutObject,s3:GetObject,s3:DeleteObject",
+          "s3PermissionsAuthenticatedProtected": "s3:PutObject,s3:GetObject,s3:DeleteObject",
+          "s3PermissionsAuthenticatedPublic": "s3:PutObject,s3:GetObject,s3:DeleteObject",
+          "s3PermissionsAuthenticatedUploads": "s3:PutObject",
+          "s3PermissionsGuestPublic": "DISALLOW",
+          "s3PermissionsGuestUploads": "DISALLOW",
           "env": "dev"
         }
       }

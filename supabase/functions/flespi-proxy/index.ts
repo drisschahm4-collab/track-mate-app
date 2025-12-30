@@ -2,7 +2,6 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const FLESPI_TOKEN = Deno.env.get('FLESPI_TOKEN');
 const PLUGIN_ID = '1100337';
-const DEFAULT_DEVICE_ID = Deno.env.get('FLESPI_DEVICE_ID') || '5369063';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -47,7 +46,7 @@ serve(async (req) => {
       }
 
       const encodedIdent = encodeURIComponent(`"${imei}"`);
-      const lookupUrl = `https://flespi.io/gw/devices/configuration.ident=${encodedIdent}?fields=id`;
+      const lookupUrl = `https://flespi.io/gw/devices/configuration.ident=${encodedIdent}?fields=id,name,configuration,plugins`;
       const lookup = await fetch(lookupUrl, {
         headers: {
           'Content-Type': 'application/json',

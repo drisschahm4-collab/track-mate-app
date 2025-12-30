@@ -18,7 +18,7 @@ $util.qr($ctx.stash.put("hasAuth", true))
 #end
 #if( $util.authType() == "User Pool Authorization" )
   #if( !$isAuthorized )
-    #set( $staticGroupRoles = [{"claim":"cognito:groups","entity":"admin"}] )
+    #set( $staticGroupRoles = [{"claim":"cognito:groups","entity":"admin"},{"claim":"cognito:groups","entity":"guest"}] )
     #foreach( $groupRole in $staticGroupRoles )
       #set( $groupsInToken = $util.defaultIfNull($ctx.identity.claims.get($groupRole.claim), []) )
       #if( $groupsInToken.contains($groupRole.entity) )

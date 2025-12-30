@@ -17,5 +17,11 @@ export const useAuth = () => {
   if (!context) {
     throw new Error("useAuth must be used within an AuthGate");
   }
+  console.log('[useAuth] 🔐 Current auth context:', {
+    status: context.status,
+    username: context.username,
+    userEmail: context.userEmail,
+    attributes: context.attributes
+  });
   return context;
 };

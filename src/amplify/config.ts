@@ -11,4 +11,11 @@ export const amplifyConfig: ResourcesConfig = {
       region: "eu-west-3",
     },
   },
+  API: {
+    GraphQL: {
+      endpoint: "https://c2yd53frvfff7fkdkwwu7u3ahu.appsync-api.eu-west-3.amazonaws.com/graphql",
+      region: "eu-west-3",
+      defaultAuthMode: "userPool",
+    },
+  },
 };

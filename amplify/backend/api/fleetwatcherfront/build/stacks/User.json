@@ -1894,22 +1894,6 @@
         ]
       }
     },
-    "transformerrootstackUserQuerygetUserauth0FunctionQuerygetUserauth0FunctionAppSyncFunctionAE1DE713FunctionId": {
-      "Value": {
-        "Fn::GetAtt": [
-          "QuerygetUserauth0FunctionQuerygetUserauth0FunctionAppSyncFunction9E6250B0",
-          "FunctionId"
-        ]
-      }
-    },
-    "transformerrootstackUserSubscriptiononCreateUserauth0FunctionSubscriptiononCreateUserauth0FunctionAppSyncFunction0FC1B29BFunctionId": {
-      "Value": {
-        "Fn::GetAtt": [
-          "SubscriptiononCreateUserauth0FunctionSubscriptiononCreateUserauth0FunctionAppSyncFunctionE9B4721A",
-          "FunctionId"
-        ]
-      }
-    },
     "transformerrootstackUserUserDataSourceA8C4C398Name": {
       "Value": {
         "Fn::GetAtt": [

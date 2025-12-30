@@ -76,7 +76,7 @@
           "infoSivTableName": "sivtable",
           "vehiclesTableName": "Siv",
           "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
-          "s3Key": "amplify-builds/apiSIV-75352b79764a516f5171-build.zip"
+          "s3Key": "amplify-builds/apiSIV-39373432564331716146-build.zip"
         },
         "AdminQueries3fede987": {
           "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
@@ -109,6 +109,10 @@
           "antaiPassword": "st#QDnSX4bGPy@m!",
           "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
           "s3Key": "amplify-builds/AntaiDayliInfractions-6e6b3748622f43753077-build.zip"
+        },
+        "resetPassword": {
+          "deploymentBucketName": "amplify-fleetwatcherfront-dev-bbd87-deployment",
+          "s3Key": "amplify-builds/resetPassword-4c574344475262596251-build.zip"
         }
       },
       "auth": {
@@ -118,6 +122,9 @@
       "api": {
         "AdminQueries": {},
         "fleetwatcherfront": {}
+      },
+      "storage": {
+        "fleetStorage": {}
       }
     }
   }

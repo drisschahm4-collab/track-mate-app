@@ -81,6 +81,7 @@ type Driver @model
     rules: [
         { allow: private, provider: iam, operations: [ read ] },
         { allow: groups, groups: [ "admin" ] }
+        { allow: groups, groups: ["guest"], operations: [read,update] }
     ]
 ){
     sub: String! @primaryKey
@@ -227,7 +228,8 @@ type Vehicle @model
 @auth(
     rules: [
         { allow: private, provider: iam, operations: [ read ] },
-        { allow: groups, groups: [ "admin" ] }
+        { allow: groups, groups: [ "admin" ] },
+        { allow: groups, groups: ["guest"], operations: [read,update] }
     ]
 ){
     immat: String! @primaryKey
@@ -421,7 +423,7 @@ type VehicleAlerts @model
 ){
   id: ID! @primaryKey
   vehicleImmat: String! @index(name: "byVehicle")
-  vehicle: Vehicle! @belongsTo(fields:["vehicleImmat"])
+  vehicle: Vehicle @belongsTo(fields:["vehicleImmat"])
   alertId: ID! @index(name: "byAlert")
   alert: Alert! @belongsTo(fields:["alertId"])
   isFlespi: Boolean
@@ -452,7 +454,7 @@ type VehicleAlertState @model
   state: String
   timestamp: AWSTimestamp!
   zone: Zone @hasOne
-  vehicle: Vehicle! @hasOne
+  vehicle: Vehicle @hasOne
 }
 
 type AlertHistory @model
@@ -464,7 +466,7 @@ type AlertHistory @model
   id: ID! @primaryKey
   type: AlertType!
   imei: String!
-  vehicle: Vehicle! @hasOne
+  vehicle: Vehicle @hasOne
   driver: Driver @hasOne
   company: Company! @hasOne
   timestamp: AWSTimestamp!
@@ -547,6 +549,7 @@ type Device @model
 @auth(
     rules: [
         { allow: groups, groups: [ "admin" ] }
+        { allow: groups, groups: ["guest"], operations: [read,update] }
     ]
 ){
     imei: String! @primaryKey
@@ -565,6 +568,19 @@ type Device @model
     # Relationships
     companyDevices: [CompanyDevice] @hasMany(indexName: "byDevice", fields: ["imei"])
     vehicle: Vehicle @belongsTo
+}
+
+type Intervention @model
+@auth(
+    rules: [
+        { allow: groups, groups: [ "admin" ] }
+    ]
+){
+    imei: String! @primaryKey
+    name: String
+    description: String
+    dateIntervention: String
+    picture: S3Object
 }
 
 type CompanyDevice @model
@@ -592,6 +608,7 @@ type Trame @model
         { allow: public, operations: [read] },
         { allow: private, provider: iam, operations: [ read, create, update ]  },
         { allow: groups, groups: [ "admin" ] }
+        { allow: groups, groups: ["guest"], operations: [read,update] }
     ]
 ){
     id: String! @primaryKey
@@ -623,6 +640,7 @@ type DvD @model
 @auth(
     rules: [
         { allow: groups, groups: [ "admin" ] }
+        { allow: groups, groups: ["guest"], operations: [read,update] }
     ]
 ){
   id: ID! @primaryKey
@@ -656,7 +674,7 @@ type Maintenance @model
   companyMaintenancesId: ID! @index(name: "maintenancesByCompany")
   company: Company! @belongsTo(fields: ["companyMaintenancesId"])
   vehicleMaintenancesImmat: String! @index(name: "maintenancesByVehicle")
-  vehicle: Vehicle! @belongsTo(fields: ["vehicleMaintenancesImmat"])
+  vehicle: Vehicle @belongsTo(fields: ["vehicleMaintenancesImmat"])
 }
 
 type TypeDepense @model
@@ -704,7 +722,7 @@ type Depense @model
   id: ID! @primaryKey
 
   vehicleImmat: String! @index(name: "byVehicle")
-  vehicle: Vehicle! @belongsTo(fields: ["vehicleImmat"])
+  vehicle: Vehicle @belongsTo(fields: ["vehicleImmat"])
 
   typeDepenseId: ID! @index(name: "byTypeDepense")
   typeDepense: TypeDepense! @belongsTo(fields: ["typeDepenseId"])
@@ -814,7 +832,24 @@ type Mutation {
   executeMaintenanceAction( action: MaintenanceAction! maintenanceId: ID! input: AWSJSON ): MaintenanceResponse @function(name: "FleetWatcherMaintenanceProcessor-${env}")
   updateUserPassword( userPoolId: String! username: String! newPassword: String! ): UpdatePasswordResponse @function(name: "FleetWatcherUpdateUserPassword-${env}")
   createAntaiVehicleAndInfraction(input: AntaiVehicleInput!): AntaiResponse @function(name: "antaifunction-${env}")
+  adminChangePassword(username: String!, newPassword: String!): Result @function(name: "resetPassword-${env}")
+  syncroSivVehicle(input: SyncroSivVehicleInput!): SyncroSivVehicleResponse @function(name: "apiSIV-${env}")
 }
+
+input SyncroSivVehicleInput {
+  companyVehiclesId: String!
+}
+
+type SyncroSivVehicleResponse {
+  success: Boolean!
+  message: String
+}
+
+type Result {
+  success: Boolean
+  message: String
+}
+
 
 type AntaiResponse {
   success: Boolean

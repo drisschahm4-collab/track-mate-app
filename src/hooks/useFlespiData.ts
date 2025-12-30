@@ -32,30 +32,39 @@ export interface FlespiMessage {
   server_timestamp?: number;
 }
 
-export function useFlespiData(refreshInterval: number = 5000) {
+export function useFlespiData(refreshInterval: number = 5000, initialImei?: string) {
   const [vehicleData, setVehicleData] = useState<VehicleData | null>(null);
   const [vehicleInfo, setVehicleInfo] = useState<VehicleInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
-  const [targetImei, setTargetImei] = useState<string>();
-  const [missingImei, setMissingImei] = useState(false);
+  const [targetImei, setTargetImei] = useState<string | undefined>(initialImei?.trim() || undefined);
 
   const setImei = useCallback((imei?: string) => {
     setTargetImei(imei?.trim() || undefined);
   }, []);
 
+  useEffect(() => {
+    if (initialImei) {
+      setTargetImei(initialImei.trim());
+    }
+  }, [initialImei]);
+
   const fetchData = useCallback(async () => {
     if (!targetImei) {
-      setMissingImei(true);
-      setError(null);
       setLoading(false);
+      return;
+    }
+
+    if (!targetImei) {
+      setLoading(false);
+      console.warn('[Flespi] Aucun IMEI résolu, skip fetch.');
       return;
     }
 
     try {
       const { data, error: fnError } = await supabase.functions.invoke('flespi-proxy', {
-        body: { imei: targetImei },
+        body: targetImei ? { imei: targetImei } : undefined,
       });
 
       if (fnError) {
@@ -81,7 +90,6 @@ export function useFlespiData(refreshInterval: number = 5000) {
         });
         setLastUpdate(new Date());
         setError(null);
-        setMissingImei(false);
         console.info('[Flespi] Telemetry', {
           imei: targetImei,
           latitude: message['position.latitude'],
@@ -102,7 +110,10 @@ export function useFlespiData(refreshInterval: number = 5000) {
   }, [targetImei]);
 
   const fetchDeviceInfo = useCallback(async () => {
-    if (!targetImei) return;
+    if (!targetImei) {
+      console.warn('[Flespi] Aucun IMEI résolu, skip device-info.');
+      return;
+    }
 
     try {
       const { data, error: deviceError } = await supabase.functions.invoke('flespi-proxy', {
@@ -155,11 +166,11 @@ export function useFlespiData(refreshInterval: number = 5000) {
   return {
     vehicleData,
     vehicleInfo,
+    currentImei: targetImei,
     loading,
     error,
     lastUpdate,
     refresh: fetchData,
     setImei,
-    missingImei,
   };
 }
