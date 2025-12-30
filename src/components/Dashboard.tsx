@@ -5,32 +5,39 @@ import { useAuth } from '@/hooks/useAuth';
 import { useFlespiData } from '@/hooks/useFlespiData';
 import { usePrivacyMode } from '@/hooks/usePrivacyMode';
 import { useUserImei } from '@/hooks/useUserImei';
+import { useVehicleResolver } from '@/hooks/useVehicleResolver';
 import { assignPrivacyPlugin } from '@/integrations/flespi';
-import { fetchDvdByDriverSub } from '@/integrations/amplify/dvd';
-import { Battery, Clock, Gauge, MapPin, Navigation, Zap } from 'lucide-react';
+import { Battery, Clock, Gauge, MapPin, Navigation, Zap, Car, Building2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Header from './Header';
 import MetricCard from './MetricCard';
 import VehicleMap from './VehicleMap';
+
 const Dashboard: React.FC = () => {
+  const { userEmail, username, sub, groups, attributes, signOut } = useAuth();
+  const { imei, setImei } = useUserImei(username);
+
+  // ===== Vehicle Resolver (DvD -> User -> Company) =====
   const {
-    userEmail,
-    username,
-    sub,
-    groups,
-    attributes,
-    signOut
-  } = useAuth();
-  const {
-    imei,
-    setImei
-  } = useUserImei(username);
+    loading: vehicleResolverLoading,
+    vehicles: resolvedVehicles,
+    selectedVehicle,
+    selectVehicle,
+    diagnostics,
+    resolve: refreshVehicleResolver,
+  } = useVehicleResolver(sub, groups);
+
   const attributeImei = attributes?.['custom:imei'] || attributes?.imei || attributes?.['custom:device_imei'];
-  const preferredImei = imei || attributeImei || (username && /^\d{8,20}$/.test(username) ? username : undefined);
-  const [imeiSource, setImeiSource] = useState<'storage' | 'username' | 'cognito' | 'manual' | 'DvD' | undefined>(imei ? 'storage' : attributeImei ? 'cognito' : undefined);
+  
+  // Priority: selectedVehicle.imei > localStorage imei > cognito attribute > numeric username
+  const resolvedImei = selectedVehicle?.imei || imei || attributeImei || (username && /^\d{8,20}$/.test(username) ? username : undefined);
+  
+  const [imeiSource, setImeiSource] = useState<'storage' | 'username' | 'cognito' | 'manual' | 'DvD' | 'accessibleVehicles' | 'company' | undefined>();
   const [manualImei, setManualImei] = useState('');
+
   const {
     vehicleData,
     vehicleInfo,
@@ -38,104 +45,49 @@ const Dashboard: React.FC = () => {
     error,
     lastUpdate,
     refresh,
-    setImei: setHookImei
-  } = useFlespiData(5000, preferredImei);
-  const {
-    isPrivate,
-    setPrivate
-  } = usePrivacyMode();
+    setImei: setHookImei,
+  } = useFlespiData(5000, resolvedImei);
+
+  const { isPrivate, setPrivate } = usePrivacyMode();
   const [signingOut, setSigningOut] = useState(false);
   const [privacyPending, setPrivacyPending] = useState(false);
-  const [dvdImmat, setDvdImmat] = useState<string | undefined>();
-  const [dvdVehicleImei, setDvdVehicleImei] = useState<string | undefined>();
-  const [dvdVehicleName, setDvdVehicleName] = useState<string | undefined>();
+  // Update IMEI source when selectedVehicle changes
   useEffect(() => {
-    setHookImei(imei);
-    if (imei && !imeiSource) {
+    if (selectedVehicle?.imei) {
+      setImeiSource(selectedVehicle.source);
+      setHookImei(selectedVehicle.imei);
+      console.info('[IMEI] ✅ Set from VehicleResolver:', selectedVehicle.imei, 'source:', selectedVehicle.source);
+    }
+  }, [selectedVehicle, setHookImei]);
+
+  // Fallback: storage IMEI
+  useEffect(() => {
+    if (imei && !selectedVehicle?.imei && !imeiSource) {
       setImeiSource('storage');
+      setHookImei(imei);
       console.info('[IMEI] Loaded from storage', imei);
     }
-  }, [imei, setHookImei]);
+  }, [imei, selectedVehicle, imeiSource, setHookImei]);
+
+  // Fallback: numeric username as IMEI
   useEffect(() => {
-    if (!imei && username && /^\d{8,20}$/.test(username)) {
+    if (!resolvedImei && username && /^\d{8,20}$/.test(username)) {
       setImei(username);
       setHookImei(username);
       setImeiSource('username');
       console.info('[IMEI] Inferred from username', username);
     }
-  }, [imei, username, setImei, setHookImei]);
+  }, [resolvedImei, username, setImei, setHookImei]);
+
+  // Fallback: Cognito attribute
   useEffect(() => {
-    if (!imei && attributeImei) {
+    if (!resolvedImei && attributeImei) {
       setImei(attributeImei);
       setHookImei(attributeImei);
       setImeiSource('cognito');
       console.info('[IMEI] Loaded from Cognito attribute', attributeImei);
     }
-  }, [attributeImei, imei, setImei, setHookImei]);
-
-  useEffect(() => {
-    const loadDvd = async () => {
-      console.log('[Dashboard] 🚀 Loading DvD data...');
-      console.log('[Dashboard] 👤 User sub (from context):', sub);
-      console.log('[Dashboard] 👥 User groups:', groups);
-      console.log('[Dashboard] 📝 User attributes keys:', attributes ? Object.keys(attributes) : 'none');
-      console.log('[Dashboard] 📍 Current IMEI state:', imei);
-
-      if (!sub) {
-        console.warn('[Dashboard] ⚠️ No user sub found in context, skipping DvD fetch');
-        return;
-      }
-
-      try {
-        console.log('[Dashboard] 📞 Calling fetchDvdByDriverSub with sub:', sub);
-        const dvds = await fetchDvdByDriverSub(sub);
-
-        console.log('[Dashboard] 📦 DvD response received, count:', dvds.length);
-
-        if (dvds.length > 0) {
-          const dvd = dvds[0];
-          console.log('[Dashboard] 🎯 First DvD entry:', JSON.stringify(dvd, null, 2));
-
-          const immat = dvd.dvDVehicleImmat || undefined;
-          const vehicleImei = dvd.vehicle?.device?.imei;
-          const vehicleName = dvd.vehicle?.nomVehicule || dvd.vehicle?.marque || undefined;
-
-          console.log('[Dashboard] 🚗 Extracted data:', {
-            immat,
-            vehicleImei,
-            vehicleName,
-            fullVehicle: dvd.vehicle
-          });
-
-          setDvdImmat(immat);
-          setDvdVehicleImei(vehicleImei || undefined);
-          setDvdVehicleName(vehicleName);
-
-          console.log('[Dashboard] ✅ State updated:', {
-            dvdImmat: immat,
-            dvdVehicleImei: vehicleImei,
-            dvdVehicleName: vehicleName
-          });
-
-          // Si on a un IMEI du véhicule et qu'aucun IMEI n'est déjà défini, on l'utilise
-          if (vehicleImei && !imei) {
-            console.log('[Dashboard] 🎉 Setting IMEI from DvD vehicle:', vehicleImei);
-            setImei(vehicleImei);
-            setHookImei(vehicleImei);
-            setImeiSource('DvD');
-            console.info('[IMEI] ✅ Loaded from DvD vehicle', vehicleImei);
-          } else {
-            console.log('[Dashboard] ℹ️ Not setting IMEI - vehicleImei:', vehicleImei, 'existing imei:', imei);
-          }
-        } else {
-          console.warn('[Dashboard] ⚠️ No DvD entries found for driver:', attributes.sub);
-        }
-      } catch (err) {
-        console.error('[Dashboard] ❌ DvD Fetch error:', err);
-      }
-    };
-    loadDvd();
-  }, [sub, groups, imei, setImei, setHookImei]);
+  }, [resolvedImei, attributeImei, setImei, setHookImei]);
   useEffect(() => {
     if (vehicleInfo?.privacyEnabled !== undefined) {
       setPrivate(vehicleInfo.privacyEnabled);
@@ -153,14 +105,14 @@ const Dashboard: React.FC = () => {
     refresh();
   };
   const handleTogglePrivacyRemote = async () => {
-    if (!imei && !vehicleInfo?.id) return;
+    if (!resolvedImei && !vehicleInfo?.id) return;
     const next = !isPrivate;
     setPrivacyPending(true);
     try {
       await assignPrivacyPlugin({
         deviceId: vehicleInfo?.id,
-        imei: imei || vehicleInfo?.imei,
-        private: next
+        imei: resolvedImei || vehicleInfo?.imei,
+        private: next,
       });
       setPrivate(next);
     } catch (err) {
@@ -213,25 +165,53 @@ const Dashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto p-4 space-y-4">
         <Header isOnline={vehicleData?.isOnline ?? false} lastUpdate={lastUpdate} onRefresh={refresh} loading={loading} isPrivate={isPrivate} onTogglePrivacy={handleTogglePrivacyRemote} userEmail={userEmail} onSignOut={handleSignOut} signingOut={signingOut} privacyPending={privacyPending} />
 
-        {!preferredImei && !vehicleInfo?.imei && !dvdVehicleImei && (
+        {/* Vehicle Selection (if multiple found) */}
+        {resolvedVehicles.length > 1 && !selectedVehicle && (
+          <Card className="glass-card p-4 border border-warning/30">
+            <div className="flex items-center gap-3 mb-3">
+              <Building2 className="h-5 w-5 text-warning" />
+              <h3 className="font-semibold text-foreground">Plusieurs véhicules disponibles</h3>
+            </div>
+            <p className="text-sm text-muted-foreground mb-3">
+              {resolvedVehicles.length} véhicules trouvés via {resolvedVehicles[0]?.source}. Sélectionnez celui à suivre :
+            </p>
+            <Select onValueChange={selectVehicle}>
+              <SelectTrigger className="w-full md:w-[300px]">
+                <SelectValue placeholder="Choisir un véhicule..." />
+              </SelectTrigger>
+              <SelectContent>
+                {resolvedVehicles.map((v) => (
+                  <SelectItem key={v.immat} value={v.immat}>
+                    <span className="flex items-center gap-2">
+                      <Car className="h-4 w-4" />
+                      {v.immat} {v.nomVehicule && `- ${v.nomVehicule}`}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Card>
+        )}
+
+        {/* No vehicle found */}
+        {!resolvedImei && !vehicleInfo?.imei && resolvedVehicles.length === 0 && !vehicleResolverLoading && (
           <Card className="glass-card p-4 border border-destructive/30">
             <div className="mb-3">
               <h3 className="font-semibold text-foreground mb-2">⚠️ Aucun véhicule assigné</h3>
               <p className="text-sm text-muted-foreground mb-2">
-                Ce compte n'a pas de véhicule assigné (ni dans DvD, ni dans User.accessibleVehicles).
+                Ce compte n'a pas de véhicule assigné (DvD, User.accessibleVehicles, ou Company).
               </p>
               <p className="text-sm text-muted-foreground">
                 <strong>Solutions :</strong>
               </p>
               <ul className="text-sm text-muted-foreground list-disc ml-5 mt-1">
-                <li>Demandez à un administrateur d'ajouter un véhicule dans User.accessibleVehicles</li>
-                <li>Ou créer une entrée dans la table DvD pour ce driver</li>
+                <li>Demandez à un administrateur d'ajouter un véhicule</li>
                 <li>Ou saisissez manuellement l'IMEI ci-dessous</li>
               </ul>
             </div>
             <form className="flex flex-col gap-3 md:flex-row md:items-end md:gap-4" onSubmit={handleManualImeiSubmit}>
               <div className="flex-1">
-                <p className="text-xs uppercase text-muted-foreground mb-1">IMEI manuel (optionnel)</p>
+                <p className="text-xs uppercase text-muted-foreground mb-1">IMEI manuel</p>
                 <Input
                   value={manualImei}
                   onChange={(e) => setManualImei(e.target.value)}
@@ -250,20 +230,20 @@ const Dashboard: React.FC = () => {
           <div className="glass-card p-4 border border-primary/30">
             <p className="text-xs uppercase text-muted-foreground mb-1">IMEI détecté</p>
             <p className="font-display text-lg font-semibold text-foreground">
-              {vehicleInfo?.imei ?? dvdVehicleImei ?? imei ?? '—'}
+              {vehicleInfo?.imei ?? selectedVehicle?.imei ?? imei ?? '—'}
             </p>
-            <p className="text-xs text-muted-foreground mt-1">Source: {imeiSource ?? (dvdVehicleImei ? 'DvD' : 'inconnue')}</p>
+            <p className="text-xs text-muted-foreground mt-1">Source: {imeiSource ?? 'inconnue'}</p>
           </div>
           <div className="glass-card p-4">
             <p className="text-xs uppercase text-muted-foreground mb-1">Immatriculation</p>
             <p className="font-display text-lg font-semibold text-foreground">
-              {vehicleInfo?.immatriculation ?? dvdImmat ?? '—'}
+              {vehicleInfo?.immatriculation ?? selectedVehicle?.immat ?? '—'}
             </p>
           </div>
           <div className="glass-card p-4">
             <p className="text-xs uppercase text-muted-foreground mb-1">Véhicule</p>
             <p className="font-display text-lg font-semibold text-foreground">
-              {dvdVehicleName ?? '—'}
+              {selectedVehicle?.nomVehicule ?? selectedVehicle?.marque ?? '—'}
             </p>
           </div>
           <div className="glass-card p-4">
@@ -289,19 +269,21 @@ const Dashboard: React.FC = () => {
               username,
               sub: sub || 'MISSING',
               groups: groups || [],
-              attributeKeys: attributes ? Object.keys(attributes) : []
+              attributeKeys: attributes ? Object.keys(attributes) : [],
             },
             imeiResolution: {
-              preferredImei,
+              resolvedImei,
               imeiSource: imeiSource ?? 'unknown',
               attributeImei,
-              dvdVehicleImei
+              selectedVehicleImei: selectedVehicle?.imei,
             },
-            dvdResult: {
-              immat: dvdImmat,
-              vehicleName: dvdVehicleName,
-              vehicleImei: dvdVehicleImei
-            }
+            vehicleResolver: {
+              loading: vehicleResolverLoading,
+              vehicleCount: resolvedVehicles.length,
+              vehicles: resolvedVehicles.map((v) => ({ immat: v.immat, imei: v.imei, source: v.source })),
+              selectedVehicle: selectedVehicle ? { immat: selectedVehicle.immat, imei: selectedVehicle.imei } : null,
+              diagnostics,
+            },
           }, null, 2)}
           </pre>
         </Card>
@@ -311,25 +293,29 @@ const Dashboard: React.FC = () => {
             <p className="text-xs uppercase text-muted-foreground">Log véhicule</p>
             <Badge variant="secondary">IMEI source: {imeiSource ?? 'inconnu'}</Badge>
             {vehicleInfo?.id && <Badge variant="outline">Device ID: {vehicleInfo.id}</Badge>}
-            {vehicleInfo?.privacyEnabled !== undefined && <Badge variant={vehicleInfo.privacyEnabled ? 'default' : 'outline'}>
+            {vehicleInfo?.privacyEnabled !== undefined && (
+              <Badge variant={vehicleInfo.privacyEnabled ? 'default' : 'outline'}>
                 Vie privée: {vehicleInfo.privacyEnabled ? 'ON' : 'OFF'}
-              </Badge>}
+              </Badge>
+            )}
           </div>
           <pre className="bg-secondary/50 rounded-lg p-3 text-sm overflow-auto">
           {JSON.stringify({
-            imei: imei || vehicleInfo?.imei || dvdVehicleImei,
-            imeiSource: imeiSource ?? (dvdVehicleImei ? 'DvD' : undefined),
-            immatriculation: vehicleInfo?.immatriculation || dvdImmat,
-            vehicleName: dvdVehicleName,
+            imei: resolvedImei || vehicleInfo?.imei,
+            imeiSource: imeiSource ?? undefined,
+            immatriculation: vehicleInfo?.immatriculation || selectedVehicle?.immat,
+            vehicleName: selectedVehicle?.nomVehicule,
             deviceId: vehicleInfo?.id,
             privacy: vehicleInfo?.privacyEnabled,
             lastUpdate: lastUpdate?.toISOString(),
-            coords: vehicleData ? {
-              lat: vehicleData.latitude,
-              lng: vehicleData.longitude,
-              speed: vehicleData.speed,
-              heading: vehicleData.heading
-            } : null
+            coords: vehicleData
+              ? {
+                  lat: vehicleData.latitude,
+                  lng: vehicleData.longitude,
+                  speed: vehicleData.speed,
+                  heading: vehicleData.heading,
+                }
+              : null,
           }, null, 2)}
           </pre>
         </Card>
