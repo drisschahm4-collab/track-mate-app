@@ -18,6 +18,8 @@ const Dashboard: React.FC = () => {
   const {
     userEmail,
     username,
+    sub,
+    groups,
     attributes,
     signOut
   } = useAuth();
@@ -74,18 +76,19 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const loadDvd = async () => {
       console.log('[Dashboard] 🚀 Loading DvD data...');
-      console.log('[Dashboard] 📝 User attributes:', attributes);
-      console.log('[Dashboard] 👤 User sub:', attributes?.sub);
+      console.log('[Dashboard] 👤 User sub (from context):', sub);
+      console.log('[Dashboard] 👥 User groups:', groups);
+      console.log('[Dashboard] 📝 User attributes keys:', attributes ? Object.keys(attributes) : 'none');
       console.log('[Dashboard] 📍 Current IMEI state:', imei);
 
-      if (!attributes?.sub) {
-        console.warn('[Dashboard] ⚠️ No user sub found, skipping DvD fetch');
+      if (!sub) {
+        console.warn('[Dashboard] ⚠️ No user sub found in context, skipping DvD fetch');
         return;
       }
 
       try {
-        console.log('[Dashboard] 📞 Calling fetchDvdByDriverSub...');
-        const dvds = await fetchDvdByDriverSub(attributes.sub);
+        console.log('[Dashboard] 📞 Calling fetchDvdByDriverSub with sub:', sub);
+        const dvds = await fetchDvdByDriverSub(sub);
 
         console.log('[Dashboard] 📦 DvD response received, count:', dvds.length);
 
@@ -132,7 +135,7 @@ const Dashboard: React.FC = () => {
       }
     };
     loadDvd();
-  }, [attributes?.sub, imei, setImei, setHookImei]);
+  }, [sub, groups, imei, setImei, setHookImei]);
   useEffect(() => {
     if (vehicleInfo?.privacyEnabled !== undefined) {
       setPrivate(vehicleInfo.privacyEnabled);
@@ -270,6 +273,38 @@ const Dashboard: React.FC = () => {
             </p>
           </div>
         </div>
+
+        {/* Debug Card - Auth & DvD diagnostics */}
+        <Card className="glass-card p-4 border border-info/30">
+          <div className="flex flex-wrap items-center gap-3 mb-3">
+            <p className="text-xs uppercase text-muted-foreground">🔍 Debug Auth & DvD</p>
+            <Badge variant="secondary">sub: {sub ? `${sub.substring(0, 8)}...` : '❌ MISSING'}</Badge>
+            <Badge variant={groups?.includes('guest') ? 'default' : 'destructive'}>
+              groups: {groups?.join(', ') || '❌ NONE'}
+            </Badge>
+          </div>
+          <pre className="bg-secondary/50 rounded-lg p-3 text-sm overflow-auto max-h-40">
+          {JSON.stringify({
+            auth: {
+              username,
+              sub: sub || 'MISSING',
+              groups: groups || [],
+              attributeKeys: attributes ? Object.keys(attributes) : []
+            },
+            imeiResolution: {
+              preferredImei,
+              imeiSource: imeiSource ?? 'unknown',
+              attributeImei,
+              dvdVehicleImei
+            },
+            dvdResult: {
+              immat: dvdImmat,
+              vehicleName: dvdVehicleName,
+              vehicleImei: dvdVehicleImei
+            }
+          }, null, 2)}
+          </pre>
+        </Card>
 
         <Card className="glass-card p-4">
           <div className="flex flex-wrap items-center gap-3 mb-3">

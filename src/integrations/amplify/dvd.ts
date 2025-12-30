@@ -85,14 +85,24 @@ const GET_DEVICE = /* GraphQL */ `
 export async function fetchDvdByDriverSub(sub: string): Promise<DvdItem[]> {
   console.log('[DvD API] 🔍 Fetching DvD for driver sub:', sub);
 
-  // Étape 1: Récupérer les DvDs
-  const dvdResponse = await getClient().graphql({
-    query: DVD_BY_DRIVER,
-    variables: { sub },
-    authMode: "userPool",
-  });
+  try {
+    // Étape 1: Récupérer les DvDs
+    const dvdResponse = await getClient().graphql({
+      query: DVD_BY_DRIVER,
+      variables: { sub },
+      authMode: "userPool",
+    });
 
-  console.log('[DvD API] 📦 Raw DvD response:', JSON.stringify(dvdResponse, null, 2));
+    console.log('[DvD API] 📦 Raw DvD response:', JSON.stringify(dvdResponse, null, 2));
+
+    // Check for GraphQL errors
+    if ('errors' in dvdResponse && dvdResponse.errors?.length) {
+      console.error('[DvD API] ❌ GraphQL errors:', dvdResponse.errors);
+      dvdResponse.errors.forEach((err: any, i: number) => {
+        console.error(`[DvD API] Error ${i + 1}:`, err.message, err.errorType);
+      });
+      throw new Error(`GraphQL error: ${dvdResponse.errors[0]?.message || 'Unknown error'}`);
+    }
 
   const dvdData = 'data' in dvdResponse ? dvdResponse.data : null;
   const typedDvdData = dvdData as { dvDSByDvDDriverSub?: { items?: Array<{
@@ -157,9 +167,17 @@ export async function fetchDvdByDriverSub(sub: string): Promise<DvdItem[]> {
     }
   }
 
-  // Enrichir les DvD normaux
-  const enrichedItems = await enrichDvdItems(dvdItems);
-  return enrichedItems;
+    // Enrichir les DvD normaux
+    const enrichedItems = await enrichDvdItems(dvdItems);
+    return enrichedItems;
+  } catch (err) {
+    console.error('[DvD API] ❌ Fatal error in fetchDvdByDriverSub:', err);
+    if (err instanceof Error) {
+      console.error('[DvD API] Error message:', err.message);
+      console.error('[DvD API] Error stack:', err.stack);
+    }
+    throw err;
+  }
 }
 
 // Fonction helper pour enrichir les items DvD avec Vehicle et Device
