@@ -1,5 +1,5 @@
 import { PropsWithChildren, useCallback, useMemo, useState, useEffect, FormEvent } from "react";
-import { getCurrentUser, signIn, signOut, fetchUserAttributes } from "aws-amplify/auth";
+import { getCurrentUser, signIn, signOut, fetchUserAttributes, fetchAuthSession } from "aws-amplify/auth";
 import { ShieldCheck, LogIn, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,8 @@ const AuthGate = ({ children }: PropsWithChildren) => {
   const [status, setStatus] = useState<AuthContextValue["status"]>("loading");
   const [userEmail, setUserEmail] = useState<string>();
   const [username, setUsername] = useState<string>();
+  const [sub, setSub] = useState<string>();
+  const [groups, setGroups] = useState<string[]>();
   const [attributes, setAttributes] = useState<Record<string, string>>();
   const [credentials, setCredentials] = useState({ username: "", password: "" });
   const [pending, setPending] = useState(false);
@@ -20,13 +22,37 @@ const AuthGate = ({ children }: PropsWithChildren) => {
   const hydrateSession = useCallback(async () => {
     try {
       const currentUser = await getCurrentUser();
+      console.log('[AuthGate] 🔐 currentUser:', {
+        username: currentUser?.username,
+        userId: currentUser?.userId,
+        signInDetails: currentUser?.signInDetails
+      });
+
       const loginId = currentUser?.username ?? currentUser?.signInDetails?.loginId;
+      const userSub = currentUser?.userId;
+      
       setUserEmail(loginId);
       setUsername(loginId);
+      setSub(userSub);
+
+      // Fetch session to get groups from token
+      try {
+        const session = await fetchAuthSession();
+        const idTokenPayload = session?.tokens?.idToken?.payload;
+        const cognitoGroups = idTokenPayload?.['cognito:groups'] as string[] | undefined;
+        console.log('[AuthGate] 👥 Groups from token:', cognitoGroups);
+        setGroups(cognitoGroups);
+      } catch (sessionErr) {
+        console.warn('[AuthGate] ⚠️ Could not fetch session for groups:', sessionErr);
+      }
+
       const userAttrs = await fetchUserAttributes().catch(() => undefined);
       if (userAttrs) {
+        console.log('[AuthGate] 📝 User attributes:', Object.keys(userAttrs));
         setAttributes(userAttrs);
       }
+      
+      console.log('[AuthGate] ✅ Session hydrated - sub:', userSub);
       setStatus("signedIn");
     } catch {
       setStatus("signedOut");
@@ -75,6 +101,8 @@ const AuthGate = ({ children }: PropsWithChildren) => {
       setStatus("signedOut");
       setUserEmail(undefined);
       setUsername(undefined);
+      setSub(undefined);
+      setGroups(undefined);
       setAttributes(undefined);
     }
   }, []);
@@ -84,10 +112,12 @@ const AuthGate = ({ children }: PropsWithChildren) => {
       status,
       userEmail,
       username,
+      sub,
+      groups,
       attributes,
       signOut: handleSignOut,
     }),
-    [status, userEmail, username, attributes, handleSignOut]
+    [status, userEmail, username, sub, groups, attributes, handleSignOut]
   );
 
   if (status === "loading") {

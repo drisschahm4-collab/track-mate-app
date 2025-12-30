@@ -6,6 +6,8 @@ export interface AuthContextValue {
   status: AuthStatus;
   userEmail?: string;
   username?: string;
+  sub?: string;
+  groups?: string[];
   attributes?: Record<string, string>;
   signOut: () => Promise<void>;
 }

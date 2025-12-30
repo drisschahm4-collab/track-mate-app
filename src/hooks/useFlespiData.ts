@@ -41,11 +41,14 @@ export function useFlespiData(refreshInterval: number = 5000, initialImei?: stri
   const [targetImei, setTargetImei] = useState<string | undefined>(initialImei?.trim() || undefined);
 
   const setImei = useCallback((imei?: string) => {
-    setTargetImei(imei?.trim() || undefined);
-  }, []);
+    const newImei = imei?.trim() || undefined;
+    console.log('[Flespi] 🎯 setImei called:', { previous: targetImei, new: newImei });
+    setTargetImei(newImei);
+  }, [targetImei]);
 
   useEffect(() => {
     if (initialImei) {
+      console.log('[Flespi] 🚀 Initial IMEI set:', initialImei.trim());
       setTargetImei(initialImei.trim());
     }
   }, [initialImei]);
@@ -53,12 +56,8 @@ export function useFlespiData(refreshInterval: number = 5000, initialImei?: stri
   const fetchData = useCallback(async () => {
     if (!targetImei) {
       setLoading(false);
-      return;
-    }
-
-    if (!targetImei) {
-      setLoading(false);
-      console.warn('[Flespi] Aucun IMEI résolu, skip fetch.');
+      setError('Aucun IMEI résolu - vérifiez la configuration DvD ou les attributs utilisateur');
+      console.warn('[Flespi] ⚠️ Aucun IMEI résolu, skip fetch. Sources vérifiées: DvD, attributs Cognito, username');
       return;
     }
 
