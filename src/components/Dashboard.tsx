@@ -13,17 +13,35 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { assignPrivacyPlugin } from '@/integrations/flespi';
 import { Badge } from '@/components/ui/badge';
-
 const Dashboard: React.FC = () => {
-  const { userEmail, username, attributes, signOut } = useAuth();
-  const { imei, setImei } = useUserImei(username);
+  const {
+    userEmail,
+    username,
+    attributes,
+    signOut
+  } = useAuth();
+  const {
+    imei,
+    setImei
+  } = useUserImei(username);
   const [imeiDraft, setImeiDraft] = useState<string>(imei ?? '');
   const [imeiSource, setImeiSource] = useState<'storage' | 'username' | 'cognito' | 'manual' | undefined>(imei ? 'storage' : undefined);
-  const { vehicleData, vehicleInfo, loading, error, lastUpdate, refresh, setImei: setHookImei, missingImei } = useFlespiData(5000);
-  const { isPrivate, setPrivate } = usePrivacyMode();
+  const {
+    vehicleData,
+    vehicleInfo,
+    loading,
+    error,
+    lastUpdate,
+    refresh,
+    setImei: setHookImei,
+    missingImei
+  } = useFlespiData(5000);
+  const {
+    isPrivate,
+    setPrivate
+  } = usePrivacyMode();
   const [signingOut, setSigningOut] = useState(false);
   const [privacyPending, setPrivacyPending] = useState(false);
-
   useEffect(() => {
     setImeiDraft(imei ?? '');
     setHookImei(imei);
@@ -32,7 +50,6 @@ const Dashboard: React.FC = () => {
       console.info('[IMEI] Loaded from storage', imei);
     }
   }, [imei, setHookImei]);
-
   useEffect(() => {
     if (!imei && username && /^\d{8,20}$/.test(username)) {
       setImei(username);
@@ -42,12 +59,8 @@ const Dashboard: React.FC = () => {
       console.info('[IMEI] Inferred from username', username);
     }
   }, [imei, username, setImei, setHookImei]);
-
   useEffect(() => {
-    const attrImei =
-      attributes?.['custom:imei'] ||
-      attributes?.imei ||
-      attributes?.['custom:device_imei'];
+    const attrImei = attributes?.['custom:imei'] || attributes?.imei || attributes?.['custom:device_imei'];
     if (!imei && attrImei) {
       setImei(attrImei);
       setHookImei(attrImei);
@@ -56,13 +69,11 @@ const Dashboard: React.FC = () => {
       console.info('[IMEI] Loaded from Cognito attribute', attrImei);
     }
   }, [attributes, imei, setImei, setHookImei]);
-
   useEffect(() => {
     if (vehicleInfo?.privacyEnabled !== undefined) {
       setPrivate(vehicleInfo.privacyEnabled);
     }
   }, [vehicleInfo?.privacyEnabled, setPrivate]);
-
   const handleImeiSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     const trimmed = imeiDraft.trim();
@@ -72,7 +83,6 @@ const Dashboard: React.FC = () => {
     console.info('[IMEI] Set manually', trimmed);
     refresh();
   };
-
   const handleTogglePrivacyRemote = async () => {
     if (!imei && !vehicleInfo?.id) return;
     const next = !isPrivate;
@@ -81,7 +91,7 @@ const Dashboard: React.FC = () => {
       await assignPrivacyPlugin({
         deviceId: vehicleInfo?.id,
         imei: imei || vehicleInfo?.imei,
-        private: next,
+        private: next
       });
       setPrivate(next);
     } catch (err) {
@@ -90,7 +100,6 @@ const Dashboard: React.FC = () => {
       setPrivacyPending(false);
     }
   };
-
   const handleSignOut = async () => {
     setSigningOut(true);
     try {
@@ -101,59 +110,27 @@ const Dashboard: React.FC = () => {
       setSigningOut(false);
     }
   };
-
   const formatTimestamp = (timestamp: number) => {
     if (!timestamp) return '--:--';
     const date = new Date(timestamp * 1000);
     return date.toLocaleTimeString('fr-FR', {
       hour: '2-digit',
-      minute: '2-digit',
+      minute: '2-digit'
     });
   };
-
   const formatCoordinate = (coord: number, type: 'lat' | 'lng') => {
     if (isPrivate) return '****';
     if (!coord) return '-.----';
-    const direction = type === 'lat' 
-      ? (coord >= 0 ? 'N' : 'S')
-      : (coord >= 0 ? 'E' : 'O');
+    const direction = type === 'lat' ? coord >= 0 ? 'N' : 'S' : coord >= 0 ? 'E' : 'O';
     return `${Math.abs(coord).toFixed(4)}° ${direction}`;
   };
-
   if (missingImei) {
-    return (
-      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
-        <div className="glass-card p-8 w-full max-w-2xl space-y-6">
-          <div>
-            <h2 className="font-display font-bold text-xl text-foreground mb-2">
-              Associez un IMEI à votre compte
-            </h2>
-            <p className="text-muted-foreground">
-              Entrez l&apos;IMEI de votre véhicule pour charger ses données et son immatriculation.
-            </p>
-          </div>
-          <form className="flex flex-col gap-3 md:flex-row md:items-end md:gap-4" onSubmit={handleImeiSubmit}>
-            <div className="flex-1">
-              <p className="text-xs uppercase text-muted-foreground mb-1">IMEI</p>
-              <Input
-                value={imeiDraft}
-                onChange={(e) => setImeiDraft(e.target.value)}
-                placeholder="Entrez l'IMEI (ex: 864636060105273)"
-                required
-              />
-            </div>
-            <Button type="submit" className="md:w-auto w-full">
-              Enregistrer
-            </Button>
-          </form>
-        </div>
-      </div>
-    );
+    return <div className="min-h-screen bg-background p-4 flex items-center justify-center">
+        
+      </div>;
   }
-
   if (error && !vehicleData) {
-    return (
-      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
+    return <div className="min-h-screen bg-background p-4 flex items-center justify-center">
         <div className="glass-card p-8 text-center max-w-md">
           <div className="p-4 rounded-full bg-destructive/20 w-fit mx-auto mb-4">
             <Zap className="h-8 w-8 text-destructive" />
@@ -162,44 +139,22 @@ const Dashboard: React.FC = () => {
             Erreur de connexion
           </h2>
           <p className="text-muted-foreground mb-4">{error}</p>
-          <button
-            onClick={refresh}
-            className="px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
-          >
+          <button onClick={refresh} className="px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors">
             Réessayer
           </button>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto p-4 space-y-4">
-        <Header
-          isOnline={vehicleData?.isOnline ?? false}
-          lastUpdate={lastUpdate}
-          onRefresh={refresh}
-          loading={loading}
-          isPrivate={isPrivate}
-          onTogglePrivacy={handleTogglePrivacyRemote}
-          userEmail={userEmail}
-          onSignOut={handleSignOut}
-          signingOut={signingOut}
-          privacyPending={privacyPending}
-        />
+        <Header isOnline={vehicleData?.isOnline ?? false} lastUpdate={lastUpdate} onRefresh={refresh} loading={loading} isPrivate={isPrivate} onTogglePrivacy={handleTogglePrivacyRemote} userEmail={userEmail} onSignOut={handleSignOut} signingOut={signingOut} privacyPending={privacyPending} />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <Card className="glass-card p-4 lg:col-span-3">
             <form className="flex flex-col gap-3 md:flex-row md:items-end md:gap-4" onSubmit={handleImeiSubmit}>
               <div className="flex-1">
                 <p className="text-xs uppercase text-muted-foreground mb-1">IMEI associé à ce compte</p>
-                <Input
-                  value={imeiDraft}
-                  onChange={(e) => setImeiDraft(e.target.value)}
-                  placeholder="Entrez l'IMEI (ex: 864636060105273)"
-                  required
-                />
+                <Input value={imeiDraft} onChange={e => setImeiDraft(e.target.value)} placeholder="Entrez l'IMEI (ex: 864636060105273)" required />
               </div>
               <Button type="submit" className="md:w-auto w-full">
                 Mettre à jour l'IMEI
@@ -222,9 +177,7 @@ const Dashboard: React.FC = () => {
           <div className="glass-card p-4">
             <p className="text-xs uppercase text-muted-foreground mb-1">Position actuelle</p>
             <p className="font-display text-lg font-semibold text-foreground">
-              {vehicleData
-                ? `${formatCoordinate(vehicleData.latitude, 'lat')} / ${formatCoordinate(vehicleData.longitude, 'lng')}`
-                : '—'}
+              {vehicleData ? `${formatCoordinate(vehicleData.latitude, 'lat')} / ${formatCoordinate(vehicleData.longitude, 'lng')}` : '—'}
             </p>
           </div>
         </div>
@@ -234,87 +187,41 @@ const Dashboard: React.FC = () => {
             <p className="text-xs uppercase text-muted-foreground">Log véhicule</p>
             <Badge variant="secondary">IMEI source: {imeiSource ?? 'inconnu'}</Badge>
             {vehicleInfo?.id && <Badge variant="outline">Device ID: {vehicleInfo.id}</Badge>}
-            {vehicleInfo?.privacyEnabled !== undefined && (
-              <Badge variant={vehicleInfo.privacyEnabled ? 'default' : 'outline'}>
+            {vehicleInfo?.privacyEnabled !== undefined && <Badge variant={vehicleInfo.privacyEnabled ? 'default' : 'outline'}>
                 Vie privée: {vehicleInfo.privacyEnabled ? 'ON' : 'OFF'}
-              </Badge>
-            )}
+              </Badge>}
           </div>
           <pre className="bg-secondary/50 rounded-lg p-3 text-sm overflow-auto">
-{JSON.stringify({
-  imei: imei || vehicleInfo?.imei,
-  imeiSource,
-  immatriculation: vehicleInfo?.immatriculation,
-  deviceId: vehicleInfo?.id,
-  privacy: vehicleInfo?.privacyEnabled,
-  lastUpdate: lastUpdate?.toISOString(),
-  coords: vehicleData ? {
-    lat: vehicleData.latitude,
-    lng: vehicleData.longitude,
-    speed: vehicleData.speed,
-    heading: vehicleData.heading,
-  } : null,
-}, null, 2)}
+          {JSON.stringify({
+            imei: imei || vehicleInfo?.imei,
+            imeiSource,
+            immatriculation: vehicleInfo?.immatriculation,
+            deviceId: vehicleInfo?.id,
+            privacy: vehicleInfo?.privacyEnabled,
+            lastUpdate: lastUpdate?.toISOString(),
+            coords: vehicleData ? {
+              lat: vehicleData.latitude,
+              lng: vehicleData.longitude,
+              speed: vehicleData.speed,
+              heading: vehicleData.heading
+            } : null
+          }, null, 2)}
           </pre>
         </Card>
 
         {/* Map Section */}
-        <VehicleMap 
-          vehicleData={vehicleData} 
-          className="h-[40vh] min-h-[300px] shadow-card"
-          isPrivate={isPrivate}
-        />
+        <VehicleMap vehicleData={vehicleData} className="h-[40vh] min-h-[300px] shadow-card" isPrivate={isPrivate} />
 
         {/* Metrics Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {loading && !vehicleData ? (
-            <>
-              {[...Array(4)].map((_, i) => (
-                <Skeleton key={i} className="h-28 rounded-xl bg-card" />
-              ))}
-            </>
-          ) : (
-            <>
-              <MetricCard
-                icon={Gauge}
-                label="Vitesse"
-                value={Math.round(vehicleData?.speed ?? 0)}
-                unit="km/h"
-                variant={
-                  (vehicleData?.speed ?? 0) > 120
-                    ? 'danger'
-                    : (vehicleData?.speed ?? 0) > 80
-                    ? 'warning'
-                    : 'success'
-                }
-              />
-              <MetricCard
-                icon={Navigation}
-                label="Direction"
-                value={Math.round(vehicleData?.heading ?? 0)}
-                unit="°"
-              />
-              <MetricCard
-                icon={Clock}
-                label="Dernière trame"
-                value={formatTimestamp(vehicleData?.timestamp ?? 0)}
-                variant={vehicleData?.isOnline ? 'success' : 'warning'}
-              />
-              <MetricCard
-                icon={Battery}
-                label="Batterie"
-                value={vehicleData?.batteryLevel ?? '--'}
-                unit="%"
-                variant={
-                  (vehicleData?.batteryLevel ?? 100) < 20
-                    ? 'danger'
-                    : (vehicleData?.batteryLevel ?? 100) < 50
-                    ? 'warning'
-                    : 'default'
-                }
-              />
-            </>
-          )}
+          {loading && !vehicleData ? <>
+              {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-28 rounded-xl bg-card" />)}
+            </> : <>
+              <MetricCard icon={Gauge} label="Vitesse" value={Math.round(vehicleData?.speed ?? 0)} unit="km/h" variant={(vehicleData?.speed ?? 0) > 120 ? 'danger' : (vehicleData?.speed ?? 0) > 80 ? 'warning' : 'success'} />
+              <MetricCard icon={Navigation} label="Direction" value={Math.round(vehicleData?.heading ?? 0)} unit="°" />
+              <MetricCard icon={Clock} label="Dernière trame" value={formatTimestamp(vehicleData?.timestamp ?? 0)} variant={vehicleData?.isOnline ? 'success' : 'warning'} />
+              <MetricCard icon={Battery} label="Batterie" value={vehicleData?.batteryLevel ?? '--'} unit="%" variant={(vehicleData?.batteryLevel ?? 100) < 20 ? 'danger' : (vehicleData?.batteryLevel ?? 100) < 50 ? 'warning' : 'default'} />
+            </>}
         </div>
 
         {/* Position Card */}
@@ -327,13 +234,10 @@ const Dashboard: React.FC = () => {
               Position GPS
             </h2>
           </div>
-          {loading && !vehicleData ? (
-            <div className="grid grid-cols-2 gap-4">
+          {loading && !vehicleData ? <div className="grid grid-cols-2 gap-4">
               <Skeleton className="h-12 rounded-lg bg-secondary" />
               <Skeleton className="h-12 rounded-lg bg-secondary" />
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-4">
+            </div> : <div className="grid grid-cols-2 gap-4">
               <div className="bg-secondary/50 rounded-lg p-3">
                 <p className="text-xs text-muted-foreground mb-1">Latitude</p>
                 <p className="font-display font-bold text-lg text-foreground">
@@ -346,8 +250,7 @@ const Dashboard: React.FC = () => {
                   {formatCoordinate(vehicleData?.longitude ?? 0, 'lng')}
                 </p>
               </div>
-            </div>
-          )}
+            </div>}
         </div>
 
         {/* Footer */}
@@ -357,8 +260,6 @@ const Dashboard: React.FC = () => {
           </p>
         </footer>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Dashboard;
