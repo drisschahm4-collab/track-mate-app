@@ -1,5 +1,5 @@
 import { PropsWithChildren, useCallback, useMemo, useState, useEffect, FormEvent } from "react";
-import { getCurrentUser, signIn, signOut } from "aws-amplify/auth";
+import { getCurrentUser, signIn, signOut, fetchUserAttributes } from "aws-amplify/auth";
 import { ShieldCheck, LogIn, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -11,14 +11,22 @@ import { AuthContext, AuthContextValue } from "@/hooks/useAuth";
 const AuthGate = ({ children }: PropsWithChildren) => {
   const [status, setStatus] = useState<AuthContextValue["status"]>("loading");
   const [userEmail, setUserEmail] = useState<string>();
-  const [credentials, setCredentials] = useState({ email: "", password: "" });
+  const [username, setUsername] = useState<string>();
+  const [attributes, setAttributes] = useState<Record<string, string>>();
+  const [credentials, setCredentials] = useState({ username: "", password: "" });
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const hydrateSession = useCallback(async () => {
     try {
       const currentUser = await getCurrentUser();
-      setUserEmail(currentUser?.signInDetails?.loginId ?? currentUser.username);
+      const loginId = currentUser?.username ?? currentUser?.signInDetails?.loginId;
+      setUserEmail(loginId);
+      setUsername(loginId);
+      const userAttrs = await fetchUserAttributes().catch(() => undefined);
+      if (userAttrs) {
+        setAttributes(userAttrs);
+      }
       setStatus("signedIn");
     } catch {
       setStatus("signedOut");
@@ -36,7 +44,7 @@ const AuthGate = ({ children }: PropsWithChildren) => {
 
     try {
       const { isSignedIn, nextStep } = await signIn({
-        username: credentials.email.trim(),
+        username: credentials.username.trim(),
         password: credentials.password,
       });
 
@@ -66,6 +74,8 @@ const AuthGate = ({ children }: PropsWithChildren) => {
     } finally {
       setStatus("signedOut");
       setUserEmail(undefined);
+      setUsername(undefined);
+      setAttributes(undefined);
     }
   }, []);
 
@@ -73,9 +83,11 @@ const AuthGate = ({ children }: PropsWithChildren) => {
     () => ({
       status,
       userEmail,
+      username,
+      attributes,
       signOut: handleSignOut,
     }),
-    [status, userEmail, handleSignOut]
+    [status, userEmail, username, attributes, handleSignOut]
   );
 
   if (status === "loading") {
@@ -113,21 +125,21 @@ const AuthGate = ({ children }: PropsWithChildren) => {
                   <LogIn className="h-5 w-5 text-primary" />
                   Se connecter
                 </CardTitle>
-                <CardDescription>Identifiez-vous avec votre adresse e-mail et votre mot de passe.</CardDescription>
+                <CardDescription>Identifiez-vous avec votre nom d&apos;utilisateur et votre mot de passe.</CardDescription>
               </CardHeader>
               <CardContent>
                 <form className="space-y-4" onSubmit={handleSubmit}>
                   <div className="space-y-2">
-                    <Label htmlFor="email">Adresse e-mail</Label>
+                    <Label htmlFor="username">Nom d&apos;utilisateur</Label>
                     <Input
-                      id="email"
-                      type="email"
+                      id="username"
+                      type="text"
                       required
-                      value={credentials.email}
+                      value={credentials.username}
                       onChange={(event) =>
-                        setCredentials((prev) => ({ ...prev, email: event.target.value }))
+                        setCredentials((prev) => ({ ...prev, username: event.target.value }))
                       }
-                      placeholder="exemple@domaine.com"
+                      placeholder="utilisateur123"
                     />
                   </div>
                   <div className="space-y-2">

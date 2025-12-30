@@ -5,6 +5,8 @@ type AuthStatus = "loading" | "signedOut" | "signedIn";
 export interface AuthContextValue {
   status: AuthStatus;
   userEmail?: string;
+  username?: string;
+  attributes?: Record<string, string>;
   signOut: () => Promise<void>;
 }
 

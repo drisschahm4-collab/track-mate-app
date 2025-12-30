@@ -51,8 +51,8 @@ const VehicleMap: React.FC<VehicleMapProps> = ({ vehicleData, className = '', is
       attributionControl: false,
     });
 
-    // CartoDB Dark tiles (free, no token needed)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    // CartoDB Positron tiles (light, no token needed)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
       subdomains: 'abcd',
       maxZoom: 20,
@@ -66,6 +66,7 @@ const VehicleMap: React.FC<VehicleMapProps> = ({ vehicleData, className = '', is
 
     map.current.whenReady(() => {
       setMapLoaded(true);
+      map.current?.invalidateSize();
     });
 
     return () => {
@@ -115,6 +116,18 @@ const VehicleMap: React.FC<VehicleMapProps> = ({ vehicleData, className = '', is
       duration: 1,
     });
   }, [vehicleData, isPrivate]);
+
+  useEffect(() => {
+    if (!map.current) return;
+
+    const handleResize = () => {
+      map.current?.invalidateSize();
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
     <div className={`relative overflow-hidden rounded-xl ${className}`}>

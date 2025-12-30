@@ -1,18 +1,95 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Gauge, Navigation, Clock, MapPin, Battery, Zap } from 'lucide-react';
 import { useFlespiData } from '@/hooks/useFlespiData';
 import { usePrivacyMode } from '@/hooks/usePrivacyMode';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserImei } from '@/hooks/useUserImei';
 import Header from './Header';
 import MetricCard from './MetricCard';
 import VehicleMap from './VehicleMap';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { assignPrivacyPlugin } from '@/integrations/flespi';
+import { Badge } from '@/components/ui/badge';
 
 const Dashboard: React.FC = () => {
-  const { vehicleData, loading, error, lastUpdate, refresh } = useFlespiData(5000);
-  const { isPrivate, togglePrivacy } = usePrivacyMode();
-  const { userEmail, signOut } = useAuth();
+  const { userEmail, username, attributes, signOut } = useAuth();
+  const { imei, setImei } = useUserImei(username);
+  const [imeiDraft, setImeiDraft] = useState<string>(imei ?? '');
+  const [imeiSource, setImeiSource] = useState<'storage' | 'username' | 'cognito' | 'manual' | undefined>(imei ? 'storage' : undefined);
+  const { vehicleData, vehicleInfo, loading, error, lastUpdate, refresh, setImei: setHookImei, missingImei } = useFlespiData(5000);
+  const { isPrivate, setPrivate } = usePrivacyMode();
   const [signingOut, setSigningOut] = useState(false);
+  const [privacyPending, setPrivacyPending] = useState(false);
+
+  useEffect(() => {
+    setImeiDraft(imei ?? '');
+    setHookImei(imei);
+    if (imei && !imeiSource) {
+      setImeiSource('storage');
+      console.info('[IMEI] Loaded from storage', imei);
+    }
+  }, [imei, setHookImei]);
+
+  useEffect(() => {
+    if (!imei && username && /^\d{8,20}$/.test(username)) {
+      setImei(username);
+      setHookImei(username);
+      setImeiDraft(username);
+      setImeiSource('username');
+      console.info('[IMEI] Inferred from username', username);
+    }
+  }, [imei, username, setImei, setHookImei]);
+
+  useEffect(() => {
+    const attrImei =
+      attributes?.['custom:imei'] ||
+      attributes?.imei ||
+      attributes?.['custom:device_imei'];
+    if (!imei && attrImei) {
+      setImei(attrImei);
+      setHookImei(attrImei);
+      setImeiDraft(attrImei);
+      setImeiSource('cognito');
+      console.info('[IMEI] Loaded from Cognito attribute', attrImei);
+    }
+  }, [attributes, imei, setImei, setHookImei]);
+
+  useEffect(() => {
+    if (vehicleInfo?.privacyEnabled !== undefined) {
+      setPrivate(vehicleInfo.privacyEnabled);
+    }
+  }, [vehicleInfo?.privacyEnabled, setPrivate]);
+
+  const handleImeiSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    const trimmed = imeiDraft.trim();
+    setImei(trimmed || undefined);
+    setHookImei(trimmed || undefined);
+    setImeiSource('manual');
+    console.info('[IMEI] Set manually', trimmed);
+    refresh();
+  };
+
+  const handleTogglePrivacyRemote = async () => {
+    if (!imei && !vehicleInfo?.id) return;
+    const next = !isPrivate;
+    setPrivacyPending(true);
+    try {
+      await assignPrivacyPlugin({
+        deviceId: vehicleInfo?.id,
+        imei: imei || vehicleInfo?.imei,
+        private: next,
+      });
+      setPrivate(next);
+    } catch (err) {
+      console.error('[Dashboard] Privacy toggle error:', err);
+    } finally {
+      setPrivacyPending(false);
+    }
+  };
 
   const handleSignOut = async () => {
     setSigningOut(true);
@@ -42,6 +119,37 @@ const Dashboard: React.FC = () => {
       : (coord >= 0 ? 'E' : 'O');
     return `${Math.abs(coord).toFixed(4)}° ${direction}`;
   };
+
+  if (missingImei) {
+    return (
+      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
+        <div className="glass-card p-8 w-full max-w-2xl space-y-6">
+          <div>
+            <h2 className="font-display font-bold text-xl text-foreground mb-2">
+              Associez un IMEI à votre compte
+            </h2>
+            <p className="text-muted-foreground">
+              Entrez l&apos;IMEI de votre véhicule pour charger ses données et son immatriculation.
+            </p>
+          </div>
+          <form className="flex flex-col gap-3 md:flex-row md:items-end md:gap-4" onSubmit={handleImeiSubmit}>
+            <div className="flex-1">
+              <p className="text-xs uppercase text-muted-foreground mb-1">IMEI</p>
+              <Input
+                value={imeiDraft}
+                onChange={(e) => setImeiDraft(e.target.value)}
+                placeholder="Entrez l'IMEI (ex: 864636060105273)"
+                required
+              />
+            </div>
+            <Button type="submit" className="md:w-auto w-full">
+              Enregistrer
+            </Button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   if (error && !vehicleData) {
     return (
@@ -74,11 +182,81 @@ const Dashboard: React.FC = () => {
           onRefresh={refresh}
           loading={loading}
           isPrivate={isPrivate}
-          onTogglePrivacy={togglePrivacy}
+          onTogglePrivacy={handleTogglePrivacyRemote}
           userEmail={userEmail}
           onSignOut={handleSignOut}
           signingOut={signingOut}
+          privacyPending={privacyPending}
         />
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <Card className="glass-card p-4 lg:col-span-3">
+            <form className="flex flex-col gap-3 md:flex-row md:items-end md:gap-4" onSubmit={handleImeiSubmit}>
+              <div className="flex-1">
+                <p className="text-xs uppercase text-muted-foreground mb-1">IMEI associé à ce compte</p>
+                <Input
+                  value={imeiDraft}
+                  onChange={(e) => setImeiDraft(e.target.value)}
+                  placeholder="Entrez l'IMEI (ex: 864636060105273)"
+                  required
+                />
+              </div>
+              <Button type="submit" className="md:w-auto w-full">
+                Mettre à jour l'IMEI
+              </Button>
+            </form>
+          </Card>
+
+          <div className="glass-card p-4 border border-primary/30">
+            <p className="text-xs uppercase text-muted-foreground mb-1">IMEI</p>
+            <p className="font-display text-lg font-semibold text-foreground">
+              {vehicleInfo?.imei ?? '—'}
+            </p>
+          </div>
+          <div className="glass-card p-4">
+            <p className="text-xs uppercase text-muted-foreground mb-1">Immatriculation</p>
+            <p className="font-display text-lg font-semibold text-foreground">
+              {vehicleInfo?.immatriculation ?? '—'}
+            </p>
+          </div>
+          <div className="glass-card p-4">
+            <p className="text-xs uppercase text-muted-foreground mb-1">Position actuelle</p>
+            <p className="font-display text-lg font-semibold text-foreground">
+              {vehicleData
+                ? `${formatCoordinate(vehicleData.latitude, 'lat')} / ${formatCoordinate(vehicleData.longitude, 'lng')}`
+                : '—'}
+            </p>
+          </div>
+        </div>
+
+        <Card className="glass-card p-4">
+          <div className="flex flex-wrap items-center gap-3 mb-3">
+            <p className="text-xs uppercase text-muted-foreground">Log véhicule</p>
+            <Badge variant="secondary">IMEI source: {imeiSource ?? 'inconnu'}</Badge>
+            {vehicleInfo?.id && <Badge variant="outline">Device ID: {vehicleInfo.id}</Badge>}
+            {vehicleInfo?.privacyEnabled !== undefined && (
+              <Badge variant={vehicleInfo.privacyEnabled ? 'default' : 'outline'}>
+                Vie privée: {vehicleInfo.privacyEnabled ? 'ON' : 'OFF'}
+              </Badge>
+            )}
+          </div>
+          <pre className="bg-secondary/50 rounded-lg p-3 text-sm overflow-auto">
+{JSON.stringify({
+  imei: imei || vehicleInfo?.imei,
+  imeiSource,
+  immatriculation: vehicleInfo?.immatriculation,
+  deviceId: vehicleInfo?.id,
+  privacy: vehicleInfo?.privacyEnabled,
+  lastUpdate: lastUpdate?.toISOString(),
+  coords: vehicleData ? {
+    lat: vehicleData.latitude,
+    lng: vehicleData.longitude,
+    speed: vehicleData.speed,
+    heading: vehicleData.heading,
+  } : null,
+}, null, 2)}
+          </pre>
+        </Card>
 
         {/* Map Section */}
         <VehicleMap 

@@ -15,6 +15,7 @@ interface HeaderProps {
   userEmail?: string;
   onSignOut?: () => Promise<void> | void;
   signingOut?: boolean;
+  privacyPending?: boolean;
 }
 
 const Header: React.FC<HeaderProps> = ({ 
@@ -26,7 +27,8 @@ const Header: React.FC<HeaderProps> = ({
   onTogglePrivacy,
   userEmail,
   onSignOut,
-  signingOut
+  signingOut,
+  privacyPending = false
 }) => {
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('fr-FR', {
@@ -103,6 +105,7 @@ const Header: React.FC<HeaderProps> = ({
               <Switch
                 checked={isPrivate}
                 onCheckedChange={onTogglePrivacy}
+                disabled={privacyPending}
                 className="data-[state=checked]:bg-accent"
                 aria-label="Mode privé"
               />

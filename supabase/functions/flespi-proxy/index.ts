@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const FLESPI_TOKEN = Deno.env.get('FLESPI_TOKEN');
 const PLUGIN_ID = '1100337';
-const DEVICE_ID = '5369063';
+const DEFAULT_DEVICE_ID = Deno.env.get('FLESPI_DEVICE_ID') || '5369063';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -17,7 +17,11 @@ serve(async (req) => {
 
   try {
     const url = new URL(req.url);
-    const action = url.searchParams.get('action') || 'device-data';
+    const payload = await req.json().catch(() => undefined);
+    const action = url.searchParams.get('action') || payload?.action || 'device-data';
+    const imei = url.searchParams.get('imei') || payload?.imei;
+    const desiredPrivacy = payload?.private;
+    const overrideDeviceId = url.searchParams.get('deviceId') || payload?.deviceId;
 
     console.log(`[Flespi Proxy] Action: ${action}`);
 
@@ -33,35 +37,96 @@ serve(async (req) => {
     let method = 'GET';
     let body: string | undefined;
 
+    const resolveDeviceId = async (): Promise<string> => {
+      if (overrideDeviceId) return overrideDeviceId;
+      if (!imei) {
+        throw new Response(
+          JSON.stringify({ error: 'IMEI required for device lookup' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const encodedIdent = encodeURIComponent(`"${imei}"`);
+      const lookupUrl = `https://flespi.io/gw/devices/configuration.ident=${encodedIdent}?fields=id`;
+      const lookup = await fetch(lookupUrl, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `FlespiToken ${FLESPI_TOKEN}`,
+        },
+      });
+
+      const lookupData = await lookup.json();
+      const foundId = lookupData?.result?.[0]?.id;
+      if (!foundId) {
+        throw new Response(
+          JSON.stringify({ error: 'Device not found for provided IMEI' }),
+          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      return String(foundId);
+    };
+
+    const needsResolvedDevice = ['device-data', 'device-telemetry', 'device-info', 'plugin-execute', 'history'].includes(action);
+    const deviceId = needsResolvedDevice ? await resolveDeviceId() : (overrideDeviceId || DEFAULT_DEVICE_ID);
+
     switch (action) {
       case 'device-data':
         // Get latest messages from device
-        flespiUrl = `https://flespi.io/gw/devices/${DEVICE_ID}/messages?data={"count":1}`;
+        flespiUrl = `https://flespi.io/gw/devices/${deviceId}/messages?data={"count":1}`;
         break;
       
       case 'device-telemetry':
         // Get device telemetry (current state)
-        flespiUrl = `https://flespi.io/gw/devices/${DEVICE_ID}/telemetry/all`;
+        flespiUrl = `https://flespi.io/gw/devices/${deviceId}/telemetry/all`;
         break;
 
       case 'device-info':
-        // Get device info
-        flespiUrl = `https://flespi.io/gw/devices/${DEVICE_ID}`;
+        // Get device info (include plugins to know privacy state)
+        flespiUrl = `https://flespi.io/gw/devices/${deviceId}?fields=id,name,configuration,plugins`;
         break;
 
       case 'plugin-execute':
         // Execute plugin command on device
-        flespiUrl = `https://flespi.io/gw/plugins/${PLUGIN_ID}/devices/${DEVICE_ID}`;
+        flespiUrl = `https://flespi.io/gw/plugins/${PLUGIN_ID}/devices/${deviceId}`;
         method = 'POST';
-        const reqBody = await req.json().catch(() => ({}));
-        body = JSON.stringify(reqBody);
+        body = JSON.stringify(payload || {});
         break;
+
+      case 'find-device': {
+        if (!imei) {
+          return new Response(
+            JSON.stringify({ error: 'Missing IMEI' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        const encodedIdent = encodeURIComponent(`"${imei}"`);
+        flespiUrl = `https://flespi.io/gw/devices/configuration.ident=${encodedIdent}?fields=id,name,cid,configuration`;
+        break;
+      }
+
+      case 'assign-privacy': {
+        const deviceSelector = overrideDeviceId || (imei ? `configuration.ident=${encodeURIComponent(`"${imei}"`)}` : undefined);
+        if (!deviceSelector) {
+          return new Response(
+            JSON.stringify({ error: 'Missing deviceId or IMEI for privacy assignment' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        const privateField = typeof desiredPrivacy === 'boolean' ? desiredPrivacy : true;
+        flespiUrl = `https://flespi.io/gw/plugins/${PLUGIN_ID}/devices/${deviceSelector}`;
+        method = 'POST';
+        body = JSON.stringify({ fields: { private: privateField } });
+        break;
+      }
 
       case 'history':
         // Get message history (last hour)
         const from = Math.floor(Date.now() / 1000) - 3600;
         const to = Math.floor(Date.now() / 1000);
-        flespiUrl = `https://flespi.io/gw/devices/${DEVICE_ID}/messages?data={"from":${from},"to":${to}}`;
+        flespiUrl = `https://flespi.io/gw/devices/${deviceId}/messages?data={"from":${from},"to":${to}}`;
         break;
 
       default:
