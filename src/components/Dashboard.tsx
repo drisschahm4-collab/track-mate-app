@@ -35,7 +35,7 @@ const Dashboard: React.FC = () => {
   // Priority: selectedVehicle.imei > localStorage imei > cognito attribute > numeric username
   const resolvedImei = selectedVehicle?.imei || imei || attributeImei || (username && /^\d{8,20}$/.test(username) ? username : undefined);
   
-  const [imeiSource, setImeiSource] = useState<'storage' | 'username' | 'cognito' | 'manual' | 'DvD' | 'accessibleVehicles' | 'company' | undefined>();
+  const [imeiSource, setImeiSource] = useState<'storage' | 'username' | 'cognito' | 'manual' | 'DvD' | 'accessibleVehicles' | 'company' | 'listVehicles' | undefined>();
   const [manualImei, setManualImei] = useState('');
 
   const {
