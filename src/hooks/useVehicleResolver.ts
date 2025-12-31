@@ -94,33 +94,31 @@ const GET_VEHICLE = /* GraphQL */ `
   }
 `;
 
-// ===== Step D: Admin fallback - list all vehicles/devices =====
-const LIST_VEHICLES = /* GraphQL */ `
-  query ListVehicles($limit: Int) {
-    listVehicles(limit: $limit) {
+// ===== Admin: listCompanies for Driver creation =====
+const LIST_COMPANIES = /* GraphQL */ `
+  query ListCompanies($limit: Int) {
+    listCompanies(limit: $limit) {
       items {
-        immat
-        nomVehicule
-        marque
-        vehicleDeviceImei
-        companyVehiclesId
+        id
+        name
       }
     }
   }
 `;
 
-const LIST_DEVICES = /* GraphQL */ `
-  query ListDevices($limit: Int) {
-    listDevices(limit: $limit) {
-      items {
-        imei
-        name
-        flespi_id
-        enabled
-      }
+const CREATE_DRIVER = /* GraphQL */ `
+  mutation CreateDriver($input: CreateDriverInput!) {
+    createDriver(input: $input) {
+      sub
+      firstname
+      lastname
+      companyDriversId
     }
   }
 `;
+
+// Export for use in Dashboard
+export { LIST_COMPANIES, CREATE_DRIVER, getClient };
 
 const GET_DEVICE = /* GraphQL */ `
   query GetDevice($imei: String!) {
@@ -434,86 +432,25 @@ export function useVehicleResolver(sub: string | undefined, groups: string[] | u
       }
     }
 
-    // ===== STEP D: Admin fallback - listVehicles + listDevices =====
+    // ===== STEP D: Admin notice (no longer lists all vehicles) =====
     if (resolvedVehicles.length === 0 && groups?.includes('admin')) {
-      console.log('[VehicleResolve] 🔍 Step D: Admin fallback - listing all vehicles and devices...');
-      try {
-        // Fetch all vehicles
-        const vehiclesResponse = await getClient().graphql({
-          query: LIST_VEHICLES,
-          variables: { limit: 100 },
-          authMode: 'userPool',
-        });
-
-        if ('errors' in vehiclesResponse && vehiclesResponse.errors?.length) {
-          const errMsg = (vehiclesResponse.errors as any[])[0]?.message || 'listVehicles query error';
-          console.error('[VehicleResolve] ❌ Step D listVehicles GraphQL error:', errMsg);
-          errors.push(`listVehicles: ${errMsg}`);
-        }
-
-        const vehiclesData = 'data' in vehiclesResponse ? vehiclesResponse.data : null;
-        const typedVehiclesData = vehiclesData as { listVehicles?: { items?: Array<{ immat: string; nomVehicule?: string; marque?: string; vehicleDeviceImei?: string; companyVehiclesId?: string }> } } | null;
-        const allVehicles = typedVehiclesData?.listVehicles?.items?.filter(Boolean) ?? [];
-
-        console.log('[VehicleResolve] 🚗 Step D listVehicles result:', JSON.stringify({ count: allVehicles.length, immats: allVehicles.map(v => v.immat) }));
-
-        // Fetch all devices for mapping
-        const devicesResponse = await getClient().graphql({
-          query: LIST_DEVICES,
-          variables: { limit: 100 },
-          authMode: 'userPool',
-        });
-
-        if ('errors' in devicesResponse && devicesResponse.errors?.length) {
-          const errMsg = (devicesResponse.errors as any[])[0]?.message || 'listDevices query error';
-          console.error('[VehicleResolve] ❌ Step D listDevices GraphQL error:', errMsg);
-          errors.push(`listDevices: ${errMsg}`);
-        }
-
-        const devicesData = 'data' in devicesResponse ? devicesResponse.data : null;
-        const typedDevicesData = devicesData as { listDevices?: { items?: Array<{ imei: string; name?: string; flespi_id?: string; enabled?: boolean }> } } | null;
-        const allDevices = typedDevicesData?.listDevices?.items?.filter(Boolean) ?? [];
-
-        console.log('[VehicleResolve] 📱 Step D listDevices result:', JSON.stringify({ count: allDevices.length, imeis: allDevices.map(d => d.imei) }));
-
-        // Create device map for quick lookup
-        const deviceMap = new Map(allDevices.map(d => [d.imei, d]));
-
-        setState(prev => ({
-          ...prev,
-          diagnostics: { 
-            ...prev.diagnostics, 
-            stepD_listVehicles: { 
-              attempted: true, 
-              vehicleCount: allVehicles.length, 
-              deviceCount: allDevices.length, 
-              vehicles: allVehicles.map(v => v.immat) 
-            } 
-          },
-        }));
-
-        if (allVehicles.length > 0) {
-          console.log('[VehicleResolve] ✅ Step D: Found vehicles via listVehicles, enriching with device info...');
-          const enrichedVehicles: ResolvedVehicle[] = allVehicles.map((v) => {
-            const device = v.vehicleDeviceImei ? deviceMap.get(v.vehicleDeviceImei) : null;
-            return {
-              immat: v.immat,
-              nomVehicule: v.nomVehicule,
-              marque: v.marque,
-              imei: device?.imei || v.vehicleDeviceImei,
-              flespiId: device?.flespi_id,
-              deviceName: device?.name,
-              source: 'listVehicles' as VehicleSource,
-              companyId: v.companyVehiclesId,
-            };
-          });
-          resolvedVehicles = enrichedVehicles;
-        }
-      } catch (err) {
-        const errMsg = err instanceof Error ? err.message : 'listVehicles/listDevices fetch error';
-        console.error('[VehicleResolve] ❌ Step D error:', errMsg);
-        errors.push(`Step D: ${errMsg}`);
-      }
+      console.log('[VehicleResolve] ⚠️ Step D: Admin sans Driver détecté. Création de profil Driver nécessaire.');
+      console.log('[VehicleResolve] 💡 Le Step D ne liste plus tous les véhicules - veuillez créer votre profil Driver avec une company.');
+      
+      setState(prev => ({
+        ...prev,
+        diagnostics: { 
+          ...prev.diagnostics, 
+          stepD_listVehicles: { 
+            attempted: true, 
+            vehicleCount: 0, 
+            deviceCount: 0, 
+            vehicles: [],
+          } 
+        },
+      }));
+      
+      errors.push('Aucun Driver trouvé - veuillez créer votre profil Driver');
     }
 
     // ===== FINAL RESULT =====

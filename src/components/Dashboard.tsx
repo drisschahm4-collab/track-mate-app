@@ -5,13 +5,14 @@ import { useAuth } from '@/hooks/useAuth';
 import { useFlespiData } from '@/hooks/useFlespiData';
 import { usePrivacyMode } from '@/hooks/usePrivacyMode';
 import { useUserImei } from '@/hooks/useUserImei';
-import { useVehicleResolver } from '@/hooks/useVehicleResolver';
+import { useVehicleResolver, LIST_COMPANIES, CREATE_DRIVER, getClient } from '@/hooks/useVehicleResolver';
 import { assignPrivacyPlugin } from '@/integrations/flespi';
-import { Battery, Clock, Gauge, MapPin, Navigation, Zap, Car, Building2 } from 'lucide-react';
+import { Battery, Clock, Gauge, MapPin, Navigation, Zap, Car, Building2, UserPlus } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from 'sonner';
 import Header from './Header';
 import MetricCard from './MetricCard';
 import VehicleMap from './VehicleMap';
@@ -51,6 +52,83 @@ const Dashboard: React.FC = () => {
   const { isPrivate, setPrivate } = usePrivacyMode();
   const [signingOut, setSigningOut] = useState(false);
   const [privacyPending, setPrivacyPending] = useState(false);
+  
+  // Driver creation state (for admins without Driver profile)
+  const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>('');
+  const [creatingDriver, setCreatingDriver] = useState(false);
+  const [loadingCompanies, setLoadingCompanies] = useState(false);
+  
+  // Check if admin needs to create Driver profile
+  const isAdmin = groups?.includes('admin');
+  const needsDriverCreation = isAdmin && !diagnostics.stepC_driver.found && resolvedVehicles.length === 0 && !vehicleResolverLoading;
+  
+  // Load companies when admin needs to create Driver
+  useEffect(() => {
+    const loadCompanies = async () => {
+      if (needsDriverCreation && companies.length === 0 && !loadingCompanies) {
+        setLoadingCompanies(true);
+        try {
+          const response = await getClient().graphql({
+            query: LIST_COMPANIES,
+            variables: { limit: 50 },
+            authMode: 'userPool',
+          });
+          const data = 'data' in response ? response.data : null;
+          const items = (data as any)?.listCompanies?.items?.filter(Boolean) ?? [];
+          console.log('[Dashboard] 🏢 Companies loaded:', items.length);
+          setCompanies(items);
+        } catch (err) {
+          console.error('[Dashboard] ❌ Failed to load companies:', err);
+          toast.error('Erreur lors du chargement des companies');
+        } finally {
+          setLoadingCompanies(false);
+        }
+      }
+    };
+    loadCompanies();
+  }, [needsDriverCreation, companies.length, loadingCompanies]);
+  
+  // Handle Driver creation
+  const handleCreateDriver = async () => {
+    if (!sub || !selectedCompanyId) {
+      toast.error('Veuillez sélectionner une company');
+      return;
+    }
+    
+    setCreatingDriver(true);
+    try {
+      const response = await getClient().graphql({
+        query: CREATE_DRIVER,
+        variables: {
+          input: {
+            sub,
+            firstname: username || 'Admin',
+            lastname: '',
+            companyDriversId: selectedCompanyId,
+          },
+        },
+        authMode: 'userPool',
+      });
+      
+      if ('errors' in response && response.errors?.length) {
+        throw new Error((response.errors as any[])[0]?.message || 'Erreur création Driver');
+      }
+      
+      console.log('[Dashboard] ✅ Driver created successfully');
+      toast.success('Profil Driver créé ! Rechargement des véhicules...');
+      
+      // Re-run vehicle resolution
+      setTimeout(() => {
+        refreshVehicleResolver();
+      }, 500);
+    } catch (err) {
+      console.error('[Dashboard] ❌ Failed to create Driver:', err);
+      toast.error('Erreur lors de la création du profil Driver');
+    } finally {
+      setCreatingDriver(false);
+    }
+  };
   // Update IMEI source when selectedVehicle changes
   useEffect(() => {
     if (selectedVehicle?.imei) {
@@ -193,8 +271,48 @@ const Dashboard: React.FC = () => {
           </Card>
         )}
 
-        {/* No vehicle found */}
-        {!resolvedImei && !vehicleInfo?.imei && resolvedVehicles.length === 0 && !vehicleResolverLoading && (
+        {/* Admin: Create Driver Profile */}
+        {needsDriverCreation && (
+          <Card className="glass-card p-4 border border-warning/30">
+            <div className="flex items-center gap-3 mb-3">
+              <UserPlus className="h-5 w-5 text-warning" />
+              <h3 className="font-semibold text-foreground">Créer votre profil Driver</h3>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Vous êtes admin mais n'avez pas de profil Driver. Sélectionnez votre company pour voir ses véhicules.
+            </p>
+            <div className="flex flex-col gap-3 md:flex-row md:items-end md:gap-4">
+              <div className="flex-1">
+                <p className="text-xs uppercase text-muted-foreground mb-1">Company</p>
+                <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId} disabled={loadingCompanies}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={loadingCompanies ? "Chargement..." : "Sélectionner une company"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {companies.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        <span className="flex items-center gap-2">
+                          <Building2 className="h-4 w-4" />
+                          {c.name || c.id}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button 
+                onClick={handleCreateDriver} 
+                disabled={!selectedCompanyId || creatingDriver}
+                className="md:w-auto w-full"
+              >
+                {creatingDriver ? 'Création...' : 'Créer mon profil'}
+              </Button>
+            </div>
+          </Card>
+        )}
+
+        {/* No vehicle found (non-admin or after driver creation failed) */}
+        {!resolvedImei && !vehicleInfo?.imei && resolvedVehicles.length === 0 && !vehicleResolverLoading && !needsDriverCreation && (
           <Card className="glass-card p-4 border border-destructive/30">
             <div className="mb-3">
               <h3 className="font-semibold text-foreground mb-2">⚠️ Aucun véhicule assigné</h3>
