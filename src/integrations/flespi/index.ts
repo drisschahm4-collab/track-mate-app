@@ -42,8 +42,14 @@ export const assignPrivacyPlugin = async (params: { deviceId?: number; imei?: st
   return data;
 };
 
+interface FlespiDeviceWithPlugins {
+  id: number;
+  plugins?: unknown[];
+  [key: string]: unknown;
+}
+
 export const verifyPrivacyAssignment = async (deviceId: number) => {
-  const { data, error } = await supabase.functions.invoke<FlespiApiResult>("flespi-proxy", {
+  const { data, error } = await supabase.functions.invoke<FlespiApiResult<FlespiDeviceWithPlugins>>("flespi-proxy", {
     body: {
       action: "device-info",
       deviceId,
