@@ -15,5 +15,5 @@
         "Ref": "UnauthRoleName"
     },
     "S3DeploymentBucket": "amplify-fleetwatcherfront-dev-bbd87-deployment",
-    "S3DeploymentRootKey": "amplify-appsync-files/94d620170b798d1935a99e8ec40695a1b7626fef"
+    "S3DeploymentRootKey": "amplify-appsync-files/e5eaf397d52bc9fd560ab06d45109088fdcf37a6"
 }

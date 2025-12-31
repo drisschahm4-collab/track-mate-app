@@ -262,7 +262,7 @@ type Alert @aws_iam @aws_cognito_user_pools {
 type VehicleAlerts @aws_iam @aws_cognito_user_pools {
   id: ID!
   vehicleImmat: String!
-  vehicle: Vehicle
+  vehicle: Vehicle!
   alertId: ID!
   alert: Alert!
   isFlespi: Boolean
@@ -287,18 +287,18 @@ type VehicleAlertState @aws_iam @aws_cognito_user_pools {
   state: String
   timestamp: AWSTimestamp!
   zone: Zone
-  vehicle: Vehicle
+  vehicle: Vehicle!
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
   vehicleAlertStateZoneId: ID
-  vehicleAlertStateVehicleImmat: String
+  vehicleAlertStateVehicleImmat: String!
 }
 
 type AlertHistory @aws_iam @aws_cognito_user_pools {
   id: ID!
   type: AlertType!
   imei: String!
-  vehicle: Vehicle
+  vehicle: Vehicle!
   driver: Driver
   company: Company!
   timestamp: AWSTimestamp!
@@ -306,7 +306,7 @@ type AlertHistory @aws_iam @aws_cognito_user_pools {
   data: AWSJSON!
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
-  alertHistoryVehicleImmat: String
+  alertHistoryVehicleImmat: String!
   alertHistoryDriverSub: String
   alertHistoryCompanyId: ID!
   alertHistoryConfigId: ID!
@@ -385,16 +385,6 @@ type Device @aws_iam @aws_cognito_user_pools {
   deviceVehicleImmat: String
 }
 
-type Intervention @aws_iam @aws_cognito_user_pools {
-  imei: String!
-  name: String
-  description: String
-  dateIntervention: String
-  picture: S3Object
-  createdAt: AWSDateTime!
-  updatedAt: AWSDateTime!
-}
-
 type CompanyDevice @aws_iam @aws_cognito_user_pools {
   id: ID!
   companyID: ID!
@@ -463,7 +453,7 @@ type Maintenance @aws_iam @aws_cognito_user_pools {
   companyMaintenancesId: ID!
   company: Company!
   vehicleMaintenancesImmat: String!
-  vehicle: Vehicle
+  vehicle: Vehicle!
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
@@ -480,7 +470,7 @@ type TypeDepense @aws_iam @aws_cognito_user_pools {
 type Depense @aws_iam @aws_cognito_user_pools {
   id: ID!
   vehicleImmat: String!
-  vehicle: Vehicle
+  vehicle: Vehicle!
   typeDepenseId: ID!
   typeDepense: TypeDepense!
   companyDepensesId: ID!
@@ -580,8 +570,6 @@ type Query {
   listVehicleModels(id: ID, filter: ModelVehicleModelFilterInput, limit: Int, nextToken: String, sortDirection: ModelSortDirection): ModelVehicleModelConnection @aws_iam @aws_cognito_user_pools
   getDevice(imei: String!): Device @aws_iam @aws_cognito_user_pools
   listDevices(imei: String, filter: ModelDeviceFilterInput, limit: Int, nextToken: String, sortDirection: ModelSortDirection): ModelDeviceConnection @aws_iam @aws_cognito_user_pools
-  getIntervention(imei: String!): Intervention @aws_iam @aws_cognito_user_pools
-  listInterventions(imei: String, filter: ModelInterventionFilterInput, limit: Int, nextToken: String, sortDirection: ModelSortDirection): ModelInterventionConnection @aws_iam @aws_cognito_user_pools
   getCompanyDevice(id: ID!): CompanyDevice @aws_iam @aws_cognito_user_pools
   listCompanyDevices(id: ID, filter: ModelCompanyDeviceFilterInput, limit: Int, nextToken: String, sortDirection: ModelSortDirection): ModelCompanyDeviceConnection @aws_iam @aws_cognito_user_pools
   companyDevicesByCompanyIDAndAssociationDate(companyID: ID!, associationDate: ModelStringKeyConditionInput, sortDirection: ModelSortDirection, filter: ModelCompanyDeviceFilterInput, limit: Int, nextToken: String): ModelCompanyDeviceConnection @aws_iam @aws_cognito_user_pools
@@ -624,8 +612,6 @@ type Mutation {
   executeMaintenanceAction(action: MaintenanceAction!, maintenanceId: ID!, input: AWSJSON): MaintenanceResponse
   updateUserPassword(userPoolId: String!, username: String!, newPassword: String!): UpdatePasswordResponse
   createAntaiVehicleAndInfraction(input: AntaiVehicleInput!): AntaiResponse
-  adminChangePassword(username: String!, newPassword: String!): Result
-  syncroSivVehicle(input: SyncroSivVehicleInput!): SyncroSivVehicleResponse
   createCompany(input: CreateCompanyInput!, condition: ModelCompanyConditionInput): Company @aws_iam @aws_cognito_user_pools
   updateCompany(input: UpdateCompanyInput!, condition: ModelCompanyConditionInput): Company @aws_iam @aws_cognito_user_pools
   deleteCompany(input: DeleteCompanyInput!, condition: ModelCompanyConditionInput): Company @aws_iam @aws_cognito_user_pools
@@ -674,9 +660,6 @@ type Mutation {
   createDevice(input: CreateDeviceInput!, condition: ModelDeviceConditionInput): Device @aws_iam @aws_cognito_user_pools
   updateDevice(input: UpdateDeviceInput!, condition: ModelDeviceConditionInput): Device @aws_iam @aws_cognito_user_pools
   deleteDevice(input: DeleteDeviceInput!, condition: ModelDeviceConditionInput): Device @aws_iam @aws_cognito_user_pools
-  createIntervention(input: CreateInterventionInput!, condition: ModelInterventionConditionInput): Intervention @aws_iam @aws_cognito_user_pools
-  updateIntervention(input: UpdateInterventionInput!, condition: ModelInterventionConditionInput): Intervention @aws_iam @aws_cognito_user_pools
-  deleteIntervention(input: DeleteInterventionInput!, condition: ModelInterventionConditionInput): Intervention @aws_iam @aws_cognito_user_pools
   createCompanyDevice(input: CreateCompanyDeviceInput!, condition: ModelCompanyDeviceConditionInput): CompanyDevice @aws_iam @aws_cognito_user_pools
   updateCompanyDevice(input: UpdateCompanyDeviceInput!, condition: ModelCompanyDeviceConditionInput): CompanyDevice @aws_iam @aws_cognito_user_pools
   deleteCompanyDevice(input: DeleteCompanyDeviceInput!, condition: ModelCompanyDeviceConditionInput): CompanyDevice @aws_iam @aws_cognito_user_pools
@@ -707,20 +690,6 @@ type Mutation {
   createVehicleTags(input: CreateVehicleTagsInput!, condition: ModelVehicleTagsConditionInput): VehicleTags @aws_iam @aws_cognito_user_pools
   updateVehicleTags(input: UpdateVehicleTagsInput!, condition: ModelVehicleTagsConditionInput): VehicleTags @aws_iam @aws_cognito_user_pools
   deleteVehicleTags(input: DeleteVehicleTagsInput!, condition: ModelVehicleTagsConditionInput): VehicleTags @aws_iam @aws_cognito_user_pools
-}
-
-input SyncroSivVehicleInput {
-  companyVehiclesId: String!
-}
-
-type SyncroSivVehicleResponse {
-  success: Boolean!
-  message: String
-}
-
-type Result {
-  success: Boolean
-  message: String
 }
 
 type AntaiResponse {
@@ -1326,9 +1295,6 @@ type Subscription {
   onCreateDevice(filter: ModelSubscriptionDeviceFilterInput): Device @aws_subscribe(mutations: ["createDevice"]) @aws_iam @aws_cognito_user_pools
   onUpdateDevice(filter: ModelSubscriptionDeviceFilterInput): Device @aws_subscribe(mutations: ["updateDevice"]) @aws_iam @aws_cognito_user_pools
   onDeleteDevice(filter: ModelSubscriptionDeviceFilterInput): Device @aws_subscribe(mutations: ["deleteDevice"]) @aws_iam @aws_cognito_user_pools
-  onCreateIntervention(filter: ModelSubscriptionInterventionFilterInput): Intervention @aws_subscribe(mutations: ["createIntervention"]) @aws_iam @aws_cognito_user_pools
-  onUpdateIntervention(filter: ModelSubscriptionInterventionFilterInput): Intervention @aws_subscribe(mutations: ["updateIntervention"]) @aws_iam @aws_cognito_user_pools
-  onDeleteIntervention(filter: ModelSubscriptionInterventionFilterInput): Intervention @aws_subscribe(mutations: ["deleteIntervention"]) @aws_iam @aws_cognito_user_pools
   onCreateCompanyDevice(filter: ModelSubscriptionCompanyDeviceFilterInput): CompanyDevice @aws_subscribe(mutations: ["createCompanyDevice"]) @aws_iam @aws_cognito_user_pools
   onUpdateCompanyDevice(filter: ModelSubscriptionCompanyDeviceFilterInput): CompanyDevice @aws_subscribe(mutations: ["updateCompanyDevice"]) @aws_iam @aws_cognito_user_pools
   onDeleteCompanyDevice(filter: ModelSubscriptionCompanyDeviceFilterInput): CompanyDevice @aws_subscribe(mutations: ["deleteCompanyDevice"]) @aws_iam @aws_cognito_user_pools
@@ -2666,7 +2632,7 @@ input CreateVehicleAlertStateInput {
   state: String
   timestamp: AWSTimestamp!
   vehicleAlertStateZoneId: ID
-  vehicleAlertStateVehicleImmat: String
+  vehicleAlertStateVehicleImmat: String!
 }
 
 input UpdateVehicleAlertStateInput {
@@ -2739,7 +2705,7 @@ input CreateAlertHistoryInput {
   imei: String!
   timestamp: AWSTimestamp!
   data: AWSJSON!
-  alertHistoryVehicleImmat: String
+  alertHistoryVehicleImmat: String!
   alertHistoryDriverSub: String
   alertHistoryCompanyId: ID!
   alertHistoryConfigId: ID!
@@ -3183,67 +3149,6 @@ input ModelSubscriptionDeviceFilterInput {
   and: [ModelSubscriptionDeviceFilterInput]
   or: [ModelSubscriptionDeviceFilterInput]
   deviceVehicleImmat: ModelSubscriptionStringInput
-}
-
-type ModelInterventionConnection @aws_iam @aws_cognito_user_pools {
-  items: [Intervention]!
-  nextToken: String
-}
-
-input ModelInterventionFilterInput {
-  imei: ModelStringInput
-  name: ModelStringInput
-  description: ModelStringInput
-  dateIntervention: ModelStringInput
-  id: ModelIDInput
-  createdAt: ModelStringInput
-  updatedAt: ModelStringInput
-  and: [ModelInterventionFilterInput]
-  or: [ModelInterventionFilterInput]
-  not: ModelInterventionFilterInput
-}
-
-input ModelInterventionConditionInput {
-  name: ModelStringInput
-  description: ModelStringInput
-  dateIntervention: ModelStringInput
-  and: [ModelInterventionConditionInput]
-  or: [ModelInterventionConditionInput]
-  not: ModelInterventionConditionInput
-  createdAt: ModelStringInput
-  updatedAt: ModelStringInput
-}
-
-input CreateInterventionInput {
-  imei: String!
-  name: String
-  description: String
-  dateIntervention: String
-  picture: S3ObjectInput
-}
-
-input UpdateInterventionInput {
-  imei: String!
-  name: String
-  description: String
-  dateIntervention: String
-  picture: S3ObjectInput
-}
-
-input DeleteInterventionInput {
-  imei: String!
-}
-
-input ModelSubscriptionInterventionFilterInput {
-  imei: ModelSubscriptionStringInput
-  name: ModelSubscriptionStringInput
-  description: ModelSubscriptionStringInput
-  dateIntervention: ModelSubscriptionStringInput
-  id: ModelSubscriptionIDInput
-  createdAt: ModelSubscriptionStringInput
-  updatedAt: ModelSubscriptionStringInput
-  and: [ModelSubscriptionInterventionFilterInput]
-  or: [ModelSubscriptionInterventionFilterInput]
 }
 
 type ModelCompanyDeviceConnection @aws_iam @aws_cognito_user_pools {

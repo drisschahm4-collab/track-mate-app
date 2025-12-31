@@ -1705,18 +1705,26 @@
         ]
       }
     },
-    "transformerrootstackCompanyQuerygetCompanypreAuth0FunctionQuerygetCompanypreAuth0FunctionAppSyncFunction90178178FunctionId": {
-      "Value": {
-        "Fn::GetAtt": [
-          "QuerygetCompanypreAuth0FunctionQuerygetCompanypreAuth0FunctionAppSyncFunctionC7C3192F",
-          "FunctionId"
-        ]
-      }
-    },
     "transformerrootstackCompanyQuerygetCompanyauth0FunctionQuerygetCompanyauth0FunctionAppSyncFunction351C1136FunctionId": {
       "Value": {
         "Fn::GetAtt": [
           "QuerygetCompanyauth0FunctionQuerygetCompanyauth0FunctionAppSyncFunction27097143",
+          "FunctionId"
+        ]
+      }
+    },
+    "transformerrootstackCompanySubscriptiononCreateCompanyauth0FunctionSubscriptiononCreateCompanyauth0FunctionAppSyncFunctionD4D0AD8FFunctionId": {
+      "Value": {
+        "Fn::GetAtt": [
+          "SubscriptiononCreateCompanyauth0FunctionSubscriptiononCreateCompanyauth0FunctionAppSyncFunctionFCA815D1",
+          "FunctionId"
+        ]
+      }
+    },
+    "transformerrootstackCompanyQuerygetCompanypreAuth0FunctionQuerygetCompanypreAuth0FunctionAppSyncFunction90178178FunctionId": {
+      "Value": {
+        "Fn::GetAtt": [
+          "QuerygetCompanypreAuth0FunctionQuerygetCompanypreAuth0FunctionAppSyncFunctionC7C3192F",
           "FunctionId"
         ]
       }
@@ -1749,14 +1757,6 @@
       "Value": {
         "Fn::GetAtt": [
           "MutationdeleteCompanypreAuth0FunctionMutationdeleteCompanypreAuth0FunctionAppSyncFunction760FA9EE",
-          "FunctionId"
-        ]
-      }
-    },
-    "transformerrootstackCompanySubscriptiononCreateCompanyauth0FunctionSubscriptiononCreateCompanyauth0FunctionAppSyncFunctionD4D0AD8FFunctionId": {
-      "Value": {
-        "Fn::GetAtt": [
-          "SubscriptiononCreateCompanyauth0FunctionSubscriptiononCreateCompanyauth0FunctionAppSyncFunctionFCA815D1",
           "FunctionId"
         ]
       }

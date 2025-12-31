@@ -270,36 +270,6 @@
         "TypeName": "Company"
       }
     },
-    "Companyvehiclesauth0FunctionCompanyvehiclesauth0FunctionAppSyncFunctionF5B72F1F": {
-      "Type": "AWS::AppSync::FunctionConfiguration",
-      "Properties": {
-        "ApiId": {
-          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
-        },
-        "DataSourceName": {
-          "Ref": "referencetotransformerrootstackGraphQLAPINONEDS2BA9D1C8Name"
-        },
-        "FunctionVersion": "2018-05-29",
-        "Name": "Companyvehiclesauth0Function",
-        "RequestMappingTemplateS3Location": {
-          "Fn::Join": [
-            "",
-            [
-              "s3://",
-              {
-                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
-              },
-              "/",
-              {
-                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
-              },
-              "/resolvers/Company.vehicles.auth.1.req.vtl"
-            ]
-          ]
-        },
-        "ResponseMappingTemplate": "$util.toJson({})"
-      }
-    },
     "CompanyVehiclesDataResolverFnCompanyVehiclesDataResolverFnAppSyncFunction0A9D1969": {
       "Type": "AWS::AppSync::FunctionConfiguration",
       "Properties": {
@@ -357,7 +327,7 @@
           "Functions": [
             {
               "Fn::GetAtt": [
-                "Companyvehiclesauth0FunctionCompanyvehiclesauth0FunctionAppSyncFunctionF5B72F1F",
+                "CompanycompanyDevicesauth0FunctionCompanycompanyDevicesauth0FunctionAppSyncFunction68A7A973",
                 "FunctionId"
               ]
             },
@@ -702,7 +672,7 @@
           "Functions": [
             {
               "Fn::GetAtt": [
-                "Companyvehiclesauth0FunctionCompanyvehiclesauth0FunctionAppSyncFunctionF5B72F1F",
+                "CompanycompanyDevicesauth0FunctionCompanycompanyDevicesauth0FunctionAppSyncFunction68A7A973",
                 "FunctionId"
               ]
             },
@@ -748,36 +718,6 @@
         },
         "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
         "TypeName": "Company"
-      }
-    },
-    "Companytramesauth0FunctionCompanytramesauth0FunctionAppSyncFunctionA7D713B1": {
-      "Type": "AWS::AppSync::FunctionConfiguration",
-      "Properties": {
-        "ApiId": {
-          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
-        },
-        "DataSourceName": {
-          "Ref": "referencetotransformerrootstackGraphQLAPINONEDS2BA9D1C8Name"
-        },
-        "FunctionVersion": "2018-05-29",
-        "Name": "Companytramesauth0Function",
-        "RequestMappingTemplateS3Location": {
-          "Fn::Join": [
-            "",
-            [
-              "s3://",
-              {
-                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
-              },
-              "/",
-              {
-                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
-              },
-              "/resolvers/Company.trames.auth.1.req.vtl"
-            ]
-          ]
-        },
-        "ResponseMappingTemplate": "$util.toJson({})"
       }
     },
     "CompanyTramesDataResolverFnCompanyTramesDataResolverFnAppSyncFunction8E55E054": {
@@ -837,7 +777,7 @@
           "Functions": [
             {
               "Fn::GetAtt": [
-                "Companytramesauth0FunctionCompanytramesauth0FunctionAppSyncFunctionA7D713B1",
+                "Companyusersauth0FunctionCompanyusersauth0FunctionAppSyncFunction0CDD1D63",
                 "FunctionId"
               ]
             },
@@ -1440,36 +1380,6 @@
         "TypeName": "Vehicle"
       }
     },
-    "Vehiclemaintenancesauth0FunctionVehiclemaintenancesauth0FunctionAppSyncFunctionC5C9C9FA": {
-      "Type": "AWS::AppSync::FunctionConfiguration",
-      "Properties": {
-        "ApiId": {
-          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
-        },
-        "DataSourceName": {
-          "Ref": "referencetotransformerrootstackGraphQLAPINONEDS2BA9D1C8Name"
-        },
-        "FunctionVersion": "2018-05-29",
-        "Name": "Vehiclemaintenancesauth0Function",
-        "RequestMappingTemplateS3Location": {
-          "Fn::Join": [
-            "",
-            [
-              "s3://",
-              {
-                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
-              },
-              "/",
-              {
-                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
-              },
-              "/resolvers/Vehicle.maintenances.auth.1.req.vtl"
-            ]
-          ]
-        },
-        "ResponseMappingTemplate": "$util.toJson({})"
-      }
-    },
     "VehicleMaintenancesDataResolverFnVehicleMaintenancesDataResolverFnAppSyncFunctionE9C7B361": {
       "Type": "AWS::AppSync::FunctionConfiguration",
       "Properties": {
@@ -1527,7 +1437,7 @@
           "Functions": [
             {
               "Fn::GetAtt": [
-                "Vehiclemaintenancesauth0FunctionVehiclemaintenancesauth0FunctionAppSyncFunctionC5C9C9FA",
+                "CompanycompanyDevicesauth0FunctionCompanycompanyDevicesauth0FunctionAppSyncFunction68A7A973",
                 "FunctionId"
               ]
             },
@@ -1737,7 +1647,7 @@
           "Functions": [
             {
               "Fn::GetAtt": [
-                "Vehiclemaintenancesauth0FunctionVehiclemaintenancesauth0FunctionAppSyncFunctionC5C9C9FA",
+                "CompanycompanyDevicesauth0FunctionCompanycompanyDevicesauth0FunctionAppSyncFunction68A7A973",
                 "FunctionId"
               ]
             },
@@ -2025,6 +1935,36 @@
         "TypeName": "VehicleBrand"
       }
     },
+    "DevicecompanyDevicesauth0FunctionDevicecompanyDevicesauth0FunctionAppSyncFunctionA7483B1B": {
+      "Type": "AWS::AppSync::FunctionConfiguration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
+        },
+        "DataSourceName": {
+          "Ref": "referencetotransformerrootstackGraphQLAPINONEDS2BA9D1C8Name"
+        },
+        "FunctionVersion": "2018-05-29",
+        "Name": "DevicecompanyDevicesauth0Function",
+        "RequestMappingTemplateS3Location": {
+          "Fn::Join": [
+            "",
+            [
+              "s3://",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
+              },
+              "/",
+              {
+                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
+              },
+              "/resolvers/Device.companyDevices.auth.1.req.vtl"
+            ]
+          ]
+        },
+        "ResponseMappingTemplate": "$util.toJson({})"
+      }
+    },
     "DeviceCompanyDevicesDataResolverFnDeviceCompanyDevicesDataResolverFnAppSyncFunction550D4522": {
       "Type": "AWS::AppSync::FunctionConfiguration",
       "Properties": {
@@ -2082,7 +2022,7 @@
           "Functions": [
             {
               "Fn::GetAtt": [
-                "Vehiclemaintenancesauth0FunctionVehiclemaintenancesauth0FunctionAppSyncFunctionC5C9C9FA",
+                "DevicecompanyDevicesauth0FunctionDevicecompanyDevicesauth0FunctionAppSyncFunctionA7483B1B",
                 "FunctionId"
               ]
             },
@@ -2502,7 +2442,7 @@
           "Functions": [
             {
               "Fn::GetAtt": [
-                "Vehiclemaintenancesauth0FunctionVehiclemaintenancesauth0FunctionAppSyncFunctionC5C9C9FA",
+                "CompanycompanyDevicesauth0FunctionCompanycompanyDevicesauth0FunctionAppSyncFunction68A7A973",
                 "FunctionId"
               ]
             },
@@ -2607,7 +2547,7 @@
           "Functions": [
             {
               "Fn::GetAtt": [
-                "Vehiclemaintenancesauth0FunctionVehiclemaintenancesauth0FunctionAppSyncFunctionC5C9C9FA",
+                "CompanycompanyDevicesauth0FunctionCompanycompanyDevicesauth0FunctionAppSyncFunction68A7A973",
                 "FunctionId"
               ]
             },
@@ -2653,36 +2593,6 @@
         },
         "ResponseMappingTemplate": "$util.toJson($ctx.prev.result)",
         "TypeName": "Vehicle"
-      }
-    },
-    "Vehicledeviceauth0FunctionVehicledeviceauth0FunctionAppSyncFunction4338B1EF": {
-      "Type": "AWS::AppSync::FunctionConfiguration",
-      "Properties": {
-        "ApiId": {
-          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
-        },
-        "DataSourceName": {
-          "Ref": "referencetotransformerrootstackGraphQLAPINONEDS2BA9D1C8Name"
-        },
-        "FunctionVersion": "2018-05-29",
-        "Name": "Vehicledeviceauth0Function",
-        "RequestMappingTemplateS3Location": {
-          "Fn::Join": [
-            "",
-            [
-              "s3://",
-              {
-                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
-              },
-              "/",
-              {
-                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
-              },
-              "/resolvers/Vehicle.device.auth.1.req.vtl"
-            ]
-          ]
-        },
-        "ResponseMappingTemplate": "$util.toJson({})"
       }
     },
     "VehicleDeviceDataResolverFnVehicleDeviceDataResolverFnAppSyncFunction1534ACFC": {
@@ -2742,7 +2652,7 @@
           "Functions": [
             {
               "Fn::GetAtt": [
-                "Vehicledeviceauth0FunctionVehicledeviceauth0FunctionAppSyncFunction4338B1EF",
+                "CompanycartesCarburantauth0FunctionCompanycartesCarburantauth0FunctionAppSyncFunction1C02038A",
                 "FunctionId"
               ]
             },
@@ -3162,7 +3072,7 @@
           "Functions": [
             {
               "Fn::GetAtt": [
-                "Companyvehiclesauth0FunctionCompanyvehiclesauth0FunctionAppSyncFunctionF5B72F1F",
+                "CompanycompanyDevicesauth0FunctionCompanycompanyDevicesauth0FunctionAppSyncFunction68A7A973",
                 "FunctionId"
               ]
             },
@@ -3267,7 +3177,7 @@
           "Functions": [
             {
               "Fn::GetAtt": [
-                "Companyvehiclesauth0FunctionCompanyvehiclesauth0FunctionAppSyncFunctionF5B72F1F",
+                "CompanycompanyDevicesauth0FunctionCompanycompanyDevicesauth0FunctionAppSyncFunction68A7A973",
                 "FunctionId"
               ]
             },
@@ -3372,7 +3282,7 @@
           "Functions": [
             {
               "Fn::GetAtt": [
-                "Companyvehiclesauth0FunctionCompanyvehiclesauth0FunctionAppSyncFunctionF5B72F1F",
+                "DevicecompanyDevicesauth0FunctionDevicecompanyDevicesauth0FunctionAppSyncFunctionA7483B1B",
                 "FunctionId"
               ]
             },
@@ -3687,7 +3597,7 @@
           "Functions": [
             {
               "Fn::GetAtt": [
-                "Companyvehiclesauth0FunctionCompanyvehiclesauth0FunctionAppSyncFunctionF5B72F1F",
+                "DevicecompanyDevicesauth0FunctionDevicecompanyDevicesauth0FunctionAppSyncFunctionA7483B1B",
                 "FunctionId"
               ]
             },
@@ -3792,7 +3702,7 @@
           "Functions": [
             {
               "Fn::GetAtt": [
-                "Companyvehiclesauth0FunctionCompanyvehiclesauth0FunctionAppSyncFunctionF5B72F1F",
+                "DevicecompanyDevicesauth0FunctionDevicecompanyDevicesauth0FunctionAppSyncFunctionA7483B1B",
                 "FunctionId"
               ]
             },
@@ -3897,7 +3807,7 @@
           "Functions": [
             {
               "Fn::GetAtt": [
-                "Companyvehiclesauth0FunctionCompanyvehiclesauth0FunctionAppSyncFunctionF5B72F1F",
+                "DevicecompanyDevicesauth0FunctionDevicecompanyDevicesauth0FunctionAppSyncFunctionA7483B1B",
                 "FunctionId"
               ]
             },
@@ -4002,7 +3912,7 @@
           "Functions": [
             {
               "Fn::GetAtt": [
-                "Companyvehiclesauth0FunctionCompanyvehiclesauth0FunctionAppSyncFunctionF5B72F1F",
+                "DevicecompanyDevicesauth0FunctionDevicecompanyDevicesauth0FunctionAppSyncFunctionA7483B1B",
                 "FunctionId"
               ]
             },
@@ -4260,36 +4170,6 @@
         "TypeName": "Tag"
       }
     },
-    "VehicleTagsvehicleauth0FunctionVehicleTagsvehicleauth0FunctionAppSyncFunctionF8A809F6": {
-      "Type": "AWS::AppSync::FunctionConfiguration",
-      "Properties": {
-        "ApiId": {
-          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
-        },
-        "DataSourceName": {
-          "Ref": "referencetotransformerrootstackGraphQLAPINONEDS2BA9D1C8Name"
-        },
-        "FunctionVersion": "2018-05-29",
-        "Name": "VehicleTagsvehicleauth0Function",
-        "RequestMappingTemplateS3Location": {
-          "Fn::Join": [
-            "",
-            [
-              "s3://",
-              {
-                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
-              },
-              "/",
-              {
-                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
-              },
-              "/resolvers/VehicleTags.vehicle.auth.1.req.vtl"
-            ]
-          ]
-        },
-        "ResponseMappingTemplate": "$util.toJson({})"
-      }
-    },
     "VehicleTagsVehicleDataResolverFnVehicleTagsVehicleDataResolverFnAppSyncFunctionBD20B90E": {
       "Type": "AWS::AppSync::FunctionConfiguration",
       "Properties": {
@@ -4347,7 +4227,7 @@
           "Functions": [
             {
               "Fn::GetAtt": [
-                "VehicleTagsvehicleauth0FunctionVehicleTagsvehicleauth0FunctionAppSyncFunctionF8A809F6",
+                "CompanycompanyDevicesauth0FunctionCompanycompanyDevicesauth0FunctionAppSyncFunction68A7A973",
                 "FunctionId"
               ]
             },
@@ -4557,7 +4437,7 @@
           "Functions": [
             {
               "Fn::GetAtt": [
-                "VehicleTagsvehicleauth0FunctionVehicleTagsvehicleauth0FunctionAppSyncFunctionF8A809F6",
+                "CompanycompanyDevicesauth0FunctionCompanycompanyDevicesauth0FunctionAppSyncFunction68A7A973",
                 "FunctionId"
               ]
             },
@@ -4662,7 +4542,7 @@
           "Functions": [
             {
               "Fn::GetAtt": [
-                "Companyvehiclesauth0FunctionCompanyvehiclesauth0FunctionAppSyncFunctionF5B72F1F",
+                "DevicecompanyDevicesauth0FunctionDevicecompanyDevicesauth0FunctionAppSyncFunctionA7483B1B",
                 "FunctionId"
               ]
             },
@@ -4977,7 +4857,7 @@
           "Functions": [
             {
               "Fn::GetAtt": [
-                "Vehiclemaintenancesauth0FunctionVehiclemaintenancesauth0FunctionAppSyncFunctionC5C9C9FA",
+                "CompanycompanyDevicesauth0FunctionCompanycompanyDevicesauth0FunctionAppSyncFunction68A7A973",
                 "FunctionId"
               ]
             },
@@ -5187,7 +5067,7 @@
           "Functions": [
             {
               "Fn::GetAtt": [
-                "Companyvehiclesauth0FunctionCompanyvehiclesauth0FunctionAppSyncFunctionF5B72F1F",
+                "CompanycompanyDevicesauth0FunctionCompanycompanyDevicesauth0FunctionAppSyncFunction68A7A973",
                 "FunctionId"
               ]
             },
@@ -5247,7 +5127,7 @@
           "Functions": [
             {
               "Fn::GetAtt": [
-                "Companyvehiclesauth0FunctionCompanyvehiclesauth0FunctionAppSyncFunctionF5B72F1F",
+                "CompanycompanyDevicesauth0FunctionCompanycompanyDevicesauth0FunctionAppSyncFunction68A7A973",
                 "FunctionId"
               ]
             },
@@ -5772,7 +5652,7 @@
           "Functions": [
             {
               "Fn::GetAtt": [
-                "Companyvehiclesauth0FunctionCompanyvehiclesauth0FunctionAppSyncFunctionF5B72F1F",
+                "DevicecompanyDevicesauth0FunctionDevicecompanyDevicesauth0FunctionAppSyncFunctionA7483B1B",
                 "FunctionId"
               ]
             },
@@ -5982,7 +5862,7 @@
           "Functions": [
             {
               "Fn::GetAtt": [
-                "Vehicledeviceauth0FunctionVehicledeviceauth0FunctionAppSyncFunction4338B1EF",
+                "CompanycartesCarburantauth0FunctionCompanycartesCarburantauth0FunctionAppSyncFunction1C02038A",
                 "FunctionId"
               ]
             },
@@ -6087,7 +5967,7 @@
           "Functions": [
             {
               "Fn::GetAtt": [
-                "Vehiclemaintenancesauth0FunctionVehiclemaintenancesauth0FunctionAppSyncFunctionC5C9C9FA",
+                "DevicecompanyDevicesauth0FunctionDevicecompanyDevicesauth0FunctionAppSyncFunctionA7483B1B",
                 "FunctionId"
               ]
             },
@@ -6297,7 +6177,7 @@
           "Functions": [
             {
               "Fn::GetAtt": [
-                "Companyvehiclesauth0FunctionCompanyvehiclesauth0FunctionAppSyncFunctionF5B72F1F",
+                "CompanycompanyDevicesauth0FunctionCompanycompanyDevicesauth0FunctionAppSyncFunction68A7A973",
                 "FunctionId"
               ]
             },
@@ -6357,7 +6237,7 @@
           "Functions": [
             {
               "Fn::GetAtt": [
-                "Companyvehiclesauth0FunctionCompanyvehiclesauth0FunctionAppSyncFunctionF5B72F1F",
+                "CompanycompanyDevicesauth0FunctionCompanycompanyDevicesauth0FunctionAppSyncFunction68A7A973",
                 "FunctionId"
               ]
             },

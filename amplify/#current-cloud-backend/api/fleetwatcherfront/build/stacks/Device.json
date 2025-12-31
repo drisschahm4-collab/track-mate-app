@@ -52,6 +52,9 @@
     "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref": {
       "Type": "String"
     },
+    "referencetotransformerrootstackAlertNestedStackAlertNestedStackResource7D8488D8OutputstransformerrootstackAlertQuerygetAlertauth0FunctionQuerygetAlertauth0FunctionAppSyncFunction6FA80CD0FunctionId": {
+      "Type": "String"
+    },
     "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyQuerygetCompanypostAuth0FunctionQuerygetCompanypostAuth0FunctionAppSyncFunction0E5EEE8AFunctionId": {
       "Type": "String"
     },
@@ -65,6 +68,9 @@
       "Type": "String"
     },
     "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyMutationupdateCompanyinit0FunctionMutationupdateCompanyinit0FunctionAppSyncFunction54454202FunctionId": {
+      "Type": "String"
+    },
+    "referencetotransformerrootstackAlertNestedStackAlertNestedStackResource7D8488D8OutputstransformerrootstackAlertSubscriptiononCreateAlertauth0FunctionSubscriptiononCreateAlertauth0FunctionAppSyncFunctionEA672576FunctionId": {
       "Type": "String"
     },
     "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanySubscriptionOnCreateCompanyDataResolverFnSubscriptionOnCreateCompanyDataResolverFnAppSyncFunctionE80FA435FunctionId": {
@@ -398,36 +404,6 @@
         "ResponseMappingTemplate": "$util.toJson({})"
       }
     },
-    "QuerygetDeviceauth0FunctionQuerygetDeviceauth0FunctionAppSyncFunctionE9D84544": {
-      "Type": "AWS::AppSync::FunctionConfiguration",
-      "Properties": {
-        "ApiId": {
-          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
-        },
-        "DataSourceName": {
-          "Ref": "referencetotransformerrootstackGraphQLAPINONEDS2BA9D1C8Name"
-        },
-        "FunctionVersion": "2018-05-29",
-        "Name": "QuerygetDeviceauth0Function",
-        "RequestMappingTemplateS3Location": {
-          "Fn::Join": [
-            "",
-            [
-              "s3://",
-              {
-                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
-              },
-              "/",
-              {
-                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
-              },
-              "/resolvers/Query.getDevice.auth.1.req.vtl"
-            ]
-          ]
-        },
-        "ResponseMappingTemplate": "$util.toJson({})"
-      }
-    },
     "QueryGetDeviceDataResolverFnQueryGetDeviceDataResolverFnAppSyncFunction7DD622FA": {
       "Type": "AWS::AppSync::FunctionConfiguration",
       "Properties": {
@@ -496,10 +472,7 @@
               ]
             },
             {
-              "Fn::GetAtt": [
-                "QuerygetDeviceauth0FunctionQuerygetDeviceauth0FunctionAppSyncFunctionE9D84544",
-                "FunctionId"
-              ]
+              "Ref": "referencetotransformerrootstackAlertNestedStackAlertNestedStackResource7D8488D8OutputstransformerrootstackAlertQuerygetAlertauth0FunctionQuerygetAlertauth0FunctionAppSyncFunction6FA80CD0FunctionId"
             },
             {
               "Ref": "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyQuerygetCompanypostAuth0FunctionQuerygetCompanypostAuth0FunctionAppSyncFunction0E5EEE8AFunctionId"
@@ -646,10 +619,7 @@
               ]
             },
             {
-              "Fn::GetAtt": [
-                "QuerygetDeviceauth0FunctionQuerygetDeviceauth0FunctionAppSyncFunctionE9D84544",
-                "FunctionId"
-              ]
+              "Ref": "referencetotransformerrootstackAlertNestedStackAlertNestedStackResource7D8488D8OutputstransformerrootstackAlertQuerygetAlertauth0FunctionQuerygetAlertauth0FunctionAppSyncFunction6FA80CD0FunctionId"
             },
             {
               "Ref": "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyQuerygetCompanypostAuth0FunctionQuerygetCompanypostAuth0FunctionAppSyncFunction0E5EEE8AFunctionId"
@@ -1256,36 +1226,6 @@
         "TypeName": "Mutation"
       }
     },
-    "SubscriptiononCreateDeviceauth0FunctionSubscriptiononCreateDeviceauth0FunctionAppSyncFunction9F6A1BD8": {
-      "Type": "AWS::AppSync::FunctionConfiguration",
-      "Properties": {
-        "ApiId": {
-          "Ref": "referencetotransformerrootstackGraphQLAPI20497F53ApiId"
-        },
-        "DataSourceName": {
-          "Ref": "referencetotransformerrootstackGraphQLAPINONEDS2BA9D1C8Name"
-        },
-        "FunctionVersion": "2018-05-29",
-        "Name": "SubscriptiononCreateDeviceauth0Function",
-        "RequestMappingTemplateS3Location": {
-          "Fn::Join": [
-            "",
-            [
-              "s3://",
-              {
-                "Ref": "referencetotransformerrootstackS3DeploymentBucket7592718ARef"
-              },
-              "/",
-              {
-                "Ref": "referencetotransformerrootstackS3DeploymentRootKeyA71EA735Ref"
-              },
-              "/resolvers/Subscription.onCreateDevice.auth.1.req.vtl"
-            ]
-          ]
-        },
-        "ResponseMappingTemplate": "$util.toJson({})"
-      }
-    },
     "SubscriptiononCreateDeviceResolver": {
       "Type": "AWS::AppSync::Resolver",
       "Properties": {
@@ -1297,10 +1237,7 @@
         "PipelineConfig": {
           "Functions": [
             {
-              "Fn::GetAtt": [
-                "SubscriptiononCreateDeviceauth0FunctionSubscriptiononCreateDeviceauth0FunctionAppSyncFunction9F6A1BD8",
-                "FunctionId"
-              ]
+              "Ref": "referencetotransformerrootstackAlertNestedStackAlertNestedStackResource7D8488D8OutputstransformerrootstackAlertSubscriptiononCreateAlertauth0FunctionSubscriptiononCreateAlertauth0FunctionAppSyncFunctionEA672576FunctionId"
             },
             {
               "Ref": "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyQuerygetCompanypostAuth0FunctionQuerygetCompanypostAuth0FunctionAppSyncFunction0E5EEE8AFunctionId"
@@ -1353,10 +1290,7 @@
         "PipelineConfig": {
           "Functions": [
             {
-              "Fn::GetAtt": [
-                "SubscriptiononCreateDeviceauth0FunctionSubscriptiononCreateDeviceauth0FunctionAppSyncFunction9F6A1BD8",
-                "FunctionId"
-              ]
+              "Ref": "referencetotransformerrootstackAlertNestedStackAlertNestedStackResource7D8488D8OutputstransformerrootstackAlertSubscriptiononCreateAlertauth0FunctionSubscriptiononCreateAlertauth0FunctionAppSyncFunctionEA672576FunctionId"
             },
             {
               "Ref": "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyQuerygetCompanypostAuth0FunctionQuerygetCompanypostAuth0FunctionAppSyncFunction0E5EEE8AFunctionId"
@@ -1409,10 +1343,7 @@
         "PipelineConfig": {
           "Functions": [
             {
-              "Fn::GetAtt": [
-                "SubscriptiononCreateDeviceauth0FunctionSubscriptiononCreateDeviceauth0FunctionAppSyncFunction9F6A1BD8",
-                "FunctionId"
-              ]
+              "Ref": "referencetotransformerrootstackAlertNestedStackAlertNestedStackResource7D8488D8OutputstransformerrootstackAlertSubscriptiononCreateAlertauth0FunctionSubscriptiononCreateAlertauth0FunctionAppSyncFunctionEA672576FunctionId"
             },
             {
               "Ref": "referencetotransformerrootstackCompanyNestedStackCompanyNestedStackResource3589B7BAOutputstransformerrootstackCompanyQuerygetCompanypostAuth0FunctionQuerygetCompanypostAuth0FunctionAppSyncFunction0E5EEE8AFunctionId"
@@ -1517,54 +1448,6 @@
             ]
           ]
         }
-      }
-    },
-    "transformerrootstackDeviceQuerygetDevicepreAuth0FunctionQuerygetDevicepreAuth0FunctionAppSyncFunctionFA05E94AFunctionId": {
-      "Value": {
-        "Fn::GetAtt": [
-          "QuerygetDevicepreAuth0FunctionQuerygetDevicepreAuth0FunctionAppSyncFunction96481AB0",
-          "FunctionId"
-        ]
-      }
-    },
-    "transformerrootstackDeviceQuerylistDevicespreAuth0FunctionQuerylistDevicespreAuth0FunctionAppSyncFunction71CCB868FunctionId": {
-      "Value": {
-        "Fn::GetAtt": [
-          "QuerylistDevicespreAuth0FunctionQuerylistDevicespreAuth0FunctionAppSyncFunction7505E596",
-          "FunctionId"
-        ]
-      }
-    },
-    "transformerrootstackDeviceMutationcreateDevicepreAuth0FunctionMutationcreateDevicepreAuth0FunctionAppSyncFunctionFD21EEEDFunctionId": {
-      "Value": {
-        "Fn::GetAtt": [
-          "MutationcreateDevicepreAuth0FunctionMutationcreateDevicepreAuth0FunctionAppSyncFunctionDC9AFE31",
-          "FunctionId"
-        ]
-      }
-    },
-    "transformerrootstackDeviceMutationdeleteDevicepreAuth0FunctionMutationdeleteDevicepreAuth0FunctionAppSyncFunction28FA7A95FunctionId": {
-      "Value": {
-        "Fn::GetAtt": [
-          "MutationdeleteDevicepreAuth0FunctionMutationdeleteDevicepreAuth0FunctionAppSyncFunctionC8B1DCEE",
-          "FunctionId"
-        ]
-      }
-    },
-    "transformerrootstackDeviceQuerygetDeviceauth0FunctionQuerygetDeviceauth0FunctionAppSyncFunctionB5EA3E89FunctionId": {
-      "Value": {
-        "Fn::GetAtt": [
-          "QuerygetDeviceauth0FunctionQuerygetDeviceauth0FunctionAppSyncFunctionE9D84544",
-          "FunctionId"
-        ]
-      }
-    },
-    "transformerrootstackDeviceSubscriptiononCreateDeviceauth0FunctionSubscriptiononCreateDeviceauth0FunctionAppSyncFunctionEA60403BFunctionId": {
-      "Value": {
-        "Fn::GetAtt": [
-          "SubscriptiononCreateDeviceauth0FunctionSubscriptiononCreateDeviceauth0FunctionAppSyncFunction9F6A1BD8",
-          "FunctionId"
-        ]
       }
     },
     "transformerrootstackDeviceDeviceDataSource057337C2Name": {
