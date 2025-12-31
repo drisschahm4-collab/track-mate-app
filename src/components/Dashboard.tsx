@@ -1,9 +1,10 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { Gauge, Navigation, Clock, MapPin, Battery, Zap } from 'lucide-react';
+import { Gauge, Navigation, Clock, MapPin, Battery, Zap, Car } from 'lucide-react';
 import { useFlespiData } from '@/hooks/useFlespiData';
 import { usePrivacyMode } from '@/hooks/usePrivacyMode';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserImei } from '@/hooks/useUserImei';
+import { useVehicleResolver } from '@/hooks/useVehicleResolver';
 import Header from './Header';
 import MetricCard from './MetricCard';
 import VehicleMap from './VehicleMap';
@@ -13,6 +14,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { assignPrivacyPlugin } from '@/integrations/flespi';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 const Dashboard: React.FC = () => {
   const {
     userEmail,
@@ -24,8 +27,20 @@ const Dashboard: React.FC = () => {
     imei,
     setImei
   } = useUserImei(username);
+
+  // Résolution des véhicules via DvD avec pagination
+  const {
+    vehicles: dvdVehicles,
+    imeis: dvdImeis,
+    loading: dvdLoading,
+    error: dvdError,
+    totalFetched: dvdTotalFetched,
+    refresh: refreshDvd,
+  } = useVehicleResolver(username);
+
+  const [selectedVehicleImmat, setSelectedVehicleImmat] = useState<string | undefined>();
   const [imeiDraft, setImeiDraft] = useState<string>(imei ?? '');
-  const [imeiSource, setImeiSource] = useState<'storage' | 'username' | 'cognito' | 'manual' | undefined>(imei ? 'storage' : undefined);
+  const [imeiSource, setImeiSource] = useState<'storage' | 'username' | 'cognito' | 'manual' | 'dvd' | undefined>(imei ? 'storage' : undefined);
   const {
     vehicleData,
     vehicleInfo,
@@ -69,6 +84,38 @@ const Dashboard: React.FC = () => {
       console.info('[IMEI] Loaded from Cognito attribute', attrImei);
     }
   }, [attributes, imei, setImei, setHookImei]);
+
+  // Auto-set IMEI depuis DvD resolution
+  useEffect(() => {
+    if (!imei && dvdImeis.length > 0) {
+      const resolvedImei = dvdImeis[0];
+      setImei(resolvedImei);
+      setHookImei(resolvedImei);
+      setImeiDraft(resolvedImei);
+      setImeiSource('dvd');
+      console.info('[IMEI] Resolved from DvD:', resolvedImei);
+
+      // Si plusieurs véhicules, sélectionner le premier par défaut
+      if (dvdVehicles.length > 0) {
+        setSelectedVehicleImmat(dvdVehicles[0].immat);
+      }
+    }
+  }, [dvdImeis, dvdVehicles, imei, setImei, setHookImei]);
+
+  // Changement de véhicule sélectionné
+  const handleVehicleChange = (immat: string) => {
+    setSelectedVehicleImmat(immat);
+    const selectedVehicle = dvdVehicles.find(v => v.immat === immat);
+    if (selectedVehicle?.vehicleDeviceImei) {
+      setImei(selectedVehicle.vehicleDeviceImei);
+      setHookImei(selectedVehicle.vehicleDeviceImei);
+      setImeiDraft(selectedVehicle.vehicleDeviceImei);
+      setImeiSource('dvd');
+      console.info('[IMEI] Changed via vehicle selector:', selectedVehicle.vehicleDeviceImei);
+      refresh();
+    }
+  };
+
   useEffect(() => {
     if (vehicleInfo?.privacyEnabled !== undefined) {
       setPrivate(vehicleInfo.privacyEnabled);
@@ -150,6 +197,35 @@ const Dashboard: React.FC = () => {
         <Header isOnline={vehicleData?.isOnline ?? false} lastUpdate={lastUpdate} onRefresh={refresh} loading={loading} isPrivate={isPrivate} onTogglePrivacy={handleTogglePrivacyRemote} userEmail={userEmail} onSignOut={handleSignOut} signingOut={signingOut} privacyPending={privacyPending} />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Sélecteur de véhicule DvD si plusieurs véhicules */}
+          {dvdVehicles.length > 1 && (
+            <Card className="glass-card p-4 lg:col-span-3">
+              <div className="flex flex-col gap-3 md:flex-row md:items-end md:gap-4">
+                <div className="flex-1">
+                  <p className="text-xs uppercase text-muted-foreground mb-1 flex items-center gap-2">
+                    <Car className="h-4 w-4" />
+                    Véhicules assignés ({dvdVehicles.length})
+                  </p>
+                  <Select value={selectedVehicleImmat} onValueChange={handleVehicleChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choisir un véhicule" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {dvdVehicles.map((v) => (
+                        <SelectItem key={v.immat} value={v.immat}>
+                          {v.nomVehicule || v.immat} - {v.marque || 'N/A'}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Badge variant="secondary" className="h-fit">
+                  {dvdLoading ? 'Résolution...' : `${dvdTotalFetched} DvD trouvés`}
+                </Badge>
+              </div>
+            </Card>
+          )}
+
           <Card className="glass-card p-4 lg:col-span-3">
             <form className="flex flex-col gap-3 md:flex-row md:items-end md:gap-4" onSubmit={handleImeiSubmit}>
               <div className="flex-1">
@@ -190,8 +266,11 @@ const Dashboard: React.FC = () => {
             {vehicleInfo?.privacyEnabled !== undefined && <Badge variant={vehicleInfo.privacyEnabled ? 'default' : 'outline'}>
                 Vie privée: {vehicleInfo.privacyEnabled ? 'ON' : 'OFF'}
               </Badge>}
+            <Badge variant={dvdLoading ? 'secondary' : dvdError ? 'destructive' : 'outline'}>
+              DvD: {dvdLoading ? 'chargement...' : dvdError ? 'erreur' : `${dvdTotalFetched} affectations`}
+            </Badge>
           </div>
-          <pre className="bg-secondary/50 rounded-lg p-3 text-sm overflow-auto">
+          <pre className="bg-secondary/50 rounded-lg p-3 text-sm overflow-auto max-h-64">
           {JSON.stringify({
             imei: imei || vehicleInfo?.imei,
             imeiSource,
@@ -204,7 +283,14 @@ const Dashboard: React.FC = () => {
               lng: vehicleData.longitude,
               speed: vehicleData.speed,
               heading: vehicleData.heading
-            } : null
+            } : null,
+            dvd: {
+              loading: dvdLoading,
+              error: dvdError,
+              totalFetched: dvdTotalFetched,
+              vehicles: dvdVehicles.map(v => ({ immat: v.immat, imei: v.vehicleDeviceImei, nom: v.nomVehicule })),
+              selectedImmat: selectedVehicleImmat,
+            }
           }, null, 2)}
           </pre>
         </Card>
