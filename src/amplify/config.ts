@@ -12,9 +12,10 @@ export const amplifyConfig: ResourcesConfig = {
   },
   API: {
     GraphQL: {
-      endpoint: "https://eepxb7jzpvbyzhnspwyrljhfri.appsync-api.eu-west-3.amazonaws.com/graphql",
+      endpoint: "https://c2yd53frvfff7fkdkwwu7u3ahu.appsync-api.eu-west-3.amazonaws.com/graphql",
       region: "eu-west-3",
       defaultAuthMode: "userPool",
+      apiKey: "da2-2jbdfcic3fhehcnjb6mce2gtgq",
     },
   },
 };

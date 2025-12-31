@@ -195,10 +195,20 @@ export const useVehicleResolver = (username: string | undefined): UseVehicleReso
 
       setVehicles(resolvedVehicles);
       setImeis(resolvedImeis);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Erreur lors de la résolution des véhicules';
+    } catch (err: any) {
       console.error('[DvD] Resolution error:', err);
-      setError(message);
+      
+      let errorMessage = 'Erreur lors de la résolution des véhicules';
+      
+      if (err.message?.includes('ERR_NAME_NOT_RESOLVED') || err.name === 'NetworkError') {
+        errorMessage = 'Impossible de se connecter à l\'API AppSync. Vérifiez la configuration.';
+      } else if (err.errors?.[0]?.message) {
+        errorMessage = err.errors[0].message;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
