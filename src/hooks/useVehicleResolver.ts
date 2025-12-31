@@ -1,7 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/api';
-
-const client = generateClient();
 
 // GraphQL query avec pagination et tous les champs nécessaires
 const LIST_DVD_WITH_DRIVER = /* GraphQL */ `
@@ -109,6 +107,9 @@ export const useVehicleResolver = (username: string | undefined): UseVehicleReso
   const [error, setError] = useState<string | null>(null);
   const [totalFetched, setTotalFetched] = useState(0);
 
+  // Lazy initialization: client created only after Amplify.configure() has run
+  const client = useMemo(() => generateClient(), []);
+
   const fetchAllDvDs = useCallback(async (targetUsername: string): Promise<DvDRecord[]> => {
     const allDvDs: DvDRecord[] = [];
     let nextToken: string | null = null;
@@ -200,7 +201,12 @@ export const useVehicleResolver = (username: string | undefined): UseVehicleReso
       
       let errorMessage = 'Erreur lors de la résolution des véhicules';
       
-      if (err.message?.includes('ERR_NAME_NOT_RESOLVED') || err.name === 'NetworkError') {
+      // Check offline status first
+      if (!navigator.onLine) {
+        errorMessage = 'Connexion internet indisponible. Veuillez vérifier votre connexion.';
+      } else if (err.message?.includes('Amplify has not been configured')) {
+        errorMessage = 'Erreur d\'initialisation Amplify. Veuillez rafraîchir la page.';
+      } else if (err.message?.includes('ERR_NAME_NOT_RESOLVED') || err.name === 'NetworkError') {
         errorMessage = 'Impossible de se connecter à l\'API AppSync. Vérifiez la configuration.';
       } else if (err.errors?.[0]?.message) {
         errorMessage = err.errors[0].message;
