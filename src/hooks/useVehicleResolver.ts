@@ -99,7 +99,7 @@ interface UseVehicleResolverResult {
   refresh: () => void;
 }
 
-export const useVehicleResolver = (username: string | undefined): UseVehicleResolverResult => {
+export const useVehicleResolver = (userSub: string | undefined, username?: string): UseVehicleResolverResult => {
   const [vehicles, setVehicles] = useState<DvDVehicle[]>([]);
   const [imeis, setImeis] = useState<string[]>([]);
   const [dvds, setDvds] = useState<DvDRecord[]>([]);
@@ -110,7 +110,7 @@ export const useVehicleResolver = (username: string | undefined): UseVehicleReso
   // Lazy initialization: client created only after Amplify.configure() has run
   const client = useMemo(() => generateClient(), []);
 
-  const fetchAllDvDs = useCallback(async (targetSub: string): Promise<DvDRecord[]> => {
+  const fetchAllDvDs = useCallback(async (targetSub: string, targetUsername?: string): Promise<DvDRecord[]> => {
     const allDvDs: DvDRecord[] = [];
     let nextToken: string | null = null;
     let iteration = 0;
@@ -165,30 +165,46 @@ export const useVehicleResolver = (username: string | undefined): UseVehicleReso
 
     console.log(`[DvD] Pagination complete: ${allDvDs.length} total DvD records fetched in ${iteration} pages`);
 
-    // Filtrer par sub du driver (côté client) - utilise dvDDriverSub ou driver.sub
+    // Debug: log sample records to see what's in dvDDriverSub
+    console.log('[DvD] Sample records:', allDvDs.slice(0, 3).map(d => ({
+      dvDDriverSub: d.dvDDriverSub,
+      driverSub: d.driver?.sub,
+      driverUsername: d.driver?.username
+    })));
+
+    // Filtrer par sub du driver (côté client) - utilise dvDDriverSub ou driver.sub OU username
     const filtered = allDvDs.filter((dvd) => {
       const driverSub = dvd.dvDDriverSub || dvd.driver?.sub;
+      const driverUsername = dvd.driver?.username;
       const isActive = !dvd.unassignmentDate; // Seulement les affectations actives
-      const matchesSub = driverSub === targetSub;
+      
+      // Match par sub UUID OU par username
+      const matchesBySub = driverSub === targetSub;
+      const matchesByUsername = targetUsername && (
+        driverSub === targetUsername || 
+        driverUsername === targetUsername
+      );
+      
+      const matches = matchesBySub || matchesByUsername;
 
-      if (matchesSub) {
-        console.log(`[DvD] Match found: driver.sub="${driverSub}", active=${isActive}, vehicle=${dvd.vehicle?.immat}`);
+      if (matches) {
+        console.log(`[DvD] Match found: dvDDriverSub="${driverSub}", driver.username="${driverUsername}", active=${isActive}, vehicle=${dvd.vehicle?.immat}`);
       }
 
-      return matchesSub && isActive;
+      return matches && isActive;
     });
 
-    console.log(`[DvD] Filtered by sub "${targetSub}": ${filtered.length}/${allDvDs.length} active assignments`);
+    console.log(`[DvD] Filtered by sub "${targetSub}" OR username "${targetUsername}": ${filtered.length}/${allDvDs.length} active assignments`);
 
     return filtered;
   }, [client]);
 
-  const resolveVehicles = useCallback(async (targetUsername: string) => {
+  const resolveVehicles = useCallback(async (targetSub: string, targetUsername?: string) => {
     setLoading(true);
     setError(null);
 
     try {
-      const filteredDvds = await fetchAllDvDs(targetUsername);
+      const filteredDvds = await fetchAllDvDs(targetSub, targetUsername);
       setDvds(filteredDvds);
       setTotalFetched(filteredDvds.length);
 
@@ -239,21 +255,21 @@ export const useVehicleResolver = (username: string | undefined): UseVehicleReso
   }, [fetchAllDvDs]);
 
   const refresh = useCallback(() => {
-    if (username) {
-      resolveVehicles(username);
+    if (userSub) {
+      resolveVehicles(userSub, username);
     }
-  }, [username, resolveVehicles]);
+  }, [userSub, username, resolveVehicles]);
 
   useEffect(() => {
-    if (username) {
-      resolveVehicles(username);
+    if (userSub) {
+      resolveVehicles(userSub, username);
     } else {
       setVehicles([]);
       setImeis([]);
       setDvds([]);
       setTotalFetched(0);
     }
-  }, [username, resolveVehicles]);
+  }, [userSub, username, resolveVehicles]);
 
   return {
     vehicles,
