@@ -294,18 +294,6 @@ const Dashboard: React.FC = () => {
             </Card>
           )}
 
-          <Card className="glass-card p-4 lg:col-span-3">
-            <form className="flex flex-col gap-3 md:flex-row md:items-end md:gap-4" onSubmit={handleImeiSubmit}>
-              <div className="flex-1">
-                <p className="text-xs uppercase text-muted-foreground mb-1">IMEI associé à ce compte</p>
-                <Input value={imeiDraft} onChange={e => setImeiDraft(e.target.value)} placeholder="Entrez l'IMEI (ex: 864636060105273)" required />
-              </div>
-              <Button type="submit" className="md:w-auto w-full">
-                Mettre à jour l'IMEI
-              </Button>
-            </form>
-          </Card>
-
           <div className="glass-card p-4 border border-primary/30">
             <p className="text-xs uppercase text-muted-foreground mb-1">IMEI</p>
             <p className="font-display text-lg font-semibold text-foreground">
