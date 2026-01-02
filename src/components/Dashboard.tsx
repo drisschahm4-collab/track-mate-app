@@ -103,6 +103,13 @@ const Dashboard: React.FC = () => {
     }
   }, [dvdImeis, dvdVehicles, imei, setImei, setHookImei]);
 
+  // Priorité: immat DvD > immat Flespi (qui affiche le nom device)
+  const displayImmat = useMemo(() => {
+    if (selectedVehicleImmat) return selectedVehicleImmat;
+    if (dvdVehicles.length > 0) return dvdVehicles[0].immat;
+    return vehicleInfo?.immatriculation;
+  }, [selectedVehicleImmat, dvdVehicles, vehicleInfo?.immatriculation]);
+
   // Changement de véhicule sélectionné
   const handleVehicleChange = (immat: string) => {
     setSelectedVehicleImmat(immat);
@@ -308,7 +315,7 @@ const Dashboard: React.FC = () => {
           <div className="glass-card p-4">
             <p className="text-xs uppercase text-muted-foreground mb-1">Immatriculation</p>
             <p className="font-display text-lg font-semibold text-foreground">
-              {vehicleInfo?.immatriculation ?? '—'}
+              {displayImmat ?? '—'}
             </p>
           </div>
           <div className="glass-card p-4">
@@ -335,7 +342,7 @@ const Dashboard: React.FC = () => {
           {JSON.stringify({
             imei: imei || vehicleInfo?.imei,
             imeiSource,
-            immatriculation: vehicleInfo?.immatriculation,
+            immatriculation: displayImmat,
             deviceId: vehicleInfo?.id,
             privacy: vehicleInfo?.privacyEnabled,
             lastUpdate: lastUpdate?.toISOString(),
