@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { Gauge, Navigation, Clock, MapPin, Battery, Zap, Car, Loader2 } from 'lucide-react';
+import { Gauge, Navigation, Clock, MapPin, Battery, Zap, Car, Loader2, LogOut } from 'lucide-react';
 import { useFlespiData } from '@/hooks/useFlespiData';
 import { usePrivacyMode } from '@/hooks/usePrivacyMode';
 import { useAuth } from '@/hooks/useAuth';
@@ -223,6 +223,16 @@ const Dashboard: React.FC = () => {
           <Badge variant="secondary" className="text-xs">
             User: {userSub?.substring(0, 8)}... | DvD: {dvdTotalFetched}
           </Badge>
+          
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={signOut}
+            className="text-muted-foreground hover:text-destructive"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Se déconnecter
+          </Button>
         </div>
       </div>
     );
