@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { Gauge, Navigation, Clock, MapPin, Battery, Zap, Car } from 'lucide-react';
+import { Gauge, Navigation, Clock, MapPin, Battery, Zap, Car, Loader2 } from 'lucide-react';
 import { useFlespiData } from '@/hooks/useFlespiData';
 import { usePrivacyMode } from '@/hooks/usePrivacyMode';
 import { useAuth } from '@/hooks/useAuth';
@@ -173,9 +173,59 @@ const Dashboard: React.FC = () => {
     return `${Math.abs(coord).toFixed(4)}° ${direction}`;
   };
   if (missingImei) {
-    return <div className="min-h-screen bg-background p-4 flex items-center justify-center">
-        
-      </div>;
+    return (
+      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
+        <div className="glass-card p-8 text-center max-w-md space-y-4">
+          {dvdLoading ? (
+            <>
+              <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+              <h2 className="font-display font-bold text-xl text-foreground">
+                Recherche de vos véhicules...
+              </h2>
+              <p className="text-muted-foreground">
+                Résolution en cours ({dvdTotalFetched} affectations analysées)
+              </p>
+            </>
+          ) : dvdError ? (
+            <>
+              <Zap className="h-8 w-8 text-destructive mx-auto" />
+              <h2 className="font-display font-bold text-xl text-foreground">
+                Erreur de résolution
+              </h2>
+              <p className="text-muted-foreground text-sm">{dvdError}</p>
+              <Button onClick={refreshDvd} variant="outline">
+                Réessayer
+              </Button>
+            </>
+          ) : (
+            <>
+              <Car className="h-8 w-8 text-muted-foreground mx-auto" />
+              <h2 className="font-display font-bold text-xl text-foreground">
+                Aucun véhicule assigné
+              </h2>
+              <p className="text-muted-foreground">
+                Aucune affectation active trouvée pour votre compte.
+                Vous pouvez entrer un IMEI manuellement.
+              </p>
+              <form onSubmit={handleImeiSubmit} className="space-y-3">
+                <Input
+                  value={imeiDraft}
+                  onChange={(e) => setImeiDraft(e.target.value)}
+                  placeholder="IMEI (ex: 864636060105273)"
+                />
+                <Button type="submit" className="w-full">
+                  Utiliser cet IMEI
+                </Button>
+              </form>
+            </>
+          )}
+          
+          <Badge variant="secondary" className="text-xs">
+            User: {userSub?.substring(0, 8)}... | DvD: {dvdTotalFetched}
+          </Badge>
+        </div>
+      </div>
+    );
   }
   if (error && !vehicleData) {
     return <div className="min-h-screen bg-background p-4 flex items-center justify-center">
