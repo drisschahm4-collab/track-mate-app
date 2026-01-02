@@ -110,14 +110,14 @@ export const useVehicleResolver = (username: string | undefined): UseVehicleReso
   // Lazy initialization: client created only after Amplify.configure() has run
   const client = useMemo(() => generateClient(), []);
 
-  const fetchAllDvDs = useCallback(async (targetUsername: string): Promise<DvDRecord[]> => {
+  const fetchAllDvDs = useCallback(async (targetSub: string): Promise<DvDRecord[]> => {
     const allDvDs: DvDRecord[] = [];
     let nextToken: string | null = null;
     let iteration = 0;
     const MAX_ITERATIONS = 25; // 25 x 100 = 2500 max records
     const LIMIT_PER_PAGE = 100;
 
-    console.log(`[DvD] Starting pagination fetch for username: "${targetUsername}"`);
+    console.log(`[DvD] Starting pagination fetch for sub: "${targetSub}"`);
 
     do {
       console.log(`[DvD] Fetching page ${iteration + 1}, nextToken: ${nextToken ? 'present' : 'null'}`);
@@ -130,9 +130,15 @@ export const useVehicleResolver = (username: string | undefined): UseVehicleReso
             nextToken,
           },
           authMode: 'userPool',
-        }) as { data: { listDvDS: { items: DvDRecord[]; nextToken: string | null } } };
+        }) as { data: { listDvDS: { items: DvDRecord[]; nextToken: string | null } }; errors?: any[] };
 
-        const items = response.data?.listDvDS?.items || [];
+        // Log partial errors but continue with available data
+        if (response.errors?.length) {
+          console.warn(`[DvD] Partial errors on page ${iteration + 1}:`, response.errors);
+        }
+
+        // Filter out null items (some may be null due to partial errors)
+        const items = (response.data?.listDvDS?.items || []).filter(Boolean);
         allDvDs.push(...items);
 
         nextToken = response.data?.listDvDS?.nextToken || null;
@@ -147,23 +153,23 @@ export const useVehicleResolver = (username: string | undefined): UseVehicleReso
 
     console.log(`[DvD] Pagination complete: ${allDvDs.length} total DvD records fetched in ${iteration} pages`);
 
-    // Filtrer par username du driver (côté client)
+    // Filtrer par sub du driver (côté client) - utilise dvDDriverSub ou driver.sub
     const filtered = allDvDs.filter((dvd) => {
-      const driverUsername = dvd.driver?.username;
+      const driverSub = dvd.dvDDriverSub || dvd.driver?.sub;
       const isActive = !dvd.unassignmentDate; // Seulement les affectations actives
-      const matchesUsername = driverUsername === targetUsername;
+      const matchesSub = driverSub === targetSub;
 
-      if (matchesUsername) {
-        console.log(`[DvD] Match found: driver.username="${driverUsername}", active=${isActive}, vehicle=${dvd.vehicle?.immat}`);
+      if (matchesSub) {
+        console.log(`[DvD] Match found: driver.sub="${driverSub}", active=${isActive}, vehicle=${dvd.vehicle?.immat}`);
       }
 
-      return matchesUsername && isActive;
+      return matchesSub && isActive;
     });
 
-    console.log(`[DvD] Filtered by username "${targetUsername}": ${filtered.length}/${allDvDs.length} active assignments`);
+    console.log(`[DvD] Filtered by sub "${targetSub}": ${filtered.length}/${allDvDs.length} active assignments`);
 
     return filtered;
-  }, []);
+  }, [client]);
 
   const resolveVehicles = useCallback(async (targetUsername: string) => {
     setLoading(true);
