@@ -20,6 +20,7 @@ const Dashboard: React.FC = () => {
   const {
     userEmail,
     username,
+    userSub,
     attributes,
     signOut
   } = useAuth();
@@ -28,7 +29,7 @@ const Dashboard: React.FC = () => {
     setImei
   } = useUserImei(username);
 
-  // Résolution des véhicules via DvD avec pagination
+  // Résolution des véhicules via DvD avec pagination - utilise le sub Cognito
   const {
     vehicles: dvdVehicles,
     imeis: dvdImeis,
@@ -36,7 +37,7 @@ const Dashboard: React.FC = () => {
     error: dvdError,
     totalFetched: dvdTotalFetched,
     refresh: refreshDvd,
-  } = useVehicleResolver(username);
+  } = useVehicleResolver(userSub);
 
   const [selectedVehicleImmat, setSelectedVehicleImmat] = useState<string | undefined>();
   const [imeiDraft, setImeiDraft] = useState<string>(imei ?? '');

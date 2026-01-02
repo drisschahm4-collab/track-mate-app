@@ -79,15 +79,18 @@ const AuthGate = ({ children }: PropsWithChildren) => {
     }
   }, []);
 
+  const userSub = attributes?.sub;
+
   const contextValue: AuthContextValue = useMemo(
     () => ({
       status,
       userEmail,
       username,
+      userSub,
       attributes,
       signOut: handleSignOut,
     }),
-    [status, userEmail, username, attributes, handleSignOut]
+    [status, userEmail, username, userSub, attributes, handleSignOut]
   );
 
   if (status === "loading") {
