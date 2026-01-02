@@ -145,9 +145,21 @@ export const useVehicleResolver = (username: string | undefined): UseVehicleReso
         iteration++;
 
         console.log(`[DvD] Page ${iteration}: ${items.length} items, total: ${allDvDs.length}, hasMore: ${!!nextToken}`);
-      } catch (err) {
-        console.error(`[DvD] Error fetching page ${iteration + 1}:`, err);
-        throw err;
+      } catch (err: any) {
+        // Amplify throws even when there's partial data with errors
+        // Check if we actually got data despite the "error"
+        if (err?.data?.listDvDS?.items) {
+          console.warn(`[DvD] Partial errors on page ${iteration + 1}, but got data:`, err.errors);
+          const items = (err.data.listDvDS.items || []).filter(Boolean);
+          allDvDs.push(...items);
+          nextToken = err.data.listDvDS.nextToken || null;
+          iteration++;
+          console.log(`[DvD] Page ${iteration}: ${items.length} items from partial response, total: ${allDvDs.length}`);
+        } else {
+          // Real error - no data at all
+          console.error(`[DvD] Error fetching page ${iteration + 1}:`, err);
+          throw err;
+        }
       }
     } while (nextToken && iteration < MAX_ITERATIONS);
 
