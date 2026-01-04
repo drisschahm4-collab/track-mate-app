@@ -51,7 +51,7 @@ const Dashboard: React.FC = () => {
     refresh,
     setImei: setHookImei,
     missingImei
-  } = useFlespiData(5000);
+  } = useFlespiData(30000);
   const {
     isPrivate,
     setPrivate
@@ -149,6 +149,8 @@ const Dashboard: React.FC = () => {
         private: next
       });
       setPrivate(next);
+      // Refresh après 1s pour mettre à jour l'état du device
+      setTimeout(() => refresh(), 1000);
     } catch (err) {
       console.error('[Dashboard] Privacy toggle error:', err);
     } finally {
@@ -398,7 +400,7 @@ const Dashboard: React.FC = () => {
         {/* Footer */}
         <footer className="text-center py-4">
           <p className="text-sm text-muted-foreground">
-            Connecté à Flespi • Device ID: 5369063
+            Connecté à Flespi • Actualisation : 30s
           </p>
         </footer>
       </div>
