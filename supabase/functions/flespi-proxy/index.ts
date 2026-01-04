@@ -23,7 +23,7 @@ serve(async (req) => {
     const desiredPrivacy = payload?.private;
     const overrideDeviceId = url.searchParams.get('deviceId') || payload?.deviceId;
 
-    console.log(`[Flespi Proxy] Action: ${action}`);
+    console.log(`[Flespi Proxy] Action: ${action}, IMEI: ${imei}, overrideDeviceId: ${overrideDeviceId}`);
 
     if (!FLESPI_TOKEN) {
       console.error('[Flespi Proxy] FLESPI_TOKEN not configured');
@@ -37,10 +37,14 @@ serve(async (req) => {
     let method = 'GET';
     let body: string | undefined;
 
-    const resolveDeviceId = async (): Promise<string> => {
-      if (overrideDeviceId) return overrideDeviceId;
+    const resolveDeviceId = async (): Promise<string | Response> => {
+      if (overrideDeviceId) {
+        console.log(`[Flespi Proxy] Using override deviceId: ${overrideDeviceId}`);
+        return String(overrideDeviceId);
+      }
       if (!imei) {
-        throw new Response(
+        console.error('[Flespi Proxy] No IMEI provided for device lookup');
+        return new Response(
           JSON.stringify({ error: 'IMEI required for device lookup' }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
@@ -48,6 +52,8 @@ serve(async (req) => {
 
       const encodedIdent = encodeURIComponent(`"${imei}"`);
       const lookupUrl = `https://flespi.io/gw/devices/configuration.ident=${encodedIdent}?fields=id`;
+      console.log(`[Flespi Proxy] Looking up device by IMEI: ${imei}, URL: ${lookupUrl}`);
+      
       const lookup = await fetch(lookupUrl, {
         headers: {
           'Content-Type': 'application/json',
@@ -57,9 +63,13 @@ serve(async (req) => {
 
       const lookupData = await lookup.json();
       const foundId = lookupData?.result?.[0]?.id;
+      
+      console.log(`[Flespi Proxy] IMEI lookup result:`, { imei, foundId, resultCount: lookupData?.result?.length });
+      
       if (!foundId) {
-        throw new Response(
-          JSON.stringify({ error: 'Device not found for provided IMEI' }),
+        console.error(`[Flespi Proxy] Device not found for IMEI: ${imei}`);
+        return new Response(
+          JSON.stringify({ error: 'Device not found for provided IMEI', imei }),
           { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
@@ -68,7 +78,19 @@ serve(async (req) => {
     };
 
     const needsResolvedDevice = ['device-data', 'device-telemetry', 'device-info', 'plugin-execute', 'history'].includes(action);
-    const deviceId = needsResolvedDevice ? await resolveDeviceId() : (overrideDeviceId || DEFAULT_DEVICE_ID);
+    let deviceId: string;
+    
+    if (needsResolvedDevice) {
+      const resolved = await resolveDeviceId();
+      if (resolved instanceof Response) {
+        return resolved; // Return error response directly
+      }
+      deviceId = resolved;
+    } else {
+      deviceId = overrideDeviceId ? String(overrideDeviceId) : DEFAULT_DEVICE_ID;
+    }
+    
+    console.log(`[Flespi Proxy] Resolved deviceId: ${deviceId} for action: ${action}`);
 
     switch (action) {
       case 'device-data':
