@@ -181,21 +181,29 @@ const Dashboard: React.FC = () => {
     const direction = type === 'lat' ? coord >= 0 ? 'N' : 'S' : coord >= 0 ? 'E' : 'O';
     return `${Math.abs(coord).toFixed(4)}° ${direction}`;
   };
+  // Pendant le chargement DvD - afficher UNIQUEMENT le loader plein écran
+  if (missingImei && dvdLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
+          <h2 className="font-display font-bold text-xl text-foreground">
+            Recherche de vos véhicules...
+          </h2>
+          <p className="text-muted-foreground">
+            Résolution en cours ({dvdTotalFetched} affectations analysées)
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Après chargement: erreur ou aucun véhicule trouvé
   if (missingImei) {
     return (
       <div className="min-h-screen bg-background p-4 flex items-center justify-center">
         <div className="glass-card p-8 text-center max-w-md space-y-4">
-          {dvdLoading ? (
-            <>
-              <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-              <h2 className="font-display font-bold text-xl text-foreground">
-                Recherche de vos véhicules...
-              </h2>
-              <p className="text-muted-foreground">
-                Résolution en cours ({dvdTotalFetched} affectations analysées)
-              </p>
-            </>
-          ) : dvdError ? (
+          {dvdError ? (
             <>
               <Zap className="h-8 w-8 text-destructive mx-auto" />
               <h2 className="font-display font-bold text-xl text-foreground">
