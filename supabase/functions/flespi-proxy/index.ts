@@ -94,8 +94,8 @@ serve(async (req) => {
 
     switch (action) {
       case 'device-data':
-        // Get latest messages from device
-        flespiUrl = `https://flespi.io/gw/devices/${deviceId}/messages?data={"count":1}`;
+        // Get latest message from device (reverse:true = newest first)
+        flespiUrl = `https://flespi.io/gw/devices/${deviceId}/messages?data={"count":1,"reverse":true}`;
         break;
       
       case 'device-telemetry':
