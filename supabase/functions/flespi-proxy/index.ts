@@ -128,9 +128,38 @@ serve(async (req) => {
         break;
       }
 
+      case 'check-privacy': {
+        // Vérifier si le device est assigné au plugin "Vie Privée" et lire fields.private
+        // Endpoint: GET /gw/plugins/1100337/devices/configuration.ident="IMEI"?fields=device_id,fields,auto_created
+        if (!imei) {
+          return new Response(
+            JSON.stringify({ error: 'IMEI required for privacy check' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        
+        const encodedIdent = encodeURIComponent(`"${imei}"`);
+        flespiUrl = `https://flespi.io/gw/plugins/${PLUGIN_ID}/devices/configuration.ident=${encodedIdent}?fields=device_id,fields,auto_created`;
+        console.log(`[Flespi Proxy] Checking privacy for IMEI: ${imei}`);
+        break;
+      }
+
       case 'assign-privacy': {
-        const deviceSelector = overrideDeviceId || (imei ? `configuration.ident=${encodeURIComponent(`"${imei}"`)}` : undefined);
-        if (!deviceSelector) {
+        // Assigner le plugin Vie Privée avec private=true/false
+        // Option A: par device_id (recommandée)
+        // Option B: par IMEI (selector)
+        
+        let deviceSelector: string;
+        
+        if (overrideDeviceId) {
+          // Option A: utiliser le device_id directement
+          deviceSelector = String(overrideDeviceId);
+          console.log(`[Flespi Proxy] Assigning privacy by device_id: ${deviceSelector}`);
+        } else if (imei) {
+          // Option B: utiliser le selector par IMEI
+          deviceSelector = `configuration.ident=${encodeURIComponent(`"${imei}"`)}`;
+          console.log(`[Flespi Proxy] Assigning privacy by IMEI selector: ${imei}`);
+        } else {
           return new Response(
             JSON.stringify({ error: 'Missing deviceId or IMEI for privacy assignment' }),
             { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -141,6 +170,8 @@ serve(async (req) => {
         flespiUrl = `https://flespi.io/gw/plugins/${PLUGIN_ID}/devices/${deviceSelector}`;
         method = 'POST';
         body = JSON.stringify({ fields: { private: privateField } });
+        
+        console.log(`[Flespi Proxy] Privacy assignment: plugin=${PLUGIN_ID}, private=${privateField}`);
         break;
       }
 
