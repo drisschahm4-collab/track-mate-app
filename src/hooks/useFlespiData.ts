@@ -95,6 +95,7 @@ export function useFlespiData(refreshInterval: number = 5000) {
           speed: message['position.speed'],
           heading: message['position.direction'],
           timestamp: messageTime,
+          private: message.private,
         });
       } else {
         setError('Aucune donnée disponible');
