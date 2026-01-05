@@ -105,27 +105,34 @@ export function useFlespiData(refreshInterval: number = 5000) {
     if (!targetImei) return;
 
     try {
-      const { data, error: deviceError } = await supabase.functions.invoke('flespi-proxy', {
+      // 1. Récupérer les infos de base du device
+      const { data: deviceData, error: deviceError } = await supabase.functions.invoke('flespi-proxy', {
         body: { action: 'device-info', imei: targetImei },
       });
 
-      if (deviceError) {
-        throw new Error(deviceError.message);
+      if (deviceError) throw new Error(deviceError.message);
+
+      const info = deviceData?.result?.[0];
+      const imei = info?.configuration?.ident;
+      const immatriculation = info?.name;
+
+      // 2. Vérifier l'état vie privée via l'endpoint dédié
+      // GET /gw/plugins/1100337/devices/configuration.ident="IMEI"?fields=device_id,fields,auto_created
+      const { data: privacyData, error: privacyError } = await supabase.functions.invoke('flespi-proxy', {
+        body: { action: 'check-privacy', imei: targetImei },
+      });
+
+      if (privacyError) {
+        console.warn('[Flespi] Privacy check failed:', privacyError);
       }
 
-      const info = data?.result?.[0];
-      const imei =
-        info?.configuration?.ident ||
-        info?.configuration?.device?.ident ||
-        info?.ident;
-      const immatriculation =
-        info?.name ||
-        info?.configuration?.name ||
-        info?.device?.name;
-      const plugin = Array.isArray(info?.plugins)
-        ? info.plugins.find((p: any) => p?.id === 1100337 || p?.plugin_id === 1100337)
-        : undefined;
-      const privacyEnabled = plugin?.private === true;
+      // Interpréter la réponse:
+      // - result vide [] = plugin non assigné au device
+      // - result[0].fields.private === true = vie privée activée
+      // - result[0].fields.private === false = assigné mais désactivé
+      const pluginAssignment = privacyData?.result?.[0];
+      const isAssigned = !!pluginAssignment;
+      const privacyEnabled = pluginAssignment?.fields?.private === true;
 
       setVehicleInfo({
         id: info?.id,
@@ -133,12 +140,14 @@ export function useFlespiData(refreshInterval: number = 5000) {
         immatriculation,
         privacyEnabled,
       });
-      console.info('[Flespi] Device info', {
-        id: info?.id,
+
+      console.info('[Flespi] Device info + privacy check', {
+        deviceId: info?.id,
         imei,
         immatriculation,
-        privacyPlugin: privacyEnabled,
-        rawPlugins: info?.plugins,
+        pluginAssigned: isAssigned,
+        privacyEnabled,
+        rawPrivacyResult: privacyData?.result,
       });
     } catch (err) {
       console.error('[useFlespiData] Device info error:', err);
