@@ -30,6 +30,7 @@ export interface FlespiMessage {
   'battery.level'?: number;
   'engine.ignition.status'?: boolean;
   server_timestamp?: number;
+  private?: boolean;
 }
 
 export function useFlespiData(refreshInterval: number = 5000) {
@@ -79,6 +80,11 @@ export function useFlespiData(refreshInterval: number = 5000) {
           batteryLevel: message['battery.level'],
           ignition: message['engine.ignition.status'],
         });
+        
+        // Update privacy status from telemetry message
+        const isPrivate = message.private === true;
+        setVehicleInfo(prev => prev ? { ...prev, privacyEnabled: isPrivate } : prev);
+        
         setLastUpdate(new Date());
         setError(null);
         setMissingImei(false);
@@ -105,7 +111,6 @@ export function useFlespiData(refreshInterval: number = 5000) {
     if (!targetImei) return;
 
     try {
-      // 1. Récupérer les infos de base du device
       const { data: deviceData, error: deviceError } = await supabase.functions.invoke('flespi-proxy', {
         body: { action: 'device-info', imei: targetImei },
       });
@@ -113,41 +118,19 @@ export function useFlespiData(refreshInterval: number = 5000) {
       if (deviceError) throw new Error(deviceError.message);
 
       const info = deviceData?.result?.[0];
-      const imei = info?.configuration?.ident;
-      const immatriculation = info?.name;
-
-      // 2. Vérifier l'état vie privée via l'endpoint dédié
-      // GET /gw/plugins/1100337/devices/configuration.ident="IMEI"?fields=device_id,fields,auto_created
-      const { data: privacyData, error: privacyError } = await supabase.functions.invoke('flespi-proxy', {
-        body: { action: 'check-privacy', imei: targetImei },
-      });
-
-      if (privacyError) {
-        console.warn('[Flespi] Privacy check failed:', privacyError);
-      }
-
-      // Interpréter la réponse:
-      // - result vide [] = plugin non assigné au device
-      // - result[0].fields.private === true = vie privée activée
-      // - result[0].fields.private === false = assigné mais désactivé
-      const pluginAssignment = privacyData?.result?.[0];
-      const isAssigned = !!pluginAssignment;
-      const privacyEnabled = pluginAssignment?.fields?.private === true;
-
-      setVehicleInfo({
+      
+      setVehicleInfo(prev => ({
+        ...prev,
         id: info?.id,
-        imei,
-        immatriculation,
-        privacyEnabled,
-      });
+        imei: info?.configuration?.ident,
+        immatriculation: info?.name,
+        // privacyEnabled is updated by fetchData from telemetry
+      }));
 
-      console.info('[Flespi] Device info + privacy check', {
+      console.info('[Flespi] Device info', {
         deviceId: info?.id,
-        imei,
-        immatriculation,
-        pluginAssigned: isAssigned,
-        privacyEnabled,
-        rawPrivacyResult: privacyData?.result,
+        imei: info?.configuration?.ident,
+        immatriculation: info?.name,
       });
     } catch (err) {
       console.error('[useFlespiData] Device info error:', err);
