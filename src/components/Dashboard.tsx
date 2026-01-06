@@ -16,7 +16,7 @@ import { assignPrivacyPlugin } from '@/integrations/flespi';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-const Dashboard: React.FC = () => {
+const Dashboard = React.forwardRef<HTMLDivElement>((props, ref) => {
   const {
     userEmail,
     username,
@@ -270,7 +270,7 @@ const Dashboard: React.FC = () => {
         </div>
       </div>;
   }
-  return <div className="min-h-screen bg-background">
+  return <div ref={ref} className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto p-4 space-y-4">
         <Header isOnline={vehicleData?.isOnline ?? false} lastUpdate={lastUpdate} onRefresh={refresh} loading={loading} isPrivate={isPrivate} onTogglePrivacy={handleTogglePrivacyRemote} userEmail={userEmail} onSignOut={handleSignOut} signingOut={signingOut} privacyPending={privacyPending} />
 
@@ -413,5 +413,7 @@ const Dashboard: React.FC = () => {
         </footer>
       </div>
     </div>;
-};
+});
+Dashboard.displayName = "Dashboard";
+
 export default Dashboard;

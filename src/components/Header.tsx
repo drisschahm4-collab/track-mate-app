@@ -18,18 +18,19 @@ interface HeaderProps {
   privacyPending?: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ 
-  isOnline, 
-  lastUpdate, 
-  onRefresh, 
-  loading,
-  isPrivate = false,
-  onTogglePrivacy,
-  userEmail,
-  onSignOut,
-  signingOut,
-  privacyPending = false
-}) => {
+const Header = React.forwardRef<HTMLElement, HeaderProps>(
+  ({ 
+    isOnline, 
+    lastUpdate, 
+    onRefresh, 
+    loading,
+    isPrivate = false,
+    onTogglePrivacy,
+    userEmail,
+    onSignOut,
+    signingOut,
+    privacyPending = false
+  }, ref) => {
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('fr-FR', {
       hour: '2-digit',
@@ -39,7 +40,7 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="glass-card p-4 flex items-center justify-between">
+    <header ref={ref} className="glass-card p-4 flex items-center justify-between">
       <div className="flex items-center gap-4">
         <div className="p-3 rounded-xl bg-primary/20">
           <Truck className="h-6 w-6 text-primary" />
@@ -126,6 +127,7 @@ const Header: React.FC<HeaderProps> = ({
       </div>
     </header>
   );
-};
+});
+Header.displayName = "Header";
 
 export default Header;

@@ -10,7 +10,8 @@ interface VehicleMapProps {
   isPrivate?: boolean;
 }
 
-const VehicleMap: React.FC<VehicleMapProps> = ({ vehicleData, className = '', isPrivate = false }) => {
+const VehicleMap = React.forwardRef<HTMLDivElement, VehicleMapProps>(
+  ({ vehicleData, className = '', isPrivate = false }, ref) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
   const marker = useRef<L.Marker | null>(null);
@@ -130,7 +131,7 @@ const VehicleMap: React.FC<VehicleMapProps> = ({ vehicleData, className = '', is
   }, []);
 
   return (
-    <div className={`relative overflow-hidden rounded-xl ${className}`}>
+    <div ref={ref} className={`relative overflow-hidden rounded-xl ${className}`}>
       <div ref={mapContainer} className="absolute inset-0" />
       {!mapLoaded && (
         <div className="absolute inset-0 flex items-center justify-center bg-card/80 backdrop-blur">
@@ -150,6 +151,7 @@ const VehicleMap: React.FC<VehicleMapProps> = ({ vehicleData, className = '', is
       <div className="absolute inset-0 pointer-events-none rounded-xl ring-1 ring-inset ring-border/30" />
     </div>
   );
-};
+});
+VehicleMap.displayName = "VehicleMap";
 
 export default VehicleMap;
