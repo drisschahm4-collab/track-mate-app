@@ -99,6 +99,7 @@ export function useFlespiData(refreshInterval: number = 5000) {
           heading: message['position.direction'],
           timestamp: messageTime,
           private: message.private,
+          address: message['gisgraphy.address'],
         });
       } else {
         setError('Aucune donnée disponible');
