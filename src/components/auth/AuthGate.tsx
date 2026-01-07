@@ -55,12 +55,11 @@ const AuthGate = ({ children }: PropsWithChildren) => {
         setError(
           nextStep?.signInStep
             ? `Action requise: ${nextStep.signInStep.replace(/_/g, " ").toLowerCase()}`
-            : "Connexion incomplète, vérifiez les étapes supplémentaires."
+            : "Connexion incomplète, vérifiez les étapes supplémentaires.",
         );
       }
     } catch (authError) {
-      const message =
-        authError instanceof Error ? authError.message : "Impossible de se connecter pour le moment.";
+      const message = authError instanceof Error ? authError.message : "Impossible de se connecter pour le moment.";
       setError(message);
       setStatus("signedOut");
     } finally {
@@ -90,7 +89,7 @@ const AuthGate = ({ children }: PropsWithChildren) => {
       attributes,
       signOut: handleSignOut,
     }),
-    [status, userEmail, username, userSub, attributes, handleSignOut]
+    [status, userEmail, username, userSub, attributes, handleSignOut],
   );
 
   if (status === "loading") {
@@ -114,11 +113,9 @@ const AuthGate = ({ children }: PropsWithChildren) => {
                 <ShieldCheck className="h-4 w-4 text-primary" />
                 <span className="text-sm text-muted-foreground">Connexion requise</span>
               </div>
-              <h1 className="text-2xl font-display font-bold text-foreground">
-                Espace sécurisé FleetTrack
-              </h1>
+              <h1 className="text-2xl font-display font-bold text-foreground">Espace sécurisé FleetTrack</h1>
               <p className="text-muted-foreground max-w-lg mx-auto">
-                Authentifiez-vous avec Cognito pour accéder au tableau de bord et verrouiller les données de suivi.
+                Authentifiez-vous pour accéder au tableau de bord et verrouiller les données de suivi.
               </p>
             </div>
 
@@ -128,7 +125,9 @@ const AuthGate = ({ children }: PropsWithChildren) => {
                   <LogIn className="h-5 w-5 text-primary" />
                   Se connecter
                 </CardTitle>
-                <CardDescription>Identifiez-vous avec votre nom d&apos;utilisateur et votre mot de passe.</CardDescription>
+                <CardDescription>
+                  Identifiez-vous avec votre nom d&apos;utilisateur et votre mot de passe.
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <form className="space-y-4" onSubmit={handleSubmit}>
@@ -139,9 +138,7 @@ const AuthGate = ({ children }: PropsWithChildren) => {
                       type="text"
                       required
                       value={credentials.username}
-                      onChange={(event) =>
-                        setCredentials((prev) => ({ ...prev, username: event.target.value }))
-                      }
+                      onChange={(event) => setCredentials((prev) => ({ ...prev, username: event.target.value }))}
                       placeholder="utilisateur123"
                     />
                   </div>
@@ -152,9 +149,7 @@ const AuthGate = ({ children }: PropsWithChildren) => {
                       type="password"
                       required
                       value={credentials.password}
-                      onChange={(event) =>
-                        setCredentials((prev) => ({ ...prev, password: event.target.value }))
-                      }
+                      onChange={(event) => setCredentials((prev) => ({ ...prev, password: event.target.value }))}
                       placeholder="••••••••"
                     />
                   </div>
