@@ -201,11 +201,11 @@ const Dashboard = React.forwardRef<HTMLDivElement>((props, ref) => {
   if (missingImei) {
     return (
       <div className="min-h-screen bg-background p-4 flex items-center justify-center">
-        <div className="glass-card p-8 text-center max-w-md space-y-4">
+        <div className="glass-card p-6 md:p-8 text-center max-w-md space-y-4">
           {dvdError ? (
             <>
               <Zap className="h-8 w-8 text-destructive mx-auto" />
-              <h2 className="font-display font-bold text-xl text-foreground">
+              <h2 className="font-display font-bold text-lg md:text-xl text-foreground">
                 Erreur de résolution
               </h2>
               <p className="text-muted-foreground text-sm">{dvdError}</p>
@@ -215,30 +215,15 @@ const Dashboard = React.forwardRef<HTMLDivElement>((props, ref) => {
             </>
           ) : (
             <>
-              <Car className="h-8 w-8 text-muted-foreground mx-auto" />
-              <h2 className="font-display font-bold text-xl text-foreground">
-                Aucun véhicule assigné
+              <Loader2 className="h-10 w-10 md:h-12 md:w-12 animate-spin mx-auto text-primary" />
+              <h2 className="font-display font-bold text-lg md:text-xl text-foreground">
+                Recherche de vos véhicules...
               </h2>
-              <p className="text-muted-foreground">
-                Aucune affectation active trouvée pour votre compte.
-                Vous pouvez entrer un IMEI manuellement.
+              <p className="text-muted-foreground text-sm">
+                Veuillez patienter pendant la résolution
               </p>
-              <form onSubmit={handleImeiSubmit} className="space-y-3">
-                <Input
-                  value={imeiDraft}
-                  onChange={(e) => setImeiDraft(e.target.value)}
-                  placeholder="IMEI (ex: 864636060105273)"
-                />
-                <Button type="submit" className="w-full">
-                  Utiliser cet IMEI
-                </Button>
-              </form>
             </>
           )}
-          
-          <Badge variant="secondary" className="text-xs">
-            User: {userSub?.substring(0, 8)}... | DvD: {dvdTotalFetched}
-          </Badge>
           
           <Button 
             variant="ghost" 
@@ -270,7 +255,7 @@ const Dashboard = React.forwardRef<HTMLDivElement>((props, ref) => {
       </div>;
   }
   return <div ref={ref} className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto p-4 space-y-4">
+      <div className="max-w-7xl mx-auto p-3 md:p-4 space-y-3 md:space-y-4">
         <Header isOnline={vehicleData?.isOnline ?? false} lastUpdate={lastUpdate} onRefresh={refresh} loading={loading} isPrivate={isPrivate} onTogglePrivacy={handleTogglePrivacyRemote} userEmail={userEmail} onSignOut={handleSignOut} signingOut={signingOut} privacyPending={privacyPending} />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -303,33 +288,33 @@ const Dashboard = React.forwardRef<HTMLDivElement>((props, ref) => {
             </Card>
           )}
 
-          <div className="glass-card p-4 border border-primary/30">
+          <div className="glass-card p-3 md:p-4 border border-primary/30">
             <p className="text-xs uppercase text-muted-foreground mb-1">IMEI</p>
-            <p className="font-display text-lg font-semibold text-foreground">
+            <p className="font-display text-sm md:text-lg font-semibold text-foreground truncate">
               {vehicleInfo?.imei ?? '—'}
             </p>
           </div>
-          <div className="glass-card p-4">
+          <div className="glass-card p-3 md:p-4">
             <p className="text-xs uppercase text-muted-foreground mb-1">Immatriculation</p>
-            <p className="font-display text-lg font-semibold text-foreground">
+            <p className="font-display text-sm md:text-lg font-semibold text-foreground">
               {displayImmat ?? '—'}
             </p>
           </div>
-          <div className="glass-card p-4 lg:col-span-1">
+          <div className="glass-card p-3 md:p-4 lg:col-span-1">
             <div className="flex items-center justify-between mb-1">
               <p className="text-xs uppercase text-muted-foreground">Adresse</p>
               <Button size="sm" variant="ghost" onClick={refresh} className="h-6 w-6 p-0">
                 <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
               </Button>
             </div>
-            <p className="font-display text-lg font-semibold text-foreground truncate">
+            <p className="font-display text-sm md:text-lg font-semibold text-foreground truncate">
               {vehicleData?.address ?? `[Aucune adresse - lat: ${vehicleData?.latitude?.toFixed(4) ?? '?'}]`}
             </p>
           </div>
         </div>
 
         {/* Map Section */}
-        <VehicleMap vehicleData={vehicleData} className="h-[40vh] min-h-[300px] shadow-card" isPrivate={isPrivate} />
+        <VehicleMap vehicleData={vehicleData} className="h-[35vh] md:h-[40vh] min-h-[250px] md:min-h-[300px] shadow-card" isPrivate={isPrivate} />
 
         {/* Metrics Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
