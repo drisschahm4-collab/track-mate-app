@@ -58,7 +58,7 @@ const Dashboard = React.forwardRef<HTMLDivElement>((props, ref) => {
   } = usePrivacyMode();
   const [signingOut, setSigningOut] = useState(false);
   const [privacyPending, setPrivacyPending] = useState(false);
-  const [ignorePrivacySync, setIgnorePrivacySync] = useState(false);
+  
   useEffect(() => {
     setImeiDraft(imei ?? '');
     setHookImei(imei);
@@ -125,12 +125,6 @@ const Dashboard = React.forwardRef<HTMLDivElement>((props, ref) => {
     }
   };
 
-  useEffect(() => {
-    if (!ignorePrivacySync && vehicleInfo?.privacyEnabled !== undefined) {
-      console.info('[Privacy] Sync from Flespi:', vehicleInfo.privacyEnabled);
-      setPrivate(vehicleInfo.privacyEnabled);
-    }
-  }, [vehicleInfo?.privacyEnabled, setPrivate, ignorePrivacySync]);
   const handleImeiSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     const trimmed = imeiDraft.trim();
@@ -144,8 +138,7 @@ const Dashboard = React.forwardRef<HTMLDivElement>((props, ref) => {
     if (!imei && !vehicleInfo?.id) return;
     const next = !isPrivate;
     setPrivacyPending(true);
-    setIgnorePrivacySync(true); // Ignorer la sync pendant 10s
-    console.info('[Privacy] Toggle to:', next, '- sync ignored for 10s');
+    console.info('[Privacy] Manual toggle to:', next);
     try {
       await assignPrivacyPlugin({
         deviceId: vehicleInfo?.id,
@@ -153,16 +146,9 @@ const Dashboard = React.forwardRef<HTMLDivElement>((props, ref) => {
         private: next
       });
       setPrivate(next);
-      // Refresh après 1s pour mettre à jour l'état du device
       setTimeout(() => refresh(), 1000);
-      // Réactiver la sync après 10s (temps pour Flespi de propager)
-      setTimeout(() => {
-        setIgnorePrivacySync(false);
-        console.info('[Privacy] Sync re-enabled');
-      }, 10000);
     } catch (err) {
       console.error('[Dashboard] Privacy toggle error:', err);
-      setIgnorePrivacySync(false); // Réactiver en cas d'erreur
     } finally {
       setPrivacyPending(false);
     }
