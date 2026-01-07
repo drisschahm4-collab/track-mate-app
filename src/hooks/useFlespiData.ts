@@ -11,6 +11,7 @@ export interface VehicleData {
   batteryLevel?: number;
   ignition?: boolean;
   altitude?: number;
+  address?: string;
 }
 
 export interface VehicleInfo {
@@ -31,6 +32,7 @@ export interface FlespiMessage {
   'engine.ignition.status'?: boolean;
   server_timestamp?: number;
   private?: boolean;
+  'gisgraphy.address'?: string;
 }
 
 export function useFlespiData(refreshInterval: number = 5000) {
@@ -79,6 +81,7 @@ export function useFlespiData(refreshInterval: number = 5000) {
           isOnline,
           batteryLevel: message['battery.level'],
           ignition: message['engine.ignition.status'],
+          address: message['gisgraphy.address'],
         });
         
         // Update privacy status from telemetry message

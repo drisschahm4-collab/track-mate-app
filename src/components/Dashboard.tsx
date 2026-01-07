@@ -176,7 +176,6 @@ const Dashboard = React.forwardRef<HTMLDivElement>((props, ref) => {
     });
   };
   const formatCoordinate = (coord: number, type: 'lat' | 'lng') => {
-    if (isPrivate) return '****';
     if (!coord) return '-.----';
     const direction = type === 'lat' ? coord >= 0 ? 'N' : 'S' : coord >= 0 ? 'E' : 'O';
     return `${Math.abs(coord).toFixed(4)}° ${direction}`;
@@ -316,50 +315,13 @@ const Dashboard = React.forwardRef<HTMLDivElement>((props, ref) => {
               {displayImmat ?? '—'}
             </p>
           </div>
-          <div className="glass-card p-4">
-            <p className="text-xs uppercase text-muted-foreground mb-1">Position actuelle</p>
-            <p className="font-display text-lg font-semibold text-foreground">
-              {vehicleData ? `${formatCoordinate(vehicleData.latitude, 'lat')} / ${formatCoordinate(vehicleData.longitude, 'lng')}` : '—'}
+          <div className="glass-card p-4 lg:col-span-1">
+            <p className="text-xs uppercase text-muted-foreground mb-1">Adresse</p>
+            <p className="font-display text-lg font-semibold text-foreground truncate">
+              {vehicleData?.address ?? 'Adresse non disponible'}
             </p>
           </div>
         </div>
-
-        <Card className="glass-card p-4">
-          <div className="flex flex-wrap items-center gap-3 mb-3">
-            <p className="text-xs uppercase text-muted-foreground">Log véhicule</p>
-            <Badge variant="secondary">IMEI source: {imeiSource ?? 'inconnu'}</Badge>
-            {vehicleInfo?.id && <Badge variant="outline">Device ID: {vehicleInfo.id}</Badge>}
-            {vehicleInfo?.privacyEnabled !== undefined && <Badge variant={vehicleInfo.privacyEnabled ? 'default' : 'outline'}>
-                Vie privée: {vehicleInfo.privacyEnabled ? 'ON' : 'OFF'}
-              </Badge>}
-            <Badge variant={dvdLoading ? 'secondary' : dvdError ? 'destructive' : 'outline'}>
-              DvD: {dvdLoading ? 'chargement...' : dvdError ? 'erreur' : `${dvdTotalFetched} affectations`}
-            </Badge>
-          </div>
-          <pre className="bg-secondary/50 rounded-lg p-3 text-sm overflow-auto max-h-64">
-          {JSON.stringify({
-            imei: imei || vehicleInfo?.imei,
-            imeiSource,
-            immatriculation: displayImmat,
-            deviceId: vehicleInfo?.id,
-            privacy: vehicleInfo?.privacyEnabled,
-            lastUpdate: lastUpdate?.toISOString(),
-            coords: vehicleData ? {
-              lat: vehicleData.latitude,
-              lng: vehicleData.longitude,
-              speed: vehicleData.speed,
-              heading: vehicleData.heading
-            } : null,
-            dvd: {
-              loading: dvdLoading,
-              error: dvdError,
-              totalFetched: dvdTotalFetched,
-              vehicles: dvdVehicles.map(v => ({ immat: v.immat, imei: v.vehicleDeviceImei, nom: v.nomVehicule })),
-              selectedImmat: selectedVehicleImmat,
-            }
-          }, null, 2)}
-          </pre>
-        </Card>
 
         {/* Map Section */}
         <VehicleMap vehicleData={vehicleData} className="h-[40vh] min-h-[300px] shadow-card" isPrivate={isPrivate} />
