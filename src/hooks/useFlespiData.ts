@@ -33,6 +33,7 @@ export interface FlespiMessage {
   server_timestamp?: number;
   private?: boolean;
   'gisgraphy.address'?: string;
+  ident?: string;
 }
 
 export function useFlespiData(refreshInterval: number = 5000) {
@@ -67,6 +68,8 @@ export function useFlespiData(refreshInterval: number = 5000) {
 
       if (data?.result && data.result.length > 0) {
         const message: FlespiMessage = data.result[0];
+        console.info('[Flespi] Raw message:', JSON.stringify(message));
+        console.info('[Flespi] Request IMEI:', targetImei, '| Message ident:', message.ident);
         const now = Date.now() / 1000;
         const messageTime = message.timestamp || message.server_timestamp || 0;
         const isOnline = (now - messageTime) < 300; // 5 minutes threshold

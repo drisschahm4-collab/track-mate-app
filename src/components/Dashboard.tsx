@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { Gauge, Navigation, Clock, MapPin, Battery, Zap, Car, Loader2, LogOut } from 'lucide-react';
+import { Gauge, Navigation, Clock, MapPin, Battery, Zap, Car, Loader2, LogOut, RefreshCw } from 'lucide-react';
 import { useFlespiData } from '@/hooks/useFlespiData';
 import { usePrivacyMode } from '@/hooks/usePrivacyMode';
 import { useAuth } from '@/hooks/useAuth';
@@ -316,9 +316,14 @@ const Dashboard = React.forwardRef<HTMLDivElement>((props, ref) => {
             </p>
           </div>
           <div className="glass-card p-4 lg:col-span-1">
-            <p className="text-xs uppercase text-muted-foreground mb-1">Adresse</p>
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-xs uppercase text-muted-foreground">Adresse</p>
+              <Button size="sm" variant="ghost" onClick={refresh} className="h-6 w-6 p-0">
+                <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
+              </Button>
+            </div>
             <p className="font-display text-lg font-semibold text-foreground truncate">
-              {vehicleData?.address ?? 'Adresse non disponible'}
+              {vehicleData?.address ?? `[Aucune adresse - lat: ${vehicleData?.latitude?.toFixed(4) ?? '?'}]`}
             </p>
           </div>
         </div>
