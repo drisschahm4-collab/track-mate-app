@@ -292,7 +292,7 @@ const Dashboard = React.forwardRef<HTMLDivElement>((props, ref) => {
                 <RefreshCw className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
               </Button>
             </div>
-            <p className="font-display text-sm md:text-lg font-semibold text-foreground truncate">
+                    <p className="font-display text-sm md:text-lg font-semibold text-foreground break-words">
               {vehicleData?.address ?? `[Aucune adresse - lat: ${vehicleData?.latitude?.toFixed(4) ?? "?"}]`}
             </p>
           </div>
