@@ -173,7 +173,6 @@ const Dashboard = React.forwardRef<HTMLDivElement>((props, ref) => {
         <div className="text-center space-y-4">
           <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
           <h2 className="font-display font-bold text-xl text-foreground">Recherche de vos véhicules...</h2>
-          <p className="text-muted-foreground">Résolution en cours ({dvdTotalFetched} affectations analysées)</p>
         </div>
       </div>
     );
