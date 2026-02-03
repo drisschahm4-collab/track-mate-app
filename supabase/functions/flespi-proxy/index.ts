@@ -167,17 +167,20 @@ serve(async (req) => {
 
         const privateField = typeof desiredPrivacy === 'boolean' ? desiredPrivacy : true;
         
-        // 1. Appel plugin principal (1100337) - POST avec private=true/false
+        // 1. Appel plugin principal (1100337)
+        // - Activer vie privée → POST avec private=true
+        // - Désactiver vie privée → DELETE (retirer le device)
         const mainPluginUrl = `https://flespi.io/gw/plugins/${PLUGIN_ID}/devices/${deviceSelector}`;
-        console.log(`[Flespi Proxy] Calling main plugin: POST ${mainPluginUrl}, private=${privateField}`);
+        const mainMethod = privateField ? 'POST' : 'DELETE';
+        console.log(`[Flespi Proxy] Calling main plugin: ${mainMethod} ${mainPluginUrl}`);
         
         const mainResponse = await fetch(mainPluginUrl, {
-          method: 'POST',
+          method: mainMethod,
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `FlespiToken ${FLESPI_TOKEN}`,
           },
-          body: JSON.stringify({ fields: { private: privateField } }),
+          body: mainMethod === 'POST' ? JSON.stringify({ fields: { private: true } }) : undefined,
         });
         
         const mainData = await mainResponse.json();
