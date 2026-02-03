@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const FLESPI_TOKEN = Deno.env.get('FLESPI_TOKEN');
 const PLUGIN_ID = '1100337';
+const ERASE_PLUGIN_ID = '1110097';
 const DEFAULT_DEVICE_ID = Deno.env.get('FLESPI_DEVICE_ID') || '5369063';
 
 const corsHeaders = {
@@ -145,18 +146,16 @@ serve(async (req) => {
       }
 
       case 'assign-privacy': {
-        // Assigner le plugin Vie Privée avec private=true/false
+        // Assigner les plugins Vie Privée (1100337) et Erase location (1110097)
         // Option A: par device_id (recommandée)
         // Option B: par IMEI (selector)
         
         let deviceSelector: string;
         
         if (overrideDeviceId) {
-          // Option A: utiliser le device_id directement
           deviceSelector = String(overrideDeviceId);
           console.log(`[Flespi Proxy] Assigning privacy by device_id: ${deviceSelector}`);
         } else if (imei) {
-          // Option B: utiliser le selector par IMEI
           deviceSelector = `configuration.ident=${encodeURIComponent(`"${imei}"`)}`;
           console.log(`[Flespi Proxy] Assigning privacy by IMEI selector: ${imei}`);
         } else {
@@ -167,12 +166,63 @@ serve(async (req) => {
         }
 
         const privateField = typeof desiredPrivacy === 'boolean' ? desiredPrivacy : true;
-        flespiUrl = `https://flespi.io/gw/plugins/${PLUGIN_ID}/devices/${deviceSelector}`;
-        method = 'POST';
-        body = JSON.stringify({ fields: { private: privateField } });
         
-        console.log(`[Flespi Proxy] Privacy assignment: plugin=${PLUGIN_ID}, private=${privateField}`);
-        break;
+        // 1. Appel plugin principal (1100337) - POST avec private=true/false
+        const mainPluginUrl = `https://flespi.io/gw/plugins/${PLUGIN_ID}/devices/${deviceSelector}`;
+        console.log(`[Flespi Proxy] Calling main plugin: POST ${mainPluginUrl}, private=${privateField}`);
+        
+        const mainResponse = await fetch(mainPluginUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `FlespiToken ${FLESPI_TOKEN}`,
+          },
+          body: JSON.stringify({ fields: { private: privateField } }),
+        });
+        
+        const mainData = await mainResponse.json();
+        console.log(`[Flespi Proxy] Main plugin response: ${mainResponse.status}`);
+        
+        if (!mainResponse.ok) {
+          console.error('[Flespi Proxy] Main plugin error:', mainData);
+          return new Response(
+            JSON.stringify({ error: 'Main privacy plugin error', details: mainData }),
+            { status: mainResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        
+        // 2. Appel plugin Erase location (1110097)
+        // - Activer vie privée → POST (assigner le device)
+        // - Désactiver vie privée → DELETE (retirer le device)
+        const erasePluginUrl = `https://flespi.io/gw/plugins/${ERASE_PLUGIN_ID}/devices/${deviceSelector}`;
+        const eraseMethod = privateField ? 'POST' : 'DELETE';
+        console.log(`[Flespi Proxy] Calling erase plugin: ${eraseMethod} ${erasePluginUrl}`);
+        
+        const eraseResponse = await fetch(erasePluginUrl, {
+          method: eraseMethod,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `FlespiToken ${FLESPI_TOKEN}`,
+          },
+          body: eraseMethod === 'POST' ? JSON.stringify({}) : undefined,
+        });
+        
+        const eraseData = await eraseResponse.json();
+        console.log(`[Flespi Proxy] Erase plugin response: ${eraseResponse.status}`);
+        
+        if (!eraseResponse.ok) {
+          console.error('[Flespi Proxy] Erase plugin error:', eraseData);
+          // On continue même si erreur sur le 2ème plugin, le principal a fonctionné
+        }
+        
+        return new Response(
+          JSON.stringify({ 
+            mainPlugin: mainData, 
+            erasePlugin: eraseData,
+            private: privateField 
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
 
       case 'history':
