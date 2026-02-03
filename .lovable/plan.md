@@ -1,65 +1,69 @@
 
 
-## Plan : Ajouter le plugin 1110097 (Erase location) au toggle vie privée
+## Plan : Supprimer le device des deux plugins lors de la désactivation
 
-### Contexte
-
-Actuellement, quand on toggle la vie privée :
-- **Plugin 1100337** : "Vie Privée" → véhicule assigné avec `private: true/false`
-
-Tu veux ajouter :
-- **Plugin 1110097** : "Vie Privée - Erase location" → véhicule assigné/retiré en même temps
-
-### Logique
+### Problème actuel
 
 | Action | Plugin 1100337 | Plugin 1110097 |
 |--------|----------------|----------------|
-| Activer vie privée | POST avec `private: true` | POST (assigner le device) |
-| Désactiver vie privée | POST avec `private: false` | DELETE (retirer le device) |
+| Activer | POST (assigner + private=true) | POST (assigner) |
+| Désactiver | POST (private=false) ❌ | DELETE ✅ |
 
-### Modifications
+Le plugin 1100337 garde le device assigné avec `private=false` au lieu de le supprimer.
 
-#### 1. Edge Function (`supabase/functions/flespi-proxy/index.ts`)
+### Nouvelle logique souhaitée
 
-Ajouter une constante pour le second plugin :
+| Action | Plugin 1100337 | Plugin 1110097 |
+|--------|----------------|----------------|
+| Activer | POST (assigner + private=true) | POST (assigner) |
+| Désactiver | **DELETE** (retirer) | DELETE (retirer) |
+
+### Modification
+
+**Fichier** : `supabase/functions/flespi-proxy/index.ts`
+
+**Ligne 170-181** - Changer la logique du plugin principal :
+
 ```typescript
-const PLUGIN_ID = '1100337';
-const ERASE_PLUGIN_ID = '1110097';  // Nouveau
-```
+// AVANT
+const mainPluginUrl = `https://flespi.io/gw/plugins/${PLUGIN_ID}/devices/${deviceSelector}`;
+const mainResponse = await fetch(mainPluginUrl, {
+  method: 'POST',
+  body: JSON.stringify({ fields: { private: privateField } }),
+});
 
-Modifier le case `assign-privacy` pour :
-1. Appeler le plugin 1100337 (existant)
-2. Appeler le plugin 1110097 :
-   - Si `private: true` → POST pour assigner
-   - Si `private: false` → DELETE pour retirer
+// APRÈS
+const mainPluginUrl = `https://flespi.io/gw/plugins/${PLUGIN_ID}/devices/${deviceSelector}`;
+const mainMethod = privateField ? 'POST' : 'DELETE';
+const mainResponse = await fetch(mainPluginUrl, {
+  method: mainMethod,
+  body: mainMethod === 'POST' ? JSON.stringify({ fields: { private: true } }) : undefined,
+});
+```
 
 ### Détails techniques
 
 ```text
-┌─────────────────┐
-│  Toggle Privacy │
-└────────┬────────┘
-         │
-         ▼
+┌─────────────────────┐
+│  Désactiver Privacy │
+└──────────┬──────────┘
+           │
+           ▼
 ┌─────────────────────────────────┐
 │  Edge Function: assign-privacy  │
-└────────┬───────────────┬────────┘
-         │               │
-         ▼               ▼
-┌─────────────────┐ ┌─────────────────────┐
-│ Plugin 1100337  │ │ Plugin 1110097      │
-│ POST private=X  │ │ POST (on) / DEL (off)│
-└─────────────────┘ └─────────────────────┘
+│  private = false                │
+└──────────┬──────────────────────┘
+           │
+     ┌─────┴─────┐
+     ▼           ▼
+┌─────────┐  ┌─────────┐
+│ 1100337 │  │ 1110097 │
+│ DELETE  │  │ DELETE  │
+└─────────┘  └─────────┘
 ```
-
-### Fichiers modifiés
-
-| Fichier | Modification |
-|---------|--------------|
-| `supabase/functions/flespi-proxy/index.ts` | Ajouter appel au plugin 1110097 dans `assign-privacy` |
 
 ### Résultat attendu
 
-- **Activer** : Les deux plugins reçoivent le device
-- **Désactiver** : Plugin 1100337 reçoit `private: false`, Plugin 1110097 retire le device
+- **Activer** : Les deux plugins reçoivent le device (POST)
+- **Désactiver** : Les deux plugins retirent le device (DELETE)
 
