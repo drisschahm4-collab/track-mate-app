@@ -1,69 +1,55 @@
 
+Constat
 
-## Plan : Supprimer le device des deux plugins lors de la désactivation
+- L’authentification fonctionne : la session replay montre bien le passage du formulaire de connexion vers l’écran “Recherche de vos véhicules…”.
+- Le blocage arrive après le login, au moment où l’app essaie de retrouver le véhicule du client.
 
-### Problème actuel
+Source du problème
 
-| Action | Plugin 1100337 | Plugin 1110097 |
-|--------|----------------|----------------|
-| Activer | POST (assigner + private=true) | POST (assigner) |
-| Désactiver | POST (private=false) ❌ | DELETE ✅ |
+1. `src/hooks/useVehicleResolver.ts` utilise `listDvDS` puis filtre côté client.
+   - C’est fragile et trop coûteux.
+2. La recherche est coupée avant la fin.
+   - Le code limite à `MAX_ITERATIONS = 25`.
+   - Les logs montrent pourtant : `Page 25 ... hasMore: true`.
+   - Donc l’app s’arrête alors qu’il reste encore des DvD à lire.
+3. La requête DvD inclut `company`, alors que certaines lignes ont une société manquante.
+   - Les logs montrent : `Cannot return null for non-nullable type: 'Company' within parent 'DvD'`.
+   - Résultat : certaines lignes DvD deviennent `null` et sont supprimées avant le filtre.
+4. Le matching actuel est incomplet.
+   - Il compare seulement `userSub` et `username`.
+   - Or les logs montrent des `dvDDriverSub` de formats différents (UUID, numériques, etc.).
+   - Donc il y a probablement une incohérence entre l’identifiant Cognito du client et l’identifiant stocké dans DvD.
+5. `src/components/Dashboard.tsx` affiche un faux chargement infini.
+   - Quand aucun IMEI n’est trouvé, l’écran continue d’afficher “Veuillez patienter pendant la résolution”.
+   - L’utilisateur croit donc que “ça ne se connecte jamais”, alors que la résolution a déjà échoué ou fini sans résultat.
 
-Le plugin 1100337 garde le device assigné avec `private=false` au lieu de le supprimer.
+Plan de correction
 
-### Nouvelle logique souhaitée
+1. Remplacer la stratégie actuelle par une recherche ciblée sur l’index `dvDSByDvDDriverSub` au lieu de scanner `listDvDS`.
+2. Faire une résolution par étapes :
+   - essai avec `userSub`
+   - essai avec `username`
+   - si besoin, essai avec un identifiant métier supplémentaire
+3. Retirer `company` de la requête DvD côté frontend, car ce champ n’est pas nécessaire pour retrouver l’IMEI et provoque des pertes de résultats.
+4. Supprimer le plafond artificiel des 25 pages si un fallback paginé reste nécessaire.
+5. Corriger l’UI dans `Dashboard.tsx` pour afficher 3 états distincts :
+   - résolution en cours
+   - aucun véhicule trouvé
+   - erreur technique
+6. Ajouter un fallback visible :
+   - message “aucun véhicule assigné”
+   - bouton réessayer
+   - éventuellement saisie manuelle IMEI
 
-| Action | Plugin 1100337 | Plugin 1110097 |
-|--------|----------------|----------------|
-| Activer | POST (assigner + private=true) | POST (assigner) |
-| Désactiver | **DELETE** (retirer) | DELETE (retirer) |
+Détails techniques
 
-### Modification
-
-**Fichier** : `supabase/functions/flespi-proxy/index.ts`
-
-**Ligne 170-181** - Changer la logique du plugin principal :
-
-```typescript
-// AVANT
-const mainPluginUrl = `https://flespi.io/gw/plugins/${PLUGIN_ID}/devices/${deviceSelector}`;
-const mainResponse = await fetch(mainPluginUrl, {
-  method: 'POST',
-  body: JSON.stringify({ fields: { private: privateField } }),
-});
-
-// APRÈS
-const mainPluginUrl = `https://flespi.io/gw/plugins/${PLUGIN_ID}/devices/${deviceSelector}`;
-const mainMethod = privateField ? 'POST' : 'DELETE';
-const mainResponse = await fetch(mainPluginUrl, {
-  method: mainMethod,
-  body: mainMethod === 'POST' ? JSON.stringify({ fields: { private: true } }) : undefined,
-});
-```
-
-### Détails techniques
-
-```text
-┌─────────────────────┐
-│  Désactiver Privacy │
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────────────────┐
-│  Edge Function: assign-privacy  │
-│  private = false                │
-└──────────┬──────────────────────┘
-           │
-     ┌─────┴─────┐
-     ▼           ▼
-┌─────────┐  ┌─────────┐
-│ 1100337 │  │ 1110097 │
-│ DELETE  │  │ DELETE  │
-└─────────┘  └─────────┘
-```
-
-### Résultat attendu
-
-- **Activer** : Les deux plugins reçoivent le device (POST)
-- **Désactiver** : Les deux plugins retirent le device (DELETE)
-
+- Fichiers concernés :
+  - `src/hooks/useVehicleResolver.ts`
+  - `src/components/Dashboard.tsx`
+- Preuves relevées dans le code/logs :
+  - `Filtered by sub "...": 0/2489`
+  - `Page 25 ... hasMore: true`
+  - `Cannot return null for non-nullable type: 'Company'`
+- Conclusion :
+  - le vrai problème n’est pas la connexion utilisateur,
+  - mais une résolution DvD incomplète, plus un écran qui reste bloqué sur un faux état de chargement.
