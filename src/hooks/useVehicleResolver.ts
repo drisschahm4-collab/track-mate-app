@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/api';
 
-// GraphQL query avec pagination et tous les champs nécessaires
-const LIST_DVD_WITH_DRIVER = /* GraphQL */ `
-  query ListDvDS($limit: Int, $nextToken: String) {
-    listDvDS(limit: $limit, nextToken: $nextToken) {
+// Requête ciblée par index dvDSByDvDDriverSub — sans le champ company (non-nullable, cause des nulls)
+const DVD_BY_DRIVER_SUB = /* GraphQL */ `
+  query DvDSByDvDDriverSub($dvDDriverSub: String!, $nextToken: String) {
+    dvDSByDvDDriverSub(dvDDriverSub: $dvDDriverSub, nextToken: $nextToken) {
       items {
         id
         dvDVehicleImmat
@@ -35,10 +35,6 @@ const LIST_DVD_WITH_DRIVER = /* GraphQL */ `
           email
           mobile
           companyDriversId
-        }
-        company {
-          id
-          name
         }
       }
       nextToken
@@ -99,6 +95,60 @@ interface UseVehicleResolverResult {
   refresh: () => void;
 }
 
+/**
+ * Fetch all DvD records for a given driverSub using the GSI index (no full-scan).
+ * Paginates without artificial limit.
+ */
+async function fetchDvDsByDriverSub(
+  client: ReturnType<typeof generateClient>,
+  driverSub: string
+): Promise<DvDRecord[]> {
+  const all: DvDRecord[] = [];
+  let nextToken: string | null = null;
+  let page = 0;
+
+  console.log(`[DvD] Querying index dvDSByDvDDriverSub for "${driverSub}"`);
+
+  do {
+    try {
+      const response = await client.graphql({
+        query: DVD_BY_DRIVER_SUB,
+        variables: { dvDDriverSub: driverSub, nextToken },
+        authMode: 'userPool',
+      }) as { data: { dvDSByDvDDriverSub: { items: DvDRecord[]; nextToken: string | null } }; errors?: any[] };
+
+      if (response.errors?.length) {
+        console.warn(`[DvD] Partial errors page ${page + 1}:`, response.errors);
+      }
+
+      const items = (response.data?.dvDSByDvDDriverSub?.items || []).filter(Boolean);
+      all.push(...items);
+      nextToken = response.data?.dvDSByDvDDriverSub?.nextToken || null;
+      page++;
+      console.log(`[DvD] Page ${page}: ${items.length} items, total: ${all.length}, hasMore: ${!!nextToken}`);
+    } catch (err: any) {
+      if (err?.data?.dvDSByDvDDriverSub?.items) {
+        const items = (err.data.dvDSByDvDDriverSub.items || []).filter(Boolean);
+        all.push(...items);
+        nextToken = err.data.dvDSByDvDDriverSub.nextToken || null;
+        page++;
+      } else {
+        console.error(`[DvD] Error fetching page ${page + 1}:`, err);
+        throw err;
+      }
+    }
+  } while (nextToken);
+
+  return all;
+}
+
+/**
+ * Filter to only active assignments (no unassignmentDate).
+ */
+function filterActive(records: DvDRecord[]): DvDRecord[] {
+  return records.filter((r) => !r.unassignmentDate);
+}
+
 export const useVehicleResolver = (userSub: string | undefined, username?: string): UseVehicleResolverResult => {
   const [vehicles, setVehicles] = useState<DvDVehicle[]>([]);
   const [imeis, setImeis] = useState<string[]>([]);
@@ -107,152 +157,64 @@ export const useVehicleResolver = (userSub: string | undefined, username?: strin
   const [error, setError] = useState<string | null>(null);
   const [totalFetched, setTotalFetched] = useState(0);
 
-  // Lazy initialization: client created only after Amplify.configure() has run
   const client = useMemo(() => generateClient(), []);
-
-  const fetchAllDvDs = useCallback(async (targetSub: string, targetUsername?: string): Promise<DvDRecord[]> => {
-    const allDvDs: DvDRecord[] = [];
-    let nextToken: string | null = null;
-    let iteration = 0;
-    const MAX_ITERATIONS = 25; // 25 x 100 = 2500 max records
-    const LIMIT_PER_PAGE = 100;
-
-    console.log(`[DvD] Starting pagination fetch for sub: "${targetSub}"`);
-
-    do {
-      console.log(`[DvD] Fetching page ${iteration + 1}, nextToken: ${nextToken ? 'present' : 'null'}`);
-
-      try {
-        const response = await client.graphql({
-          query: LIST_DVD_WITH_DRIVER,
-          variables: {
-            limit: LIMIT_PER_PAGE,
-            nextToken,
-          },
-          authMode: 'userPool',
-        }) as { data: { listDvDS: { items: DvDRecord[]; nextToken: string | null } }; errors?: any[] };
-
-        // Log partial errors but continue with available data
-        if (response.errors?.length) {
-          console.warn(`[DvD] Partial errors on page ${iteration + 1}:`, response.errors);
-        }
-
-        // Filter out null items (some may be null due to partial errors)
-        const items = (response.data?.listDvDS?.items || []).filter(Boolean);
-        allDvDs.push(...items);
-
-        nextToken = response.data?.listDvDS?.nextToken || null;
-        iteration++;
-
-        console.log(`[DvD] Page ${iteration}: ${items.length} items, total: ${allDvDs.length}, hasMore: ${!!nextToken}`);
-      } catch (err: any) {
-        // Amplify throws even when there's partial data with errors
-        // Check if we actually got data despite the "error"
-        if (err?.data?.listDvDS?.items) {
-          console.warn(`[DvD] Partial errors on page ${iteration + 1}, but got data:`, err.errors);
-          const items = (err.data.listDvDS.items || []).filter(Boolean);
-          allDvDs.push(...items);
-          nextToken = err.data.listDvDS.nextToken || null;
-          iteration++;
-          console.log(`[DvD] Page ${iteration}: ${items.length} items from partial response, total: ${allDvDs.length}`);
-        } else {
-          // Real error - no data at all
-          console.error(`[DvD] Error fetching page ${iteration + 1}:`, err);
-          throw err;
-        }
-      }
-    } while (nextToken && iteration < MAX_ITERATIONS);
-
-    console.log(`[DvD] Pagination complete: ${allDvDs.length} total DvD records fetched in ${iteration} pages`);
-
-    // Debug: log sample records to see what's in dvDDriverSub
-    console.log('[DvD] Sample records:', allDvDs.slice(0, 3).map(d => ({
-      dvDDriverSub: d.dvDDriverSub,
-      driverSub: d.driver?.sub,
-      driverUsername: d.driver?.username
-    })));
-
-    // Filtrer par sub du driver (côté client) - utilise dvDDriverSub ou driver.sub OU username
-    const filtered = allDvDs.filter((dvd) => {
-      const driverSub = dvd.dvDDriverSub || dvd.driver?.sub;
-      const driverUsername = dvd.driver?.username;
-      const isActive = !dvd.unassignmentDate; // Seulement les affectations actives
-      
-      // Match par sub UUID OU par username
-      const matchesBySub = driverSub === targetSub;
-      const matchesByUsername = targetUsername && (
-        driverSub === targetUsername || 
-        driverUsername === targetUsername
-      );
-      
-      const matches = matchesBySub || matchesByUsername;
-
-      if (matches) {
-        console.log(`[DvD] Match found: dvDDriverSub="${driverSub}", driver.username="${driverUsername}", active=${isActive}, vehicle=${dvd.vehicle?.immat}`);
-      }
-
-      return matches && isActive;
-    });
-
-    console.log(`[DvD] Filtered by sub "${targetSub}" OR username "${targetUsername}": ${filtered.length}/${allDvDs.length} active assignments`);
-
-    return filtered;
-  }, [client]);
 
   const resolveVehicles = useCallback(async (targetSub: string, targetUsername?: string) => {
     setLoading(true);
     setError(null);
 
     try {
-      const filteredDvds = await fetchAllDvDs(targetSub, targetUsername);
-      setDvds(filteredDvds);
-      setTotalFetched(filteredDvds.length);
+      // Étape 1 : recherche par sub (UUID Cognito)
+      let active = filterActive(await fetchDvDsByDriverSub(client, targetSub));
+      console.log(`[DvD] Step 1 (sub="${targetSub}"): ${active.length} active`);
 
-      if (filteredDvds.length === 0) {
-        console.warn(`[DvD] No active DvD assignments found for username: "${targetUsername}"`);
+      // Étape 2 : si rien trouvé, essayer par username
+      if (active.length === 0 && targetUsername && targetUsername !== targetSub) {
+        active = filterActive(await fetchDvDsByDriverSub(client, targetUsername));
+        console.log(`[DvD] Step 2 (username="${targetUsername}"): ${active.length} active`);
+      }
+
+      setDvds(active);
+      setTotalFetched(active.length);
+
+      if (active.length === 0) {
+        console.warn(`[DvD] No active assignments found for sub="${targetSub}" / username="${targetUsername}"`);
         setVehicles([]);
         setImeis([]);
         return;
       }
 
-      // Extraire les véhicules uniques
-      const resolvedVehicles = filteredDvds
-        .map((dvd) => dvd.vehicle)
-        .filter((v): v is DvDVehicle => v !== null && v !== undefined);
+      const resolvedVehicles = active
+        .map((d) => d.vehicle)
+        .filter((v): v is DvDVehicle => !!v);
 
-      // Extraire les IMEIs valides
       const resolvedImeis = resolvedVehicles
         .map((v) => v.vehicleDeviceImei)
         .filter((imei): imei is string => !!imei);
 
-      console.log(`[DvD] Resolved ${resolvedVehicles.length} vehicles:`, resolvedVehicles.map((v) => v.immat));
-      console.log(`[DvD] Resolved ${resolvedImeis.length} IMEIs:`, resolvedImeis);
+      console.log(`[DvD] Resolved ${resolvedVehicles.length} vehicles, ${resolvedImeis.length} IMEIs`);
 
       setVehicles(resolvedVehicles);
       setImeis(resolvedImeis);
     } catch (err: any) {
       console.error('[DvD] Resolution error:', err);
-      
+
       let errorMessage = 'Erreur lors de la résolution des véhicules';
-      
-      // Check offline status first
       if (!navigator.onLine) {
-        errorMessage = 'Connexion internet indisponible. Veuillez vérifier votre connexion.';
+        errorMessage = 'Connexion internet indisponible.';
       } else if (err.message?.includes('Amplify has not been configured')) {
-        errorMessage = 'Erreur d\'initialisation Amplify. Veuillez rafraîchir la page.';
-      } else if (err.message?.includes('ERR_NAME_NOT_RESOLVED') || err.name === 'NetworkError') {
-        errorMessage = 'Impossible de se connecter à l\'API AppSync. Vérifiez la configuration.';
+        errorMessage = 'Erreur d\'initialisation. Veuillez rafraîchir la page.';
       } else if (err.errors?.[0]?.message) {
         errorMessage = err.errors[0].message;
       } else if (err.message) {
         errorMessage = err.message;
       }
-      
+
       setError(errorMessage);
     } finally {
       setLoading(false);
     }
-  }, [fetchAllDvDs]);
+  }, [client]);
 
   const refresh = useCallback(() => {
     if (userSub) {
@@ -271,15 +233,7 @@ export const useVehicleResolver = (userSub: string | undefined, username?: strin
     }
   }, [userSub, username, resolveVehicles]);
 
-  return {
-    vehicles,
-    imeis,
-    dvds,
-    loading,
-    error,
-    totalFetched,
-    refresh,
-  };
+  return { vehicles, imeis, dvds, loading, error, totalFetched, refresh };
 };
 
 export default useVehicleResolver;
