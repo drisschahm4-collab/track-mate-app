@@ -42,6 +42,18 @@ const DVD_BY_DRIVER_SUB = /* GraphQL */ `
   }
 `;
 
+// Requête pour trouver le Driver par username et récupérer son sub interne
+const DRIVERS_BY_USERNAME = /* GraphQL */ `
+  query DriversByUsername($username: String!) {
+    driversByUsername(username: $username) {
+      items {
+        sub
+        username
+      }
+    }
+  }
+`;
+
 export interface DvDVehicle {
   immat: string;
   nomVehicule?: string;
