@@ -191,12 +191,12 @@ export const useVehicleResolver = (userSub: string | undefined, username?: strin
         console.log(`[DvD] Step 3: Looking up Driver by username "${targetUsername}"...`);
         try {
           const driverResponse = await client.graphql({
-            query: DRIVERS_BY_USERNAME,
-            variables: { username: targetUsername },
+            query: LIST_DRIVERS_BY_USERNAME,
+            variables: { filter: { username: { eq: targetUsername } } },
             authMode: 'userPool',
-          }) as { data: { driversByUsername: { items: { sub: string; username: string }[] } } };
+          }) as { data: { listDrivers: { items: { sub: string; username: string }[] } } };
 
-          const drivers = driverResponse.data?.driversByUsername?.items || [];
+          const drivers = driverResponse.data?.listDrivers?.items || [];
           console.log(`[DvD] Step 3: Found ${drivers.length} Driver(s) for username "${targetUsername}"`);
 
           for (const driver of drivers) {
