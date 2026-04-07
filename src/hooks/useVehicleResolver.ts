@@ -42,10 +42,10 @@ const DVD_BY_DRIVER_SUB = /* GraphQL */ `
   }
 `;
 
-// Requête pour trouver le Driver par username via listDrivers + filter
-const LIST_DRIVERS_BY_USERNAME = /* GraphQL */ `
-  query ListDriversByUsername($filter: ModelDriverFilterInput) {
-    listDrivers(filter: $filter, limit: 10) {
+// Requête pour trouver le Driver par username et récupérer son sub interne
+const DRIVERS_BY_USERNAME = /* GraphQL */ `
+  query DriversByUsername($username: String!) {
+    driversByUsername(username: $username) {
       items {
         sub
         username
@@ -191,12 +191,12 @@ export const useVehicleResolver = (userSub: string | undefined, username?: strin
         console.log(`[DvD] Step 3: Looking up Driver by username "${targetUsername}"...`);
         try {
           const driverResponse = await client.graphql({
-            query: LIST_DRIVERS_BY_USERNAME,
-            variables: { filter: { username: { eq: targetUsername } } },
+            query: DRIVERS_BY_USERNAME,
+            variables: { username: targetUsername },
             authMode: 'userPool',
-          }) as { data: { listDrivers: { items: { sub: string; username: string }[] } } };
+          }) as { data: { driversByUsername: { items: { sub: string; username: string }[] } } };
 
-          const drivers = driverResponse.data?.listDrivers?.items || [];
+          const drivers = driverResponse.data?.driversByUsername?.items || [];
           console.log(`[DvD] Step 3: Found ${drivers.length} Driver(s) for username "${targetUsername}"`);
 
           for (const driver of drivers) {
