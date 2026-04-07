@@ -1,55 +1,49 @@
 
-Constat
 
-- L’authentification fonctionne : la session replay montre bien le passage du formulaire de connexion vers l’écran “Recherche de vos véhicules…”.
-- Le blocage arrive après le login, au moment où l’app essaie de retrouver le véhicule du client.
+## Diagnostic
 
-Source du problème
+Les logs montrent clairement le problème :
 
-1. `src/hooks/useVehicleResolver.ts` utilise `listDvDS` puis filtre côté client.
-   - C’est fragile et trop coûteux.
-2. La recherche est coupée avant la fin.
-   - Le code limite à `MAX_ITERATIONS = 25`.
-   - Les logs montrent pourtant : `Page 25 ... hasMore: true`.
-   - Donc l’app s’arrête alors qu’il reste encore des DvD à lire.
-3. La requête DvD inclut `company`, alors que certaines lignes ont une société manquante.
-   - Les logs montrent : `Cannot return null for non-nullable type: 'Company' within parent 'DvD'`.
-   - Résultat : certaines lignes DvD deviennent `null` et sont supprimées avant le filtre.
-4. Le matching actuel est incomplet.
-   - Il compare seulement `userSub` et `username`.
-   - Or les logs montrent des `dvDDriverSub` de formats différents (UUID, numériques, etc.).
-   - Donc il y a probablement une incohérence entre l’identifiant Cognito du client et l’identifiant stocké dans DvD.
-5. `src/components/Dashboard.tsx` affiche un faux chargement infini.
-   - Quand aucun IMEI n’est trouvé, l’écran continue d’afficher “Veuillez patienter pendant la résolution”.
-   - L’utilisateur croit donc que “ça ne se connecte jamais”, alors que la résolution a déjà échoué ou fini sans résultat.
+```
+[DvD] Querying index dvDSByDvDDriverSub for "d169201e-5031-7079-88d0-3a017fc2370a" → 0 items
+[DvD] Querying index dvDSByDvDDriverSub for "hugo" → 0 items
+```
 
-Plan de correction
+L'index `dvDSByDvDDriverSub` ne trouve rien ni par le **sub Cognito** ni par le **username**. Cela signifie que le champ `dvDDriverSub` dans la table DvD contient un identifiant différent — probablement le `sub` du modèle **Driver** (pas le sub Cognito).
 
-1. Remplacer la stratégie actuelle par une recherche ciblée sur l’index `dvDSByDvDDriverSub` au lieu de scanner `listDvDS`.
-2. Faire une résolution par étapes :
-   - essai avec `userSub`
-   - essai avec `username`
-   - si besoin, essai avec un identifiant métier supplémentaire
-3. Retirer `company` de la requête DvD côté frontend, car ce champ n’est pas nécessaire pour retrouver l’IMEI et provoque des pertes de résultats.
-4. Supprimer le plafond artificiel des 25 pages si un fallback paginé reste nécessaire.
-5. Corriger l’UI dans `Dashboard.tsx` pour afficher 3 états distincts :
-   - résolution en cours
-   - aucun véhicule trouvé
-   - erreur technique
-6. Ajouter un fallback visible :
-   - message “aucun véhicule assigné”
-   - bouton réessayer
-   - éventuellement saisie manuelle IMEI
+**Cause racine** : Le sub Cognito de l'utilisateur "hugo" (`d169201e-...`) ≠ le `sub` stocké dans le modèle Driver ≠ la valeur de `dvDDriverSub` dans la table DvD.
 
-Détails techniques
+## Plan de correction
 
-- Fichiers concernés :
-  - `src/hooks/useVehicleResolver.ts`
-  - `src/components/Dashboard.tsx`
-- Preuves relevées dans le code/logs :
-  - `Filtered by sub "...": 0/2489`
-  - `Page 25 ... hasMore: true`
-  - `Cannot return null for non-nullable type: 'Company'`
-- Conclusion :
-  - le vrai problème n’est pas la connexion utilisateur,
-  - mais une résolution DvD incomplète, plus un écran qui reste bloqué sur un faux état de chargement.
+### Étape 1 — Ajouter une recherche par le modèle Driver
+
+Ajouter une requête GraphQL pour chercher le Driver par username, afin de récupérer son `sub` côté Driver :
+
+```graphql
+query DriversByUsername($username: String!) {
+  driversByUsername(username: $username) {
+    items { sub, username }
+  }
+}
+```
+
+### Étape 2 — Résolution en 3 étapes dans `useVehicleResolver.ts`
+
+| Étape | Recherche par | Quand |
+|-------|--------------|-------|
+| 1 | Cognito `userSub` | Toujours |
+| 2 | `username` | Si étape 1 = 0 |
+| 3 | Driver `sub` (récupéré via `driversByUsername`) | Si étape 2 = 0 |
+
+### Étape 3 — Ajouter des logs de diagnostic
+
+Logger le `driverSub` trouvé via le Driver pour faciliter le debug futur.
+
+### Fichier modifié
+
+`src/hooks/useVehicleResolver.ts`
+
+### Résultat attendu
+
+L'utilisateur "hugo" se connecte → le système cherche par sub Cognito (0 résultat) → cherche par username "hugo" (0 résultat) → cherche le Driver par username "hugo", récupère son `sub` → cherche les DvD par ce sub → trouve le véhicule assigné.
+
