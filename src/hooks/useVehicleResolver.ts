@@ -42,6 +42,18 @@ const DVD_BY_DRIVER_SUB = /* GraphQL */ `
   }
 `;
 
+// Requête pour trouver le Driver par username et récupérer son sub interne
+const DRIVERS_BY_USERNAME = /* GraphQL */ `
+  query DriversByUsername($username: String!) {
+    driversByUsername(username: $username) {
+      items {
+        sub
+        username
+      }
+    }
+  }
+`;
+
 export interface DvDVehicle {
   immat: string;
   nomVehicule?: string;
@@ -172,6 +184,32 @@ export const useVehicleResolver = (userSub: string | undefined, username?: strin
       if (active.length === 0 && targetUsername && targetUsername !== targetSub) {
         active = filterActive(await fetchDvDsByDriverSub(client, targetUsername));
         console.log(`[DvD] Step 2 (username="${targetUsername}"): ${active.length} active`);
+      }
+
+      // Étape 3 : si toujours rien, chercher le Driver par username pour récupérer son sub interne
+      if (active.length === 0 && targetUsername) {
+        console.log(`[DvD] Step 3: Looking up Driver by username "${targetUsername}"...`);
+        try {
+          const driverResponse = await client.graphql({
+            query: DRIVERS_BY_USERNAME,
+            variables: { username: targetUsername },
+            authMode: 'userPool',
+          }) as { data: { driversByUsername: { items: { sub: string; username: string }[] } } };
+
+          const drivers = driverResponse.data?.driversByUsername?.items || [];
+          console.log(`[DvD] Step 3: Found ${drivers.length} Driver(s) for username "${targetUsername}"`);
+
+          for (const driver of drivers) {
+            if (driver.sub && driver.sub !== targetSub && driver.sub !== targetUsername) {
+              console.log(`[DvD] Step 3: Trying Driver sub "${driver.sub}"...`);
+              active = filterActive(await fetchDvDsByDriverSub(client, driver.sub));
+              console.log(`[DvD] Step 3 (driverSub="${driver.sub}"): ${active.length} active`);
+              if (active.length > 0) break;
+            }
+          }
+        } catch (driverErr) {
+          console.warn(`[DvD] Step 3: Driver lookup failed:`, driverErr);
+        }
       }
 
       setDvds(active);
