@@ -76,6 +76,12 @@ serve(async (req) => {
         device_ident?: string;
         action: 'ON' | 'OFF';
         raw_event: string;
+        actor_sub?: string;
+        actor_email?: string;
+        actor_username?: string;
+        actor_ip?: string;
+        actor_user_agent?: string;
+        source?: string;
       }> = [];
 
       const deviceCache = new Map<number, { name?: string; ident?: string }>();
@@ -90,7 +96,13 @@ serve(async (req) => {
           device_name: event.device_name ?? undefined,
           device_ident: event.device_ident ?? undefined,
           action: event.action as 'ON' | 'OFF',
-          raw_event: 'app',
+          raw_event: event.source || 'app',
+          actor_sub: event.actor_sub ?? undefined,
+          actor_email: event.actor_email ?? undefined,
+          actor_username: event.actor_username ?? undefined,
+          actor_ip: event.actor_ip ?? undefined,
+          actor_user_agent: event.actor_user_agent ?? undefined,
+          source: event.source ?? 'app',
         });
         if (storedDeviceId && !deviceCache.has(storedDeviceId)) {
           deviceCache.set(storedDeviceId, { ident: event.device_ident ?? undefined });
