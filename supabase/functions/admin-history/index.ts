@@ -78,20 +78,24 @@ serve(async (req) => {
         raw_event: string;
       }> = [];
 
+      const deviceCache = new Map<number, { name?: string; ident?: string }>();
+
       for (const event of storedEvents ?? []) {
+        const storedDeviceId = event.device_id ? Number(event.device_id) : undefined;
         events.push({
           timestamp: Math.floor(new Date(event.created_at).getTime() / 1000),
           plugin_id: event.plugin_id,
           plugin_label: event.plugin_label,
-          device_id: event.device_id ? Number(event.device_id) : undefined,
+          device_id: storedDeviceId,
           device_name: event.device_name ?? undefined,
           device_ident: event.device_ident ?? undefined,
           action: event.action as 'ON' | 'OFF',
           raw_event: 'app',
         });
+        if (storedDeviceId && !deviceCache.has(storedDeviceId)) {
+          deviceCache.set(storedDeviceId, { ident: event.device_ident ?? undefined });
+        }
       }
-
-      const deviceCache = new Map<number, { name?: string; ident?: string }>();
 
       for (const plugin of PLUGIN_IDS) {
         const logsUrl = `https://flespi.io/gw/plugins/${plugin.id}/logs?data=${encodeURIComponent(
