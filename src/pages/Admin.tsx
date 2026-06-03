@@ -30,7 +30,7 @@ type PrivacyEvent = {
   device_id?: number;
   device_name?: string;
   device_ident?: string;
-  action: "ON" | "OFF" | "OTHER";
+  action: "ON" | "OFF";
   raw_event: string;
 };
 
