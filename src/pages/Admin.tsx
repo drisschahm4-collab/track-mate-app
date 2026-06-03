@@ -32,6 +32,22 @@ type PrivacyEvent = {
   device_ident?: string;
   action: "ON" | "OFF";
   raw_event: string;
+  actor_sub?: string;
+  actor_email?: string;
+  actor_username?: string;
+  actor_ip?: string;
+  actor_user_agent?: string;
+  source?: string;
+};
+
+type ActiveSession = {
+  device_id?: number;
+  device_name?: string;
+  device_ident?: string;
+  since: number;
+  actor_email?: string;
+  actor_username?: string;
+  actor_sub?: string;
 };
 
 const callAdmin = async <T,>(password: string, type: "verify" | "logins" | "privacy"): Promise<T> => {
@@ -52,6 +68,17 @@ const callAdmin = async <T,>(password: string, type: "verify" | "logins" | "priv
 const fmtDate = (iso: string | number) => {
   const d = typeof iso === "number" ? new Date(iso * 1000) : new Date(iso);
   return d.toLocaleString("fr-FR");
+};
+
+const fmtDuration = (sinceSec: number) => {
+  const diffMs = Date.now() - sinceSec * 1000;
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 60) return `${mins} min`;
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  if (h < 24) return `${h}h ${m}min`;
+  const d = Math.floor(h / 24);
+  return `${d}j ${h % 24}h`;
 };
 
 const Admin = () => {
