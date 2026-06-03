@@ -85,13 +85,27 @@ serve(async (req) => {
           continue;
         }
 
-        for (const entry of body.result ?? []) {
-          const ev = String(entry.event || entry.event_name || '').toLowerCase();
-          let action: 'ON' | 'OFF' | 'OTHER' = 'OTHER';
-          if (ev.includes('assign') && !ev.includes('un')) action = 'ON';
-          else if (ev.includes('unassign') || ev.includes('delete')) action = 'OFF';
-          else if (ev.includes('create')) action = 'ON';
-          else if (ev.includes('remove')) action = 'OFF';
+        const entries = body.result ?? [];
+        if (entries.length > 0) {
+          console.log(`[admin-history] plugin ${plugin.id} sample entry`, JSON.stringify(entries[0]));
+        }
+
+        for (const entry of entries) {
+          const evName = String(entry.event_name || entry.event || '').toLowerCase();
+          const evCode = typeof entry.event === 'number' ? entry.event : undefined;
+
+          let action: 'ON' | 'OFF' | 'SKIP' = 'SKIP';
+
+          // Mapping par code numérique Flespi
+          if (evCode === 1 || evCode === 4) action = 'ON';
+          else if (evCode === 3 || evCode === 5) action = 'OFF';
+          else if (evCode === 2) action = 'SKIP';
+          // Mapping par mots-clés texte
+          else if (/\b(unassign|unlink|detach|unsubscribe)\b/.test(evName)) action = 'OFF';
+          else if (/\b(delete|remove)\b/.test(evName)) action = 'OFF';
+          else if (/\b(assign|link|attach|subscribe|add|create)\b/.test(evName)) action = 'ON';
+
+          if (action === 'SKIP') continue;
 
           const deviceId: number | undefined =
             entry.device_id ?? entry.item_id ?? entry.target_id ?? undefined;
@@ -102,7 +116,7 @@ serve(async (req) => {
             plugin_label: plugin.label,
             device_id: deviceId,
             action,
-            raw_event: ev || 'unknown',
+            raw_event: evName || (evCode !== undefined ? `code:${evCode}` : 'unknown'),
           });
 
           if (deviceId && !deviceCache.has(deviceId)) {
