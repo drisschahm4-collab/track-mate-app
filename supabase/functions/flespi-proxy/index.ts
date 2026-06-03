@@ -1,6 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const FLESPI_TOKEN = Deno.env.get('FLESPI_TOKEN');
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 const PLUGIN_ID = '1100337';
 const ERASE_PLUGIN_ID = '1110097';
 const DEFAULT_DEVICE_ID = Deno.env.get('FLESPI_DEVICE_ID') || '5369063';
@@ -8,6 +11,39 @@ const DEFAULT_DEVICE_ID = Deno.env.get('FLESPI_DEVICE_ID') || '5369063';
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+const PRIVACY_PLUGINS = [
+  { id: PLUGIN_ID, label: 'Vie privée' },
+  { id: ERASE_PLUGIN_ID, label: 'Erase location' },
+];
+
+const logPrivacyEvent = async (params: {
+  action: 'ON' | 'OFF';
+  deviceId?: string;
+  deviceIdent?: string;
+  actorSub?: string;
+  actorEmail?: string;
+  pluginId: string;
+  pluginLabel: string;
+}) => {
+  if (!SUPABASE_URL || !SERVICE_ROLE_KEY) return;
+
+  try {
+    const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+    await supabase.from('privacy_events').insert({
+      action: params.action,
+      device_id: params.deviceId && /^\d+$/.test(params.deviceId) ? Number(params.deviceId) : null,
+      device_ident: params.deviceIdent || null,
+      plugin_id: params.pluginId,
+      plugin_label: params.pluginLabel,
+      actor_sub: params.actorSub || null,
+      actor_email: params.actorEmail || null,
+      source: 'app',
+    });
+  } catch (error) {
+    console.error('[Flespi Proxy] Privacy event log failed:', error);
+  }
 };
 
 serve(async (req) => {
@@ -216,6 +252,28 @@ serve(async (req) => {
         if (!eraseResponse.ok) {
           console.error('[Flespi Proxy] Erase plugin error:', eraseData);
           // On continue même si erreur sur le 2ème plugin, le principal a fonctionné
+        }
+
+        await logPrivacyEvent({
+          action: privateField ? 'ON' : 'OFF',
+          deviceId: /^\d+$/.test(deviceSelector) ? deviceSelector : undefined,
+          deviceIdent: imei,
+          actorSub: payload?.actorSub,
+          actorEmail: payload?.actorEmail,
+          pluginId: PRIVACY_PLUGINS[0].id,
+          pluginLabel: PRIVACY_PLUGINS[0].label,
+        });
+
+        if (eraseResponse.ok) {
+          await logPrivacyEvent({
+            action: privateField ? 'ON' : 'OFF',
+            deviceId: /^\d+$/.test(deviceSelector) ? deviceSelector : undefined,
+            deviceIdent: imei,
+            actorSub: payload?.actorSub,
+            actorEmail: payload?.actorEmail,
+            pluginId: PRIVACY_PLUGINS[1].id,
+            pluginLabel: PRIVACY_PLUGINS[1].label,
+          });
         }
         
         return new Response(
