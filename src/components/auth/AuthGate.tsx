@@ -68,6 +68,17 @@ const AuthGate = ({ children }: PropsWithChildren) => {
 
       if (isSignedIn) {
         await hydrateSession();
+        try {
+          const cu = await getCurrentUser();
+          const attrs = await fetchUserAttributes().catch(() => ({} as Record<string, string>));
+          await logLoginEvent({
+            user_sub: attrs?.sub,
+            username: cu?.username ?? cu?.signInDetails?.loginId,
+            email: attrs?.email ?? cu?.signInDetails?.loginId,
+          });
+        } catch (e) {
+          console.warn("[AuthGate] could not capture login context", e);
+        }
       } else {
         setStatus("signedOut");
         setError(
