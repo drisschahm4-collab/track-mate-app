@@ -7,6 +7,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AuthContext, AuthContextValue } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+
+const logLoginEvent = async (payload: {
+  user_sub?: string;
+  username?: string;
+  email?: string;
+}) => {
+  try {
+    await supabase.from("login_events").insert({
+      user_sub: payload.user_sub ?? null,
+      username: payload.username ?? null,
+      email: payload.email ?? null,
+      user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
+    });
+  } catch (e) {
+    console.warn("[AuthGate] login event log failed", e);
+  }
+};
 
 const AuthGate = ({ children }: PropsWithChildren) => {
   const [status, setStatus] = useState<AuthContextValue["status"]>("loading");
