@@ -1,47 +1,37 @@
-# Améliorer les logs Vie Privée
+# Corriger les sessions actives "fantômes"
 
-## Objectif
-Pouvoir savoir clairement **qui** (quel client/utilisateur) a activé le mode vie privée et **s'il a oublié de le désactiver**, directement dans `/admin`.
+## Problème constaté
 
-## Ce qu'on va ajouter
+Les véhicules `867481036721805` et `863540061951175` apparaissent comme **sessions vie privée actives** dans `/admin`, alors que la base `privacy_events` montre clairement un `OFF` (source `app` / `app-backfill`) comme dernier événement pour chacun.
 
-### 1. Enrichir la table `privacy_events`
-Ajouter des colonnes pour mieux tracer :
-- `actor_username` (texte) — nom d'utilisateur Cognito lisible (en plus du sub déjà présent)
-- `actor_ip` (texte) — IP de la requête (depuis les headers de l'edge function)
-- `actor_user_agent` (texte) — navigateur/appareil utilisé
+## Cause racine
 
-### 2. Edge function `flespi-proxy`
-- Lire `x-forwarded-for` et `user-agent` depuis les headers de la requête
-- Recevoir `actor_username` depuis le frontend
-- Enregistrer ces infos dans `privacy_events`
+Dans `supabase/functions/admin-history/index.ts`, la liste `activeSessions` est calculée à partir du tableau **fusionné** `enriched` qui combine :
 
-### 3. Frontend (`Dashboard.tsx` + `integrations/flespi`)
-- Envoyer aussi le `username` (préfere `email` ou `cognito:username`) en plus du `sub` lors d'un toggle ON/OFF
+1. Les événements stockés en base (`privacy_events`, source = `app` → **fiables**)
+2. Les logs bruts du plugin Flespi (codes 320/321/322/323/350… → **bruyants et non fiables** : timestamps tardifs, codes ambigus, rotation des logs, etc.)
 
-### 4. UI `/admin` — onglet Vie privée
-Refondre le tableau avec colonnes plus utiles :
-| Date | Véhicule (IMEI) | Action | Auteur (email / username) | Appareil | Source |
+Quand Flespi retourne un log mappé en `ON` (ex. `event_code:322` "subscription updated" ou un `subscribe` réémis par le plugin) avec un timestamp postérieur au `OFF` applicatif, la dernière action vue pour le device devient `ON` → la session est affichée comme active à tort.
 
-Et surtout : **nouvelle section "Sessions vie privée actives"** en haut de l'onglet :
-- Pour chaque véhicule, calcule la **dernière action ON sans OFF correspondant**
-- Affiche : véhicule, qui l'a activé, depuis combien de temps (ex: "activé il y a 3h 24min par john@xxx.com")
-- Badge rouge si > 24h (probablement oublié)
-- Bouton "Forcer désactivation" (optionnel, on peut le laisser pour plus tard)
+## Correctif (1 fichier)
 
-## Détails techniques
+`supabase/functions/admin-history/index.ts` — calculer `activeSessions` **uniquement** à partir de `storedEvents` (DB), pas du tableau fusionné :
 
-**Calcul des sessions actives** (côté `admin-history`) :
-```
-Pour chaque device_id:
-  events = privacy_events triés desc
-  dernier = events[0]
-  si dernier.action == 'ON' → session active depuis dernier.created_at
-```
+- Filtrer `storedEvents` sur `plugin_id = '1100337'` (plugin principal).
+- Pour chaque `device_id` (ou `device_ident` en repli), prendre l'événement le plus récent par `created_at`.
+- Garder uniquement ceux dont `action = 'ON'` → vraie session encore ouverte côté app.
+- Conserver les champs actuels (`since`, `actor_email`, `actor_username`, `actor_sub`, `device_name`, `device_ident`).
 
-**Migration SQL** : ajout des 3 colonnes (nullable, pas de breaking change).
+Les logs Flespi continuent d'alimenter la **table historique** (colonne "Événement brut" : `code:320`, `subscribe`…) — seul le calcul "sessions actives" est durci.
 
-## Hors scope
-- Pas de notification email automatique (peut venir après)
-- Pas de désactivation automatique forcée
-- Pas de changement à la logique Flespi elle-même
+## Aucun changement
+
+- Pas de migration SQL.
+- Pas de modification du `flespi-proxy` (la journalisation `source=app` reste la source de vérité).
+- Pas de changement UI : l'encart "Sessions vie privée actives" se videra automatiquement pour ces 2 véhicules dès le prochain refresh.
+
+## Vérification après build
+
+1. Recharger `/admin` → onglet Vie privée.
+2. Les deux IMEI ne doivent plus figurer dans "Sessions vie privée actives".
+3. Refaire un cycle ON → OFF sur un véhicule test : la session apparaît à `ON`, puis disparaît immédiatement après `OFF`.
