@@ -298,12 +298,10 @@ const Admin = () => {
                                 <Badge className="bg-accent/20 text-accent border border-accent/30">
                                   <EyeOff className="h-3 w-3 mr-1" /> ON
                                 </Badge>
-                              ) : p.action === "OFF" ? (
+                              ) : (
                                 <Badge variant="outline">
                                   <Eye className="h-3 w-3 mr-1" /> OFF
                                 </Badge>
-                              ) : (
-                                <Badge variant="secondary">{p.raw_event}</Badge>
                               )}
                             </TableCell>
                             <TableCell className="text-xs">{p.plugin_label}</TableCell>
