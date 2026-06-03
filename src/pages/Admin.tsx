@@ -288,12 +288,73 @@ const Admin = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="privacy">
+          <TabsContent value="privacy" className="space-y-4">
+            {activeSessions.length > 0 && (
+              <Card className="glass-card border-accent/40">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <EyeOff className="h-5 w-5 text-accent" />
+                    Sessions vie privée actives ({activeSessions.length})
+                  </CardTitle>
+                  <CardDescription>
+                    Véhicules dont le mode vie privée est actuellement <strong>ON</strong> (jamais désactivé depuis).
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Véhicule</TableHead>
+                          <TableHead>IMEI</TableHead>
+                          <TableHead>Activé par</TableHead>
+                          <TableHead>Depuis</TableHead>
+                          <TableHead>Durée</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {activeSessions.map((s, i) => {
+                          const mins = (Date.now() - s.since * 1000) / 60000;
+                          const stale = mins > 60 * 24;
+                          return (
+                            <TableRow key={`${s.device_id ?? s.device_ident ?? i}`}>
+                              <TableCell className="font-medium">
+                                {s.device_name || s.device_id || "—"}
+                              </TableCell>
+                              <TableCell className="text-xs text-muted-foreground">
+                                {s.device_ident || "—"}
+                              </TableCell>
+                              <TableCell className="text-xs">
+                                {s.actor_email || s.actor_username || s.actor_sub || "—"}
+                              </TableCell>
+                              <TableCell className="text-xs whitespace-nowrap">{fmtDate(s.since)}</TableCell>
+                              <TableCell>
+                                <Badge
+                                  className={
+                                    stale
+                                      ? "bg-destructive/20 text-destructive border border-destructive/40"
+                                      : "bg-accent/20 text-accent border border-accent/30"
+                                  }
+                                >
+                                  {fmtDuration(s.since)}
+                                  {stale ? " ⚠" : ""}
+                                </Badge>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             <Card className="glass-card">
               <CardHeader>
                 <CardTitle>Historique du mode vie privée</CardTitle>
                 <CardDescription>
-                  Activations / désactivations vues côté Flespi (assignations aux plugins).
+                  Activations / désactivations enregistrées par l'application et logs Flespi.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -303,7 +364,7 @@ const Admin = () => {
                   </div>
                 ) : privacy.length === 0 ? (
                   <p className="text-sm text-muted-foreground py-6 text-center">
-                    Aucun évènement disponible dans la rétention Flespi.
+                    Aucun évènement enregistré.
                   </p>
                 ) : (
                   <div className="overflow-x-auto">
@@ -312,10 +373,11 @@ const Admin = () => {
                         <TableRow>
                           <TableHead>Date</TableHead>
                           <TableHead>Action</TableHead>
-                          <TableHead>Plugin</TableHead>
                           <TableHead>Véhicule</TableHead>
+                          <TableHead>Auteur</TableHead>
                           <TableHead className="hidden md:table-cell">IMEI</TableHead>
-                          <TableHead className="hidden lg:table-cell">Évènement</TableHead>
+                          <TableHead className="hidden lg:table-cell">Appareil</TableHead>
+                          <TableHead className="hidden lg:table-cell">Source</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -333,15 +395,23 @@ const Admin = () => {
                                 </Badge>
                               )}
                             </TableCell>
-                            <TableCell className="text-xs">{p.plugin_label}</TableCell>
                             <TableCell className="font-medium">
                               {p.device_name || p.device_id || "—"}
+                            </TableCell>
+                            <TableCell className="text-xs">
+                              <div>{p.actor_email || p.actor_username || "—"}</div>
+                              {p.actor_ip && (
+                                <div className="text-muted-foreground">{p.actor_ip}</div>
+                              )}
                             </TableCell>
                             <TableCell className="hidden md:table-cell text-xs text-muted-foreground">
                               {p.device_ident || "—"}
                             </TableCell>
+                            <TableCell className="hidden lg:table-cell text-xs text-muted-foreground truncate max-w-[240px]">
+                              {p.actor_user_agent || "—"}
+                            </TableCell>
                             <TableCell className="hidden lg:table-cell text-xs text-muted-foreground">
-                              {p.raw_event}
+                              {p.source || p.raw_event}
                             </TableCell>
                           </TableRow>
                         ))}
