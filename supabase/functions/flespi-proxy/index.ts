@@ -24,6 +24,9 @@ const logPrivacyEvent = async (params: {
   deviceIdent?: string;
   actorSub?: string;
   actorEmail?: string;
+  actorUsername?: string;
+  actorIp?: string;
+  actorUserAgent?: string;
   pluginId: string;
   pluginLabel: string;
 }) => {
@@ -39,6 +42,9 @@ const logPrivacyEvent = async (params: {
       plugin_label: params.pluginLabel,
       actor_sub: params.actorSub || null,
       actor_email: params.actorEmail || null,
+      actor_username: params.actorUsername || null,
+      actor_ip: params.actorIp || null,
+      actor_user_agent: params.actorUserAgent || null,
       source: 'app',
     });
   } catch (error) {
@@ -254,12 +260,18 @@ serve(async (req) => {
           // On continue même si erreur sur le 2ème plugin, le principal a fonctionné
         }
 
+        const actorIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || req.headers.get('cf-connecting-ip') || undefined;
+        const actorUserAgent = req.headers.get('user-agent') || undefined;
+
         await logPrivacyEvent({
           action: privateField ? 'ON' : 'OFF',
           deviceId: /^\d+$/.test(deviceSelector) ? deviceSelector : undefined,
           deviceIdent: imei,
           actorSub: payload?.actorSub,
           actorEmail: payload?.actorEmail,
+          actorUsername: payload?.actorUsername,
+          actorIp,
+          actorUserAgent,
           pluginId: PRIVACY_PLUGINS[0].id,
           pluginLabel: PRIVACY_PLUGINS[0].label,
         });
@@ -271,6 +283,9 @@ serve(async (req) => {
             deviceIdent: imei,
             actorSub: payload?.actorSub,
             actorEmail: payload?.actorEmail,
+            actorUsername: payload?.actorUsername,
+            actorIp,
+            actorUserAgent,
             pluginId: PRIVACY_PLUGINS[1].id,
             pluginLabel: PRIVACY_PLUGINS[1].label,
           });

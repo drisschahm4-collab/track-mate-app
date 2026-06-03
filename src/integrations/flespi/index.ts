@@ -31,6 +31,7 @@ export const assignPrivacyPlugin = async (params: {
   private?: boolean;
   actorSub?: string;
   actorEmail?: string;
+  actorUsername?: string;
 }) => {
   const { data, error } = await supabase.functions.invoke("flespi-proxy", {
     body: {
@@ -40,6 +41,7 @@ export const assignPrivacyPlugin = async (params: {
       private: params.private,
       actorSub: params.actorSub,
       actorEmail: params.actorEmail,
+      actorUsername: params.actorUsername,
     },
   });
 

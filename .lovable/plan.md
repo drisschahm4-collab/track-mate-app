@@ -1,20 +1,47 @@
-# Corriger le mapping ON/OFF des logs Flespi
+# Améliorer les logs Vie Privée
 
-## Changements dans `supabase/functions/admin-history/index.ts`
+## Objectif
+Pouvoir savoir clairement **qui** (quel client/utilisateur) a activé le mode vie privée et **s'il a oublié de le désactiver**, directement dans `/admin`.
 
-1. **Lire `event_name` en priorité** sur `event` (qui est souvent un code numérique chez Flespi).
-2. **Ajouter le mapping des codes numériques** des plugin logs Flespi :
-   - `1` (create) / `4` (link) → **ON**
-   - `3` (delete) / `5` (unlink) → **OFF**
-   - `2` (update) → ignoré (pas une bascule)
-3. **Élargir les mots-clés texte** : `link`, `unlink`, `attach`, `detach`, `add`, `remove`, `subscribe`, `unsubscribe`, en plus de `assign`/`unassign`.
-4. **Filtrer le bruit** : ne garder dans la liste finale que les évènements classés ON ou OFF (les updates de config ne sont pas des bascules vie privée).
-5. **Logger la 1ʳᵉ entrée brute** reçue de chaque plugin (`console.log`) pour pouvoir affiner si Flespi utilise d'autres codes propriétaires.
+## Ce qu'on va ajouter
 
-## Changement UI dans `src/pages/Admin.tsx`
+### 1. Enrichir la table `privacy_events`
+Ajouter des colonnes pour mieux tracer :
+- `actor_username` (texte) — nom d'utilisateur Cognito lisible (en plus du sub déjà présent)
+- `actor_ip` (texte) — IP de la requête (depuis les headers de l'edge function)
+- `actor_user_agent` (texte) — navigateur/appareil utilisé
 
-- Remplacer le badge `unknown` ambigu par "Autre" en gris (au cas où il resterait des évènements non classés après filtrage).
+### 2. Edge function `flespi-proxy`
+- Lire `x-forwarded-for` et `user-agent` depuis les headers de la requête
+- Recevoir `actor_username` depuis le frontend
+- Enregistrer ces infos dans `privacy_events`
+
+### 3. Frontend (`Dashboard.tsx` + `integrations/flespi`)
+- Envoyer aussi le `username` (préfere `email` ou `cognito:username`) en plus du `sub` lors d'un toggle ON/OFF
+
+### 4. UI `/admin` — onglet Vie privée
+Refondre le tableau avec colonnes plus utiles :
+| Date | Véhicule (IMEI) | Action | Auteur (email / username) | Appareil | Source |
+
+Et surtout : **nouvelle section "Sessions vie privée actives"** en haut de l'onglet :
+- Pour chaque véhicule, calcule la **dernière action ON sans OFF correspondant**
+- Affiche : véhicule, qui l'a activé, depuis combien de temps (ex: "activé il y a 3h 24min par john@xxx.com")
+- Badge rouge si > 24h (probablement oublié)
+- Bouton "Forcer désactivation" (optionnel, on peut le laisser pour plus tard)
+
+## Détails techniques
+
+**Calcul des sessions actives** (côté `admin-history`) :
+```
+Pour chaque device_id:
+  events = privacy_events triés desc
+  dernier = events[0]
+  si dernier.action == 'ON' → session active depuis dernier.created_at
+```
+
+**Migration SQL** : ajout des 3 colonnes (nullable, pas de breaking change).
 
 ## Hors scope
-
-- Pas de nouvelle table, pas de changement de route, pas de modif backend autre que la fonction `admin-history`.
+- Pas de notification email automatique (peut venir après)
+- Pas de désactivation automatique forcée
+- Pas de changement à la logique Flespi elle-même

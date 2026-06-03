@@ -45,7 +45,10 @@ export type Database = {
         Row: {
           action: string
           actor_email: string | null
+          actor_ip: string | null
           actor_sub: string | null
+          actor_user_agent: string | null
+          actor_username: string | null
           created_at: string
           device_id: number | null
           device_ident: string | null
@@ -58,7 +61,10 @@ export type Database = {
         Insert: {
           action: string
           actor_email?: string | null
+          actor_ip?: string | null
           actor_sub?: string | null
+          actor_user_agent?: string | null
+          actor_username?: string | null
           created_at?: string
           device_id?: number | null
           device_ident?: string | null
@@ -71,7 +77,10 @@ export type Database = {
         Update: {
           action?: string
           actor_email?: string | null
+          actor_ip?: string | null
           actor_sub?: string | null
+          actor_user_agent?: string | null
+          actor_username?: string | null
           created_at?: string
           device_id?: number | null
           device_ident?: string | null

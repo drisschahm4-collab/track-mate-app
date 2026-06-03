@@ -135,7 +135,8 @@ const Dashboard = React.forwardRef<HTMLDivElement>((props, ref) => {
         imei: imei || vehicleInfo?.imei,
         private: next,
         actorSub: userSub,
-        actorEmail: userEmail ?? username,
+        actorEmail: userEmail ?? undefined,
+        actorUsername: username ?? undefined,
       });
       setPrivate(next);
       setTimeout(() => refresh(), 1000);
