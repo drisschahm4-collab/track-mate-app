@@ -58,6 +58,15 @@ serve(async (req) => {
     if (type === 'privacy') {
       if (!FLESPI_TOKEN) return json({ error: 'FLESPI_TOKEN non configuré' }, 500);
 
+      const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+      const { data: storedEvents, error: storedError } = await supabase
+        .from('privacy_events')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(Math.min(Math.max(Number(limit) || 200, 1), 1000));
+
+      if (storedError) return json({ error: storedError.message }, 500);
+
       const events: Array<{
         timestamp: number;
         plugin_id: string;
@@ -68,6 +77,19 @@ serve(async (req) => {
         action: 'ON' | 'OFF';
         raw_event: string;
       }> = [];
+
+      for (const event of storedEvents ?? []) {
+        events.push({
+          timestamp: Math.floor(new Date(event.created_at).getTime() / 1000),
+          plugin_id: event.plugin_id,
+          plugin_label: event.plugin_label,
+          device_id: event.device_id ? Number(event.device_id) : undefined,
+          device_name: event.device_name ?? undefined,
+          device_ident: event.device_ident ?? undefined,
+          action: event.action as 'ON' | 'OFF',
+          raw_event: 'app',
+        });
+      }
 
       const deviceCache = new Map<number, { name?: string; ident?: string }>();
 
