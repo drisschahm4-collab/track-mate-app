@@ -25,13 +25,21 @@ export const findDeviceIdByImei = async (imei: string): Promise<number | null> =
   return device?.id ?? null;
 };
 
-export const assignPrivacyPlugin = async (params: { deviceId?: number; imei?: string; private?: boolean }) => {
+export const assignPrivacyPlugin = async (params: {
+  deviceId?: number;
+  imei?: string;
+  private?: boolean;
+  actorSub?: string;
+  actorEmail?: string;
+}) => {
   const { data, error } = await supabase.functions.invoke("flespi-proxy", {
     body: {
       action: "assign-privacy",
       deviceId: params.deviceId,
       imei: params.imei,
       private: params.private,
+      actorSub: params.actorSub,
+      actorEmail: params.actorEmail,
     },
   });
 
