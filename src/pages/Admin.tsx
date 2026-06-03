@@ -89,6 +89,7 @@ const Admin = () => {
 
   const [logins, setLogins] = useState<LoginEvent[]>([]);
   const [privacy, setPrivacy] = useState<PrivacyEvent[]>([]);
+  const [activeSessions, setActiveSessions] = useState<ActiveSession[]>([]);
   const [loadingLogins, setLoadingLogins] = useState(false);
   const [loadingPrivacy, setLoadingPrivacy] = useState(false);
 
@@ -98,10 +99,11 @@ const Admin = () => {
     try {
       const [l, p] = await Promise.all([
         callAdmin<{ items: LoginEvent[] }>(pw, "logins"),
-        callAdmin<{ items: PrivacyEvent[] }>(pw, "privacy"),
+        callAdmin<{ items: PrivacyEvent[]; activeSessions?: ActiveSession[] }>(pw, "privacy"),
       ]);
       setLogins(l.items || []);
       setPrivacy(p.items || []);
+      setActiveSessions(p.activeSessions || []);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur");
     } finally {
