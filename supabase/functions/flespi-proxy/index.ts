@@ -24,6 +24,9 @@ const logPrivacyEvent = async (params: {
   deviceIdent?: string;
   actorSub?: string;
   actorEmail?: string;
+  actorUsername?: string;
+  actorIp?: string;
+  actorUserAgent?: string;
   pluginId: string;
   pluginLabel: string;
 }) => {
@@ -39,6 +42,9 @@ const logPrivacyEvent = async (params: {
       plugin_label: params.pluginLabel,
       actor_sub: params.actorSub || null,
       actor_email: params.actorEmail || null,
+      actor_username: params.actorUsername || null,
+      actor_ip: params.actorIp || null,
+      actor_user_agent: params.actorUserAgent || null,
       source: 'app',
     });
   } catch (error) {
