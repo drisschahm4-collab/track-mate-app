@@ -260,12 +260,18 @@ serve(async (req) => {
           // On continue même si erreur sur le 2ème plugin, le principal a fonctionné
         }
 
+        const actorIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || req.headers.get('cf-connecting-ip') || undefined;
+        const actorUserAgent = req.headers.get('user-agent') || undefined;
+
         await logPrivacyEvent({
           action: privateField ? 'ON' : 'OFF',
           deviceId: /^\d+$/.test(deviceSelector) ? deviceSelector : undefined,
           deviceIdent: imei,
           actorSub: payload?.actorSub,
           actorEmail: payload?.actorEmail,
+          actorUsername: payload?.actorUsername,
+          actorIp,
+          actorUserAgent,
           pluginId: PRIVACY_PLUGINS[0].id,
           pluginLabel: PRIVACY_PLUGINS[0].label,
         });
@@ -277,6 +283,9 @@ serve(async (req) => {
             deviceIdent: imei,
             actorSub: payload?.actorSub,
             actorEmail: payload?.actorEmail,
+            actorUsername: payload?.actorUsername,
+            actorIp,
+            actorUserAgent,
             pluginId: PRIVACY_PLUGINS[1].id,
             pluginLabel: PRIVACY_PLUGINS[1].label,
           });
