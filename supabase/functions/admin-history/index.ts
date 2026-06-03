@@ -91,15 +91,27 @@ serve(async (req) => {
         }
 
         for (const entry of entries) {
-          const evName = String(entry.event_name || entry.event || '').toLowerCase();
-          const evCode = typeof entry.event === 'number' ? entry.event : undefined;
+          const evName = String(entry.event_name || '').toLowerCase();
+          const evCode: number | undefined =
+            typeof entry.event_code === 'number'
+              ? entry.event_code
+              : typeof entry.event === 'number'
+                ? entry.event
+                : undefined;
 
           let action: 'ON' | 'OFF' | 'SKIP' = 'SKIP';
 
-          // Mapping par code numérique Flespi
-          if (evCode === 1 || evCode === 4) action = 'ON';
+          // Codes Flespi pour les plugins :
+          //   320 = device subscribed (ON)
+          //   321 = device unsubscribed (OFF)
+          //   322 = subscription updated → considéré ON (POST fields)
+          //   323 = unsubscribe variant (OFF)
+          //   350/351 = traitement message (ignoré)
+          if (evCode === 320 || evCode === 322) action = 'ON';
+          else if (evCode === 321 || evCode === 323) action = 'OFF';
+          // Fallback générique (anciens codes éventuels)
+          else if (evCode === 1 || evCode === 4) action = 'ON';
           else if (evCode === 3 || evCode === 5) action = 'OFF';
-          else if (evCode === 2) action = 'SKIP';
           // Mapping par mots-clés texte
           else if (/\b(unassign|unlink|detach|unsubscribe)\b/.test(evName)) action = 'OFF';
           else if (/\b(delete|remove)\b/.test(evName)) action = 'OFF';
