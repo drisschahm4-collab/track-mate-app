@@ -41,6 +41,48 @@ export type Database = {
         }
         Relationships: []
       }
+      privacy_events: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_sub: string | null
+          created_at: string
+          device_id: number | null
+          device_ident: string | null
+          device_name: string | null
+          id: string
+          plugin_id: string
+          plugin_label: string
+          source: string
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_sub?: string | null
+          created_at?: string
+          device_id?: number | null
+          device_ident?: string | null
+          device_name?: string | null
+          id?: string
+          plugin_id: string
+          plugin_label: string
+          source?: string
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_sub?: string | null
+          created_at?: string
+          device_id?: number | null
+          device_ident?: string | null
+          device_name?: string | null
+          id?: string
+          plugin_id?: string
+          plugin_label?: string
+          source?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
