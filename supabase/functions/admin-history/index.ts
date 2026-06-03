@@ -205,16 +205,19 @@ serve(async (req) => {
         }))
         .sort((a, b) => b.timestamp - a.timestamp);
 
-      // Compute active privacy sessions: par device, dernière action == ON (sur le plugin principal 1100337)
+      // Compute active privacy sessions UNIQUEMENT à partir des événements stockés en DB
+      // (source fiable = 'app' / 'app-backfill'). Les logs Flespi sont bruyants
+      // (codes 320/322 réémis tardivement) et provoquaient des faux positifs.
       const mainPluginId = PLUGIN_IDS[0].id;
-      const latestByDevice = new Map<string, typeof enriched[number]>();
+      const latestByDeviceDb = new Map<string, typeof enriched[number]>();
       for (const ev of enriched) {
         if (ev.plugin_id !== mainPluginId) continue;
+        if (!ev.source || (ev.source !== 'app' && ev.source !== 'app-backfill')) continue;
         const key = String(ev.device_id ?? ev.device_ident ?? '');
         if (!key) continue;
-        if (!latestByDevice.has(key)) latestByDevice.set(key, ev);
+        if (!latestByDeviceDb.has(key)) latestByDeviceDb.set(key, ev);
       }
-      const activeSessions = Array.from(latestByDevice.values())
+      const activeSessions = Array.from(latestByDeviceDb.values())
         .filter((ev) => ev.action === 'ON')
         .map((ev) => ({
           device_id: ev.device_id,
@@ -226,6 +229,7 @@ serve(async (req) => {
           actor_sub: ev.actor_sub,
         }))
         .sort((a, b) => a.since - b.since);
+
 
       return json({ items: enriched, activeSessions });
     }
